@@ -9,4 +9,20 @@ import android.app.Application;
  */
 
 public class App extends Application {
+
+    private static App sApp;
+
+    public App(){
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        sApp = this;
+    }
+
+    public static App getInstance(){
+        return sApp;
+    }
 }
