@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 
 import com.haier.ai.bluetoothspeaker.manager.WifiDevManager;
+import com.haier.ai.bluetoothspeaker.service.BluetoothService;
 
 /**
  * author: qu
@@ -23,6 +24,8 @@ public class Receiver extends BroadcastReceiver {
         String action = intent.getAction();
         switch (action){
             case ACTION_BOOT_COMPLATE:
+                Intent iBluetoothService = new Intent(context, BluetoothService.class);
+                context.startService(iBluetoothService);
                 break;
             case ACTION_WIFI_STATE_CHANGE:
                 //// TODO: 16-11-4  收到广播，搜索wifi

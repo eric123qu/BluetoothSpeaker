@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.haier.ai.bluetoothspeaker.manager.BluetoothManager;
 import com.haier.ai.bluetoothspeaker.thread.AcceptThread;
+import com.haier.ai.bluetoothspeaker.util.LogUtil;
 
 /**
  * author: qu
@@ -30,10 +31,16 @@ public class BluetoothService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        AcceptThread thread = new AcceptThread(BluetoothManager.getInstance().getBluetoothAdapter());
-        thread.start();
+        LogUtil.LogD(TAG, "BluetoothService is started");
+
+        startAcceptThread();
 
         return START_STICKY;
+    }
+
+    private void startAcceptThread(){
+        AcceptThread thread = new AcceptThread(BluetoothManager.getInstance().getBluetoothAdapter());
+        thread.start();
     }
 
     @Override
