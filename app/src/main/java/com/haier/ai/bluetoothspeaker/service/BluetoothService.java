@@ -4,10 +4,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import com.haier.ai.bluetoothspeaker.manager.BluetoothManager;
+import com.haier.ai.bluetoothspeaker.manager.SpeakerBluetoothManager;
 import com.haier.ai.bluetoothspeaker.thread.AcceptThread;
-import com.haier.ai.bluetoothspeaker.util.LogUtil;
 
 /**
  * author: qu
@@ -31,7 +31,7 @@ public class BluetoothService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        LogUtil.LogD(TAG, "BluetoothService is started");
+        Log.d(TAG, "BluetoothService is started");
 
         startAcceptThread();
 
@@ -39,7 +39,7 @@ public class BluetoothService extends Service {
     }
 
     private void startAcceptThread(){
-        AcceptThread thread = new AcceptThread(BluetoothManager.getInstance().getBluetoothAdapter());
+        AcceptThread thread = new AcceptThread(SpeakerBluetoothManager.getInstance().getBluetoothAdapter());
         thread.start();
     }
 

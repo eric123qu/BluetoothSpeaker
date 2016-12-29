@@ -1,8 +1,7 @@
 package com.haier.ai.bluetoothspeaker.thread;
 
 import android.bluetooth.BluetoothSocket;
-
-import com.haier.ai.bluetoothspeaker.util.LogUtil;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,9 +43,10 @@ public class ConnectedThread extends Thread {
                 bytes = mmInStream.read(buffer);
                 // Send the obtained bytes to the UI activity
                 if( bytes >0) {
+                    ////// TODO: 16-11-25 bluetoothsocket 接收数据 
                 }
 
-                LogUtil.LogD(TAG, "GETMSG, message size: "+bytes);
+                Log.d(TAG, "GETMSG, message size: "+bytes);
             } catch (IOException e) {
                 break;
             }

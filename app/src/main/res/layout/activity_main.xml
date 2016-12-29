@@ -9,10 +9,17 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.haier.ai.bluetoothspeaker.MainActivity">
+    tools:context="com.haier.ai.bluetoothspeaker.ui.MainActivity">
 
-    <TextView
+    <Button
+        android:id="@+id/button_open"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"/>
+        android:layout_height="wrap_content" android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true" android:text="open"/>
+    <Button
+        android:id="@+id/button_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_alignParentStart="true"
+        android:layout_below="@+id/button_open" android:layout_marginTop="20dp"
+        android:text="close"/>
 </RelativeLayout>

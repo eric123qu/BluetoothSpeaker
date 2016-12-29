@@ -30,7 +30,7 @@ public class WifiDevManager {
 
     public WifiDevManager(){
         if(sWifiManager == null){
-            sWifiManager = (WifiManager) App.getInstance().getSystemService(Context.WIFI_SERVICE);
+            sWifiManager = (WifiManager) App.getInstance().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         }
     }
 
