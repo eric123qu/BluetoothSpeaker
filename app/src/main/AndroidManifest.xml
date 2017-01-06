@@ -31,6 +31,9 @@
         </activity>
 
         <service
+            android:name=".service.SocketService"
+            android:enabled="true"></service>
+        <service
             android:name=".service.BluetoothService"
             android:enabled="true"/>
         <service
