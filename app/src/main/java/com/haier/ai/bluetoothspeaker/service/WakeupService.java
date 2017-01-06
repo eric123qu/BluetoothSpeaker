@@ -1,4 +1,4 @@
-package com.haier.ai.airobot.service;
+package com.haier.ai.bluetoothspeaker.service;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -147,7 +147,7 @@ public class WakeupService extends Service {
             }
         }
     }
-     class Wait4WakeupRecevier extends BroadcastReceiver{
+     class Wait4WakeupRecevier extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {

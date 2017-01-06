@@ -1,4 +1,4 @@
-package net;
+package com.haier.ai.bluetoothspeaker.net;
 
 import android.util.Log;
 

@@ -1,9 +1,13 @@
-package com.haierubic.ai;
+package com.haier.ai.bluetoothspeaker.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
+
+import com.haierubic.ai.ErrorCode;
+import com.haierubic.ai.FilterData;
+import com.haierubic.ai.IFilter;
 
 public class AudioInput extends IFilter {
 

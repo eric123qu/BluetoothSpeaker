@@ -1,4 +1,4 @@
-package com.haier.ai.airobot.event;
+package com.haier.ai.bluetoothspeaker.event;
 
 /**
  * author: qu

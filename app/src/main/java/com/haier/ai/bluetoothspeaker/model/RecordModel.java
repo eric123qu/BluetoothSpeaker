@@ -1,4 +1,4 @@
-package com.haier.ai.airobot.model;
+package com.haier.ai.bluetoothspeaker.model;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -7,24 +7,15 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.haier.ai.airobot.Const;
-import com.haier.ai.airobot.MyApplication;
-import com.haier.ai.airobot.bean.food.FResponseBean;
-import com.haier.ai.airobot.bean.food.FoodBean;
-import com.haier.ai.airobot.bean.food.Para;
-import com.haier.ai.airobot.bean.food.Result;
-import com.haier.ai.airobot.data.FoodDbManager;
-import com.haier.ai.airobot.event.ErrorEvent;
-import com.haier.ai.airobot.event.NluEvent;
-import com.haier.ai.airobot.event.ReconizeResultEvent;
-import com.haier.ai.airobot.event.ReconizeStatusEvent;
-import com.haier.ai.airobot.event.StartRecordEvent;
-import com.haier.ai.airobot.manager.LocalMediaManager;
-import com.haier.ai.airobot.net.RetrofitRequest;
-import com.haier.ai.airobot.utils.NetWorkUtils;
-import com.haier.ai.airobot.utils.SpeechJavaBeanUtils;
-import com.haierubic.ai.AudioInput;
-import com.haierubic.ai.AudioOutput;
+import com.haier.ai.bluetoothspeaker.App;
+import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.audio.AudioInput;
+import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
+import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
+import com.haier.ai.bluetoothspeaker.event.NluEvent;
+import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
+import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
+import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haierubic.ai.ErrorCode;
 import com.haierubic.ai.IAsrRecorder;
 import com.haierubic.ai.IAsrRecorderCallback;
@@ -51,7 +42,7 @@ import java.util.List;
  * date: 16-8-30
  * introduce: 采用两种方式，一种是API方式，另一种是SDK方式，以下有注释
  */
-public class RecordModel{
+public class RecordModel {
     private final String TAG = "RecordModel";
     private static final int TYPE_AIR = 0;
     private static final int  TYPE_BRIDGE = 1;
@@ -165,10 +156,10 @@ public class RecordModel{
         Log.d(TAG, "cancelRecord: cancel recorder end.");
     }
 
-    private void initGetToken(String token) {
-        /**
+  /*  private void initGetToken(String token) {
+        *//**
          * 确保app刚安装上，token为空的时候，去请求token,token长度为30
-         */
+         *//*
         if (TextUtils.isEmpty(token) || token.length() != 30) {
 //            NetRequest.getInstance().getToken();
             if (NetWorkUtils.isNetworkConnected(MyApplication.getInstance().mContext)){
@@ -177,7 +168,7 @@ public class RecordModel{
                 Log.e(TAG, "initGetToken: 您的网络未连接，请连接网络，或您的网络无法连接外网");
             }
         }
-    }
+    }*/
 
     public void sendReReconizeEvent(boolean bReReconize){
         StartRecordEvent event = new StartRecordEvent(bReReconize);
@@ -245,23 +236,19 @@ public class RecordModel{
             public void onResult(int paramInt, String paramString) {
                 // 返回识别结果。
                 final String msg = String.format("onResult(): errcode = %d, msg = %s", paramInt, paramString);
-                String asrResult = getAsrResult(paramString);
-                //// TODO: 16-9-29 状态显示语音识别成功
+
+                //String asrResult = getAsrResult(paramString);
                 EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
                 waitForWakeup();
 
-                if(TextUtils.isEmpty(asrResult)){
+              /*  if(TextUtils.isEmpty(asrResult)){
                     EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
 
                 }else {
                     EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
-                    //调用nlu接口，语义理解(空调)
-                    /*String nlu = formatNluRequest(asrResult, TYPE_AIR);
-                    getNluResult(nlu);*/
-
                     //冰箱
                     getNlpResult(asrResult);
-                }
+                }*/
             }
         };
 
@@ -278,16 +265,16 @@ public class RecordModel{
 
     /**
      * 获取asr结果
-     * @param msg
+     * @param 
      * @return
      */
-    private String getAsrResult(String msg){
+    /*private String getAsrResult(String msg){
         if(TextUtils.isEmpty(msg)){
             return null;
         }
 
         return SpeechJavaBeanUtils.S2TgetText(msg);
-    }
+    }*/
 
     public void getNluResult(String asrData){
         // 创建语义理解对象。
@@ -321,15 +308,8 @@ public class RecordModel{
                     waitForWakeup();
                 }else {
                     EventBus.getDefault().post(new NluEvent(tts));
-                    //playTTS(tts);
-                    playTTS_api(tts);
+                    playTTS(tts);
                 }
-                /*mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        log(msg);
-                    }
-                });*/
             }
 
         };
@@ -368,7 +348,7 @@ public class RecordModel{
                 break;
         }
 
-        return String .format("{\"LIBaseinfo\":{\"category\":" + "\"" +
+        return String.format("{\"LIBaseinfo\":{\"category\":" + "\"" +
                 sType + "\"" +
                 ",\"city\":\"青岛\",\"contextid\":\"123456\",\"latitude\":12.8," +
                 "\"longitude\":123.5,\"query\":" + "\"" +
@@ -376,29 +356,14 @@ public class RecordModel{
                 ",\"region\":\"李沧区\"},\"devices\":[{\"attrs\":{\"brand\":\"天意\",\"model\":\"蔚蓝\"},\"deviceModules\":[{\"moduleId\":\"C8934644F82\",\"moduleType\":\"wifimodule\"}],\"id\":\"C8934644F82\",\"name\":\"客厅空调\",\"typeInfo\":{\"typeId\":\"00000000000000008080000000041410\"}}],\"devicestate\":{\"curhumidity\":67,\"curtemp\":28,\"mode\":\"自动\",\"settemp\":26,\"windspeed\":2}}");
     }
 
-    private String parseNluResult(String msg){
+    /*private String parseNluResult(String msg){
         if(TextUtils.isEmpty(msg)){
             return null;
         }
 
         //根据nlu返回生成tts播报内容
         return SpeechJavaBeanUtils.parseAirSpeechString(SpeechJavaBeanUtils.parseAirControl(msg));
-    }
-
-
-    public void playTTS_api(String tts){
-        if(!TextUtils.isEmpty(tts)) {
-            RecordModel_bak.getInstance().T2SRequestForSemantics(tts);
-        }
-
-        waitForWakeup();
-    }
-
-    private void playTTS_api_l(String tts, MediaPlayer.OnCompletionListener listener){
-        if(!TextUtils.isEmpty(tts)) {
-            RecordModel_bak.getInstance().TTSWithStatus(tts, listener);
-        }
-    }
+    }*/
 
     public void playTTS(String content){
         if(TextUtils.isEmpty(content)){
@@ -425,7 +390,7 @@ public class RecordModel{
 
     public void waitForWakeup(){
         Intent intent = new Intent(Const.WAKEUP_TAG);
-        MyApplication.getInstance().sendBroadcast(intent);
+        App.getInstance().sendBroadcast(intent);
 
         EventBus.getDefault().post(new ReconizeStatusEvent("待唤醒"));
 //        recorder stop failed
@@ -469,291 +434,13 @@ public class RecordModel{
         mPlayer.attach(cb);
     }
 
-
-    //////////////////////////////////////////////////////////////////
-    private final String base_url = "http://121.41.27.164:8888/aiTools/refridgeSemanticsQueryInfo?input=";
-    public void getNlpResult(String param){
-        String result = null;
-        //waitForWakeup();
-
-        if(TextUtils.isEmpty(param)){
-            return;
-        }
-
-        initNet();
-
-        String url = base_url + param;
-        httpUtils.send(HttpRequest.HttpMethod.GET,
-                url,
-                new RequestCallBack<String>() {
-                    @Override
-                    public void onLoading(long total, long current, boolean isUploading) {
-                    }
-
-                    @Override
-                    public void onSuccess(ResponseInfo<String> responseInfo) {
-                        if (responseInfo.result != null) {
-                            Log.i(TAG, "onSuccess: result" + responseInfo.result);
-                            Gson gson = new Gson();
-                            FResponseBean resp = gson.fromJson(responseInfo.result, FResponseBean.class);
-                            parseNlpResult(resp);
-                        }
-
-                    }
-
-                    @Override
-                    public void onStart() {
-                    }
-
-                    @Override
-                    public void onFailure(HttpException error, String msg) {
-                        LogUtils.e("网络连接失败,错误码--" + error.getExceptionCode() + "--错误信息：--" + msg);
-                    }
-                });
-    }
-
-    private void parseNlpResult(FResponseBean resp){
-        fixResponseData(resp);
-
-        nlpControl(resp);
-    }
-
-    private void fixResponseData(FResponseBean resp){
-        Result result = resp.getResults().get(0);
-        List<Para> params = result.getParas();
-
-        for (Para param:params) {
-            String tmpKey = param.getKey();
-            if(tmpKey.contains("{")){
-                String key = tmpKey.substring(1, tmpKey.length()-1);
-                param.setKey(key);
-            }
-
-            String tmpValue = param.getValue();
-            if(tmpValue.contains("{")){
-                String value = tmpValue.substring(1, tmpValue.length()-1);
-                param.setValue(value);
-            }
-        }
-    }
-
-    private static String song = null;
-    private static String singer = null;
-    private void nlpControl(FResponseBean resp){
-        Result result = resp.getResults().get(0);
-        List<Para> params = result.getParas();
-        String response = result.getResponse();
-        String domain = result.getDomain();
-        String tts = null;
-
-
-        if(TextUtils.isEmpty(domain)){
-            showTtsResult(response);
-            return;
-        }
-
-        if(domain.equals("Common_Music")){
-            //String song = null;
-//            String singer = null;
-
-            for (Para param:params) {
-                if(param.getKey().equals("music")){
-                    song = param.getValue();
-                }else if(param.getKey().equals("singer")){
-                    singer = param.getValue();
-                }
-            }
-
-            if(TextUtils.isEmpty(song) && TextUtils.isEmpty(singer)){
-                showTtsResult("对不起，我没能理解您在说什么。");
-                return;
-            }
-
-            StringBuilder nlp = new StringBuilder();
-            if(!TextUtils.isEmpty(song)){
-                nlp.append("歌曲：");
-                nlp.append(song);
-            }
-
-            if(!TextUtils.isEmpty(singer)){
-                nlp.append("   歌手： ");
-                nlp.append(singer);
-            }
-
-            EventBus.getDefault().post(new NluEvent(nlp.toString()));
-            //modify
-            waitForWakeup();
-            playTTS_api_l(nlp.toString(), new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-
-                    LocalMediaManager.getInstance().playMusicMedia(song, singer);
-                    song = null;
-                    singer = null;
-                }
-            });
-
-
-        }else if(domain.equals("Common_Joke")){
-            showTtsResult(response);
-            //playTTS_api(response);
-        }else if(domain.equals("Common_Story")){
-            showTtsResult(response);
-            //playTTS_api(response);
-        }else if(domain.equals("Common_Weather")){
-            showTtsResult(response);
-            //playTTS_api(response);
-        }else if(domain.equals("Common_Other")){
-            showTtsResult(response);
-        }
-        else if(domain.equals("refrigerator")) {
-
-            if (params.size() == 1) {
-                String key = params.get(0).getKey();
-                String value = params.get(0).getValue();
-                switch (key) {
-                    case "query":
-                        if (value.equals("food")) {
-                            tts = FoodDbManager.getInstance().queryAllFood();
-                            showTtsResult(tts);
-                        } else if (value.equals("address") || value.equals("UserAgreement")
-                                || value.contains("service") || value.equals("binding") || value.equals("version")) {
-                            showTtsResult(response);
-                        }
-                        break;
-                    case "overtime":
-                        break;
-                    case "food_menu":
-                        if(value.equals("西红柿炒鸡蛋")){
-                            Log.d(TAG, "playTTSMedia: play 西红柿炒鸡蛋");
-                            tts = "1、鸡蛋打散加入葱花和食盐搅拌均匀，番茄切块，锅中倒油烧至7成热倒入蛋液。2、蛋液凝固成型后用重新倒油烧热后倒入番茄煸炒。";
-                        }else if(value.equals("干煸四季豆")){
-                            tts = "蒜瓣切小颗粒，老姜切末，红椒切小粒；腌肉末：放姜末、少许生粉、一点点白糖、少许老抽（看自己喜欢颜色深浅），拌匀待用";
-                        }else if(value.equals("可乐鸡翅")){
-                            tts = "油温后，放入鸡翅。煎鸡翅的时候小心被见溅伤。将鸡翅两面都煎为金黄色，备用";
-                        }else if(value.equals("醋溜白菜")){
-                            tts = "将白菜梆洗净后从之间切开成两条，取其中一条，斜着用刀片成一片片；另外一条白菜也梆也片成片；干辣椒剪开，不吃辣的可以省去辣椒这一步骤";
-                        }else if(value.equals("青椒肉丝")){
-                            tts = "青椒切成丝，里脊肉顺纹理切成丝；把切好的肉丝放入碗内加淀粉、蛋清、少许盐抓均上浆、腌制一会。";
-                        }else if(value.equals("拍黄瓜")){
-                            tts = "热锅放入一匙芝麻油，随后加入干辣椒碎小火炒香，起锅的时候加入蒜蓉拌匀；31和2混合均匀即成腌渍料";
-                        }else if(value.equals("老醋花生")){
-                            tts = "锅里放油，冷油时就倒入花生米快速翻炒，以保证花生米能够均匀受热。3待花生米有炸开的响声后再炒一会儿，待有香味且差不多都裂开时起锅沥油";
-                        }else if(value.equals("锅包肉")){
-                            tts = "里脊肉切成片备用；把切好的里脊片放入碗中，加入1勺料酒，腌制片刻；取出后一片一片铺在淀粉上，两面都沾满淀粉；锅中加入炒菜油，建议选小锅，这样倒入的油有一定高度";
-                        }else if(value.equals("鱼香茄子")){
-                            tts = "猪肉馅加入调味料腌制20分钟，木耳提前用温水泡发后切丝，胡萝卜、冬笋切丝；锅中放半斤油，烧7成热，把茄子放入炸";
-                        }else if(value.equals("宫保鸡丁")){
-                            tts = "取嫩鸡胸肉，用刀把肉拍松，切成3毫米见方的十字花纹，再切成2厘米见方的小块，加盐、、湿淀粉拌匀。花生米事先炸好的。3炒锅上火，放底油，烧热";
-                        }
-
-                        showTtsResult(tts);
-                        //LocalMediaManager.getInstance().playTTSMedia(key, value, RespListener);
-                        break;
-                    case "adjust_brightness":
-                    case "adjust_voice":
-                    case "switch_screen":
-                        //LocalMediaManager.getInstance().playTTSMedia(key, value, RespListener);
-                        showTtsResult(response);
-                        //EventBus.getDefault().post(new NluEvent(response));
-                        //waitForWakeup();
-                        break;
-                    case "add_address":
-                        showTtsResult(response);
-                        break;
-                    case "edit_address":
-                        showTtsResult(response);
-                        break;
-                    case "setmode":
-                        showTtsResult(response);
-//                        LocalMediaManager.getInstance().playTTSMedia(key, value, RespListener);
-//                        EventBus.getDefault().post(new NluEvent(response));
-                        break;
-                    /*case "settemp":
-                        showTtsResult(response);
-                        break;*/
-                    default:
-                       // waitForWakeup();
-                        showTtsResult("对不起我有点乱，请再说一遍");
-                        break;
-                }
-            } else {
-                String key0 = params.get(0).getKey();
-                String key1 = params.get(1).getKey();
-                String value0 = params.get(0).getValue();
-                String value1 = params.get(1).getValue();
-
-                switch (key0) {
-                    case "query":
-                        int count = FoodDbManager.getInstance().queryHasFoodByName(value1);
-                        if (count > 0) {
-                            tts = "你好，" + value1 + "在冰箱中，请尽快食用";
-                        } else if (count == 0) {
-                            tts = "冰箱中没有该食物";
-                        }
-
-                        showTtsResult(tts);
-                        break;
-                    case "add":
-                        if (TextUtils.isEmpty(value1)) {
-
-                        }
-
-                        FoodBean food = new FoodBean();
-                        food.setFoodName(value1);
-                        food.setCreateDate(System.currentTimeMillis());
-                        food.setSaveDay(0);
-                        FoodDbManager.getInstance().addFood(food);
-                        tts = "已为您添加好食物";
-                        showTtsResult(tts);
-                        break;
-                    case "delete":
-                        if (TextUtils.isEmpty(value1)) {
-
-                        } else {
-                            int ret = FoodDbManager.getInstance().deleteFood(value1);
-                            if(ret == 0){
-                                tts = "已为您删除该食物";
-                            }else{
-                                tts = "对不起冰箱内没有该食物";
-                            }
-
-                        }
-                        showTtsResult(tts);
-                        break;
-                    case "adjust_tempure":
-                        LocalMediaManager.getInstance().playTTSMedia(key0, value0, RespListener);
-                        EventBus.getDefault().post(new NluEvent(response));
-                        //waitForWakeup();
-                        break;
-                    case "time":
-                        showTtsResult(response);
-                        break;
-                    case "settemp":
-                        showTtsResult(response);
-                        break;
-                    case "food_menu":
-                        if(value0.equals("query")){
-                            showTtsResult("正在为您查询该食物的做法");
-                        }
-                        break;
-                    default:
-                        showTtsResult("对不起我有点乱，请再说一遍");
-                        //waitForWakeup();
-                        break;
-                }
-            }
-        }
-    }
-
     private void showTtsResult(String tts){
         if(TextUtils.isEmpty(tts)){
             EventBus.getDefault().post(new NluEvent("语义理解错误"));
             waitForWakeup();
         }else {
             EventBus.getDefault().post(new NluEvent(tts));
-            //playTTS(tts);
-            playTTS_api_l(tts, RespListener);
+            playTTS(tts);
         }
     }
 

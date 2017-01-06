@@ -21,4 +21,10 @@ public class Const {
 
     //通信类型 载体设置
     public static final int TYPE_SETTING = 3;
+
+    public static  final String WAKEUP_TAG = "com.haier.ai.wait4wakeup";
+
+    public static final String RERECONIZE_TAG = "com.haier.ai.rereconize";
+
+    public static final String RET_CODE_SUCESS = "00000";
 }

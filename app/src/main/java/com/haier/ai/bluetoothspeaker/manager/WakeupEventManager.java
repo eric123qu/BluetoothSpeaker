@@ -1,4 +1,4 @@
-package com.haier.ai.airobot.manager;
+package com.haier.ai.bluetoothspeaker.manager;
 
 import android.content.Context;
 import android.text.TextUtils;

@@ -1,4 +1,4 @@
-package com.haier.ai.airobot.service;
+package com.haier.ai.bluetoothspeaker.service;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -11,16 +11,15 @@ import android.os.SystemClock;
 import android.support.annotation.IntDef;
 import android.util.Log;
 
-import com.haier.ai.airobot.Const;
-import com.haier.ai.airobot.R;
-import com.haier.ai.airobot.event.NluEvent;
-import com.haier.ai.airobot.event.ReconizeResultEvent;
-import com.haier.ai.airobot.event.ReconizeStatusEvent;
-import com.haier.ai.airobot.event.StartRecordEvent;
-import com.haier.ai.airobot.event.WakeupEvent;
-import com.haier.ai.airobot.manager.WakeupEventManager;
-import com.haier.ai.airobot.model.RecordModel;
-import com.haier.ai.airobot.model.RecordModel_bak;
+import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.R;
+import com.haier.ai.bluetoothspeaker.event.NluEvent;
+import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
+import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
+import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
+import com.haier.ai.bluetoothspeaker.event.WakeupEvent;
+import com.haier.ai.bluetoothspeaker.manager.WakeupEventManager;
+import com.haier.ai.bluetoothspeaker.model.RecordModel;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -119,7 +118,6 @@ public class ReconizeService extends Service {
     public void startReconize(){
         //提示音
         playLocalAudio(TYPE_DING, null);
-        //CueSoundManager.getInstance().playCueSound(CueSoundManager.TYPE_DING);
         //开始识别
         RecordModel.getInstance().startRecord();
 
@@ -128,17 +126,6 @@ public class ReconizeService extends Service {
             @Override
             public void run() {
                 RecordModel.getInstance().stopRecord();
-                /*String filename = RecordModel.getInstance().stopRecord();
-                Log.d(TAG, "run: record filename:" + filename);
-                SystemClock.sleep(500);
-                //RecordModel.getInstance().uploadRecordData(filename);
-                RecordModel.getInstance().uploadRecordDataL(filename, new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        StartRecordEvent event = new StartRecordEvent(false);
-                        EventBus.getDefault().post(event);
-                    }
-                });*/
             }
         }, 3, TimeUnit.SECONDS);
     }
@@ -162,9 +149,9 @@ public class ReconizeService extends Service {
                 player.setOnCompletionListener(listenr);
                 break;
             case TYPE_RERECONIZE:
-                player = MediaPlayer.create(this, R.raw.rereconize);
-                player.setOnCompletionListener(listenr);
-                break;
+//                player = MediaPlayer.create(this, R.raw.rereconize);
+//                player.setOnCompletionListener(listenr);
+//                break;
             case TYPE_SLEEP:
                 if(player != null){
                     player.release();
@@ -206,9 +193,9 @@ public class ReconizeService extends Service {
 
                 EventBus.getDefault().post(new ReconizeStatusEvent("开始识别"));
                 //开始识别
-                //RecordModel.getInstance().startRecord();//sdk mode
+                RecordModel.getInstance().startRecord();//sdk mode
 
-                RecordModel_bak.getInstance().startRecord(); //api mode
+                //RecordModel_bak.getInstance().startRecord(); //api mode
                 scheduledThreadPool.schedule(new Runnable() {
 
                     @Override
@@ -216,17 +203,17 @@ public class ReconizeService extends Service {
                         /**
                          * sdk mode
                          */
-                        //RecordModel.getInstance().stopRecord(); //sdk mode
+                        RecordModel.getInstance().stopRecord(); //sdk mode
                         //RecordModel.getInstance().releaseSdk();
 
                         /**
                          * api mode
                          */
-                        String filename = RecordModel_bak.getInstance().stopRecord();
+                        /*String filename = RecordModel_bak.getInstance().stopRecord();
                         Log.d(TAG, "run: record filename:" + filename);
                         EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
                         SystemClock.sleep(500);
-                        RecordModel_bak.getInstance().uploadRecordData(filename);
+                        RecordModel_bak.getInstance().uploadRecordData(filename);*/
 
                     }
                 }, 3, TimeUnit.SECONDS);
@@ -277,7 +264,7 @@ public class ReconizeService extends Service {
         registerReceiver(mReceiver, filter);
     }
 
-    class ReReconizeReceiver extends BroadcastReceiver{
+    class ReReconizeReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {

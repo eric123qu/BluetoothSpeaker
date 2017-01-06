@@ -36,11 +36,6 @@
         <service
             android:name=".service.BluetoothService"
             android:enabled="true"/>
-        <service
-            android:name=".service.RecognizeService"
-            android:enabled="true"
-            android:exported="true">
-        </service>
 
         <receiver android:name=".receiver.PairingRequestReceiver">
             <intent-filter android:priority="2147483647">
