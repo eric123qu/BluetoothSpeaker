@@ -133,6 +133,9 @@ public class ProtocolManager {
         control.setTime(time);
     }
 
+    /**
+     * 拼装协议
+     */
     /*private void formProtocol(){
         arrayLen = 0;
         String origin_type = null;

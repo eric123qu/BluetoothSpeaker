@@ -30,6 +30,7 @@ public class ApplianceDefine {
     public static final byte DEV_60 = 0x02;
     public static final byte DEV_SMARTCARE = 0x03;
     public static final byte DEV_INFRARED = 0x04;               //红外报警
+    public static final byte DEV_SPEAKER = 0x05;                //音箱
 
     /**
      * 设备种类
@@ -40,6 +41,11 @@ public class ApplianceDefine {
     public static final byte TYPE_AIR_CLEANER = 0x11;          //空气净化器
     public static final byte TYPE_WATER_HEATER = 0x12;         //热水器
     public static final byte TYPE_WASHER = 0x13;               //洗衣机
+    public static final byte TYPE_FRIDGE = 0x14;               //冰箱
+    public static final byte TYPE_HOODS = 0x15;                //油烟机
+    public static final byte TYPE_SWEEPING = 0x16;             //扫地机器人
+    public static final byte TYPE_SPEAKER_LIGHT = 0x17;        //音箱灯光
+    public static final byte TYPE_SPEAKER_MUSIC = 0x18;                //音箱音乐
     public static final byte TYPE_60_AC = 0x20;                //60 空调
     public static final byte TYPE_LIGHT = 0x21;                //灯光
     public static final byte TYPE_CURTAIN = 0x22;              //窗帘
