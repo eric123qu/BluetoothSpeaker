@@ -3,8 +3,8 @@ package com.haier.ai.bluetoothspeaker.manager;
 import android.content.Context;
 
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
+import com.haier.ai.bluetoothspeaker.net.SocketClient;
 
-import net.SocketClient;
 
 /**
  * Created by qx on 17-1-5.
