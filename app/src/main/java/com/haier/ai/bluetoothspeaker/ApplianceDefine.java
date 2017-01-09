@@ -226,7 +226,37 @@ public class ApplianceDefine {
     public static final byte MODE_OUTDOOR = (byte)0x15;
     public static final byte MODE_HAND = (byte)0x18;
     public static final byte MODE_DRY_STRONG = (byte)0x19;
-    public static final byte MODE_DRY_WEAK = (byte)0x19;
+    public static final byte MODE_DRY_WEAK = (byte)0x20;
+
+    /**
+     * 0x16 扫地机器人
+     */
+    public static final byte SWEEPING_dev = 0x08;                           //扫地机器人
+    public static final byte MODE_WORK_STATE = 0x01;                        //工作状态 1 开始清扫 2 停止清扫 3 回冲
+    public static final byte MODE_CLEAN = 0x02;                             //清扫模式 1 随机清扫 2沿边清扫 3螺旋 4 规划
+    public static final byte MODE_FAN_STATE = 0x03;                         //强力度 1 正常 2 强力 3 停止
+
+    /**
+     * 0x17 音箱灯光
+     */
+    public static final byte SPEAKER_LIGHT_dev = 0x09;
+    public static final byte MODE_ONOFF_STATUS = 0x01;                      //开关机状态
+    public static final byte MODE_LED_BRIGHTNESS = 0x02;                    //灯光亮度 0-100
+    public static final byte MODE_LED_COLOR = 0x03;                         //灯光颜色 1红2橙3黄4绿5青6蓝7紫
+    public static final byte MODE_LED_MODE = 0x04;                          //演示版固定四种颜色模式（1标准，2阅读，3浪漫，4睡眠）
+
+
+    /**
+     * 0x18 音箱音乐
+     */
+    public static final byte SPEAKER_MUSIC_dev = 0x0a;
+    public static final byte MODE_PLAY_MODE = 0x01;                         //音乐播放状态 0 暂停 1播放
+    public static final byte MODE_LOOP_STATUS = 0x02;                       // 循环状态 1 单曲 2列表 3 随机播放
+    public static final byte MODE_VOLUME = 0x03;                            //音量 0-100
+    public static final byte MODE_MUTE_STATUS = 0x04;                       //静音状态 0 非静音 1 静音
+    public static final byte MODE_PLAY_SONG = 0x05;                         //昵称填写歌名
+    public static final byte MODE_PLAY_CONTROL = 0x06;                      //播放控制  1 上一首 2下一首
+
 
     /**
      * HK60(0x02)
