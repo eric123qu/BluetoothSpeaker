@@ -1,9 +1,12 @@
 package com.haier.ai.bluetoothspeaker.manager;
 
 import android.content.Context;
+import android.text.TextUtils;
 
+import com.haier.ai.bluetoothspeaker.ApplianceDefine;
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
+import com.haier.ai.bluetoothspeaker.util.BytesUtil;
 
 
 /**
@@ -131,6 +134,159 @@ public class ProtocolManager {
         control.setNickName(device);
         control.setOriginType(origin);
         control.setTime(time);
+    }
+
+    /**
+     * 打开动作
+     */
+    public void operatorOpen(){
+        if(operands.equals(UnisoundDefine.OBJ_AC)) {//空调
+//            bOpenAC = true;
+            control.setAttrStatusShort((short) 1);
+            control.setDevAttr(ApplianceDefine.AIRCON_status);
+        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)) {//灯光
+            if(TextUtils.isEmpty(control.getNickName())) { //所有灯光
+                control.setDevAttr(ApplianceDefine.CMD_LmpAllOn);
+                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Light);
+            }else{
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                hk60Data[0] = (byte)0x01;
+                hk60Data[1] = (byte)0x00;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }
+
+        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)) {//窗帘
+            if(TextUtils.isEmpty(control.getNickName())) {
+                control.setDevAttr(ApplianceDefine.CMD_LmpAllOn);
+                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Window);
+            }else{
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                hk60Data[0] = (byte)0x01;
+                hk60Data[1] = (byte)0x00;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }
+        }else if(operands.equals(UnisoundDefine.OBJ_WATER_HEATER)){//热水器
+            control.setDevAttr(ApplianceDefine.HEATER_onOffStatus);
+            control.setAttrStatusShort((short) 1);
+        }else if(operands.equals(UnisoundDefine.OBJ_AIRCLEANER)){//空气净化器
+            control.setDevAttr(ApplianceDefine.AIRCLEANER_onoffstatus);
+            control.setAttrStatusShort((short) 1);
+        }else if(operands.equals(UnisoundDefine.OBJ_FAS)){//新风
+            control.setDevAttr(ApplianceDefine.HK_NEW_WIND);
+            hk60Data[0] = ApplianceDefine.HK_FAS_ONOFFSTATUS;
+            hk60Data[1] = (byte)0x01;
+            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+        }else if(operands.equals(UnisoundDefine.OBJ_HEATER)){//地暖
+            control.setDevAttr(ApplianceDefine.HK_WARM_STATUS);
+            hk60Data[0] = ApplianceDefine.HK_HEATER_ONOFFSTATUS;
+            hk60Data[1] = (byte)0x01;
+            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)){//窗帘
+            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
+                control.setDevAttr(ApplianceDefine.HK_ALLOPEN);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x33;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }else{
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x01;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }
+        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)){//灯光
+            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
+                control.setDevAttr(ApplianceDefine.HK_ALLOPEN);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x32;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }else{
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x01;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }
+        }else if(operands.equals(UnisoundDefine.OBJ_MEDIA_PLAYER)){//背景音乐
+            control.setDevAttr(ApplianceDefine.HK_BACKGROUND_MUSIC);
+            hk60Data[0] =  ApplianceDefine.HK_MUSIC_PLAY;
+            hk60Data[1] = (byte) 0x01;
+            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+        }else if(operands.equals(UnisoundDefine.OBJ_WASHER)){//洗衣机
+            control.setDevAttr(ApplianceDefine.WASHING_onOffStatus);
+            control.setAttrStatusShort((short) 1);
+        }
+    }
+
+    /**
+     *  关闭动作
+     */
+    public void operatorClose(){
+        if(operands.equals(UnisoundDefine.OBJ_AC)) {//空调
+            control.setAttrStatusShort((short) 0);
+            control.setDevAttr(ApplianceDefine.AIRCON_status);
+//            bOpenAC = false;
+        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)) {//灯光
+            if(TextUtils.isEmpty(control.getNickName())) {
+                control.setDevAttr(ApplianceDefine.CMD_LmpAllOff);
+                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Light);
+            }else{
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                control.setAttrStatusShort((short) 0);
+            }
+
+        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)) {//窗帘
+            if(TextUtils.isEmpty(control.getNickName())) {
+                control.setDevAttr(ApplianceDefine.CMD_LmpAllOff);
+                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Window);
+            }else{
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                control.setAttrStatusShort((short) 0);
+            }
+        }else if(operands.equals(UnisoundDefine.OBJ_WATER_HEATER)){//热水器
+            control.setDevAttr(ApplianceDefine.HEATER_onOffStatus);
+            control.setAttrStatusShort((short) 0);
+        }else if(operands.equals(UnisoundDefine.OBJ_AIRCLEANER)){//空气净化器
+            control.setDevAttr(ApplianceDefine.AIRCLEANER_onoffstatus);
+            control.setAttrStatusShort((short) 0);
+        }else if(operands.equals(UnisoundDefine.OBJ_FAS)){//新风
+            control.setDevAttr(ApplianceDefine.HK_NEW_WIND);
+            hk60Data[0] = ApplianceDefine.HK_FAS_ONOFFSTATUS;
+            hk60Data[1] = (byte)0x00;
+            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+        }else if(operands.equals(UnisoundDefine.OBJ_HEATER)){//地暖
+            control.setDevAttr(ApplianceDefine.HK_WARM_STATUS);
+            hk60Data[0] = ApplianceDefine.HK_HEATER_ONOFFSTATUS;
+            hk60Data[1] = (byte)0x00;
+            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)){//窗帘
+            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
+                control.setDevAttr(ApplianceDefine.HK_ALLCLOSE);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x33;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }else {
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x00;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }
+        }else if(operands.equals(UnisoundDefine.OBJ_OUTLET)){//插座
+
+        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)){//灯光
+            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
+                control.setDevAttr(ApplianceDefine.HK_ALLOPEN);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x32;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }else{
+                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
+                hk60Data[0] = (byte) 0x00;
+                hk60Data[1] = (byte) 0x00;
+                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            }
+        }else if(operands.equals(UnisoundDefine.OBJ_WASHER)){//洗衣机
+            control.setDevAttr(ApplianceDefine.WASHING_onOffStatus);
+            control.setAttrStatusShort((short) 0);
+        }
     }
 
     /**
