@@ -6,18 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.baidu.speech.EventListener;
-import com.haier.ai.airobot.Const;
-import com.haier.ai.airobot.MyApplication;
-import com.haier.ai.airobot.event.WakeupEvent;
-import com.haier.ai.airobot.manager.WakeupEventManager;
-import com.haier.ai.airobot.net.RetrofitRequest;
-import com.haier.ai.airobot.utils.NetWorkUtils;
+import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.event.WakeupEvent;
+import com.haier.ai.bluetoothspeaker.manager.WakeupEventManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -128,15 +124,15 @@ public class WakeupService extends Service {
         registerReceiver(recevier, filter);
     }
 
-    public void initToken(){
+    /*public void initToken(){
         String token = MyApplication.getInstance().getAccessToken();
         initGetToken(token);
     }
 
     private void initGetToken(String token) {
-        /**
+        *//**
          * 确保app刚安装上，token为空的时候，去请求token,token长度为30
-         */
+         *//*
         Log.d(TAG, "initGetToken: init token");
         if (TextUtils.isEmpty(token) || token.length() != 30) {
 //            NetRequest.getInstance().getToken();
@@ -146,7 +142,7 @@ public class WakeupService extends Service {
                 Log.e(TAG, "initGetToken: 您的网络未连接，请连接网络，或您的网络无法连接外网");
             }
         }
-    }
+    }*/
      class Wait4WakeupRecevier extends BroadcastReceiver {
 
         @Override

@@ -1,12 +1,9 @@
 package com.haier.ai.bluetoothspeaker.manager;
 
 import android.content.Context;
-import android.text.TextUtils;
 
-import com.haier.ai.bluetoothspeaker.ApplianceDefine;
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
-import com.haier.ai.bluetoothspeaker.util.BytesUtil;
 
 
 /**
@@ -139,7 +136,7 @@ public class ProtocolManager {
     /**
      * 打开动作
      */
-    public void operatorOpen(){
+    /*public void operatorOpen(){
         if(operands.equals(UnisoundDefine.OBJ_AC)) {//空调
 //            bOpenAC = true;
             control.setAttrStatusShort((short) 1);
@@ -214,12 +211,12 @@ public class ProtocolManager {
             control.setDevAttr(ApplianceDefine.WASHING_onOffStatus);
             control.setAttrStatusShort((short) 1);
         }
-    }
+    }*/
 
     /**
      *  关闭动作
      */
-    public void operatorClose(){
+    /*public void operatorClose(){
         if(operands.equals(UnisoundDefine.OBJ_AC)) {//空调
             control.setAttrStatusShort((short) 0);
             control.setDevAttr(ApplianceDefine.AIRCON_status);
@@ -287,7 +284,7 @@ public class ProtocolManager {
             control.setDevAttr(ApplianceDefine.WASHING_onOffStatus);
             control.setAttrStatusShort((short) 0);
         }
-    }
+    }*/
 
     /**
      * 拼装协议
