@@ -32,4 +32,12 @@ public class Const {
 
     //内容请求接口
     public static final String URL_CONTENT = "content";
+
+    public static final int STATE_STOP = 0;                //播放停止
+
+    public static final int STATE_PLAYING = 1;             //正在播放
+
+    public static final int STATE_PAUSE = 2;               //暂停播放
+
+    public static final int STATE_BUFFING = 3;              //正在缓冲
 }

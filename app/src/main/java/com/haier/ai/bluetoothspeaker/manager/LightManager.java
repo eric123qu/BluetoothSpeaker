@@ -22,11 +22,11 @@ public class LightManager {
         return sLightManager;
     }
 
-    public static boolean openLight(){
+    public boolean openLight(){
         return true;
     }
 
-    public static boolean closeLight(){
+    public boolean closeLight(){
         return true;
     }
 
@@ -34,7 +34,7 @@ public class LightManager {
      * 设置亮度
      * @param level
      */
-    public static void setBrightness(int level){
+    public void setBrightness(int level){
 
     }
 
@@ -42,7 +42,7 @@ public class LightManager {
      * 设置色温
      * @param level
      */
-    public static void setColorTemperature(int level){
+    public void setColorTemperature(int level){
 
     }
 
@@ -50,7 +50,42 @@ public class LightManager {
      * 设置颜色
      * @param level
      */
-    public static void setColor(int level){
+    public void setColor(int level){
+
+    }
+
+    /**
+     * 网络配网模式
+     */
+    private void setNetConfigMode(){
+
+    }
+
+    /**
+     * 网络断开
+     */
+    private void netDisconnect(){
+
+    }
+
+    /**
+     * 通常状态下的灯光 ：绿色常亮：运行状态
+     */
+    private void lightNormal(){
+
+    }
+
+    /**
+     * 语音唤醒后灯光变换： 白色常亮：语音待命
+     */
+    private void lightWakeup(){
+
+    }
+
+    /**
+     * 语音识别状态下灯光：   白灯闪烁（240次每分钟）：语音命令执行
+     */
+    private void lightRecognize(){
 
     }
 }

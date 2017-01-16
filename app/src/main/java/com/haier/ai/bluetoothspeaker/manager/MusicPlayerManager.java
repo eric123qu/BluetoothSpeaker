@@ -4,7 +4,11 @@ import android.media.MediaPlayer;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.haier.ai.bluetoothspeaker.Const;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * author: qu
@@ -17,8 +21,14 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
 
     public static MusicPlayerManager sMusicPlayerManager;
     private static MediaPlayer sMediaPlayer;
+    private static int musicState = Const.STATE_STOP;       //音乐播放状态
+    private List<String> netMusicList = null;               //云端歌曲列表
+    private List<String> localMusicList = null;             //本地歌曲列表
+
 
     public MusicPlayerManager(){
+        musicState = Const.STATE_STOP;
+        initLocalMusicList();
     }
 
     public static MusicPlayerManager getInstance(){
@@ -68,6 +78,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
 
         if(sMediaPlayer.isPlaying()){
             sMediaPlayer.pause();
+            musicState = Const.STATE_PAUSE;
         }
     }
 
@@ -79,6 +90,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             return;
 
         sMediaPlayer.start();
+        musicState = Const.STATE_PLAYING;
     }
 
     /**
@@ -93,6 +105,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             sMediaPlayer.stop();
             sMediaPlayer.release();
             sMediaPlayer = null;
+            musicState = Const.STATE_STOP;
         }
     }
 
@@ -120,6 +133,47 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     public void onPrepared(MediaPlayer mp) {
         if(sMediaPlayer != null){
             sMediaPlayer.start();
+            musicState = Const.STATE_PLAYING;
         }
     }
+
+
+    /**
+     * 播放下一首
+     */
+    private void playNextMusic(){
+
+    }
+
+    /**
+     * 播放上一首
+     */
+    private void playPreviousMusic(){
+
+    }
+
+    private int getMusicState(){
+        return musicState;
+    }
+
+    /**
+     * 播放本地音乐
+     * @param song
+     * @param singer
+     */
+    private void playLocalMusic(String song ,String singer){
+
+    }
+
+    /**
+     * 初始化本地音乐播放列表
+     */
+    private void initLocalMusicList(){
+        if(localMusicList == null){
+            localMusicList = new ArrayList<>();
+        }
+
+        //添加本地歌曲
+    }
+
 }
