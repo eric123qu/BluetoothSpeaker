@@ -9,7 +9,7 @@ import android.app.Application;
  */
 
 public class App extends Application {
-
+    private final String TAG = "App";
     private static App sApp;
 
     public App(){
@@ -25,4 +25,5 @@ public class App extends Application {
     public static App getInstance(){
         return sApp;
     }
+
 }

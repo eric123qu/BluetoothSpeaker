@@ -27,4 +27,9 @@ public class Const {
     public static final String RERECONIZE_TAG = "com.haier.ai.rereconize";
 
     public static final String RET_CODE_SUCESS = "00000";
+
+    public static final String BASE_URL = "http://121.41.27.164:9030/ai-access/";
+
+    //内容请求接口
+    public static final String URL_CONTENT = "content";
 }
