@@ -57,35 +57,35 @@ public class LightManager {
     /**
      * 网络配网模式
      */
-    private void setNetConfigMode(){
+    public void netConfigMode(){
 
     }
 
     /**
      * 网络断开
      */
-    private void netDisconnect(){
+    public void netDisconnect(){
 
     }
 
     /**
      * 通常状态下的灯光 ：绿色常亮：运行状态
      */
-    private void lightNormal(){
+    public void lightNormal(){
 
     }
 
     /**
      * 语音唤醒后灯光变换： 白色常亮：语音待命
      */
-    private void lightWakeup(){
+    public void lightWakeup(){
 
     }
 
     /**
      * 语音识别状态下灯光：   白灯闪烁（240次每分钟）：语音命令执行
      */
-    private void lightRecognize(){
+    public void lightRecognize(){
 
     }
 }

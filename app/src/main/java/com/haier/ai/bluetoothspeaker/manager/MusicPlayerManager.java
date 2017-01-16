@@ -161,8 +161,8 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
      * @param song
      * @param singer
      */
-    private void playLocalMusic(String song ,String singer){
-
+    private boolean playLocalMusic(String song ,String singer){
+        return false;
     }
 
     /**

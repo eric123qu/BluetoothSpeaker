@@ -6,11 +6,15 @@ import android.content.Intent;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
+import com.haier.ai.bluetoothspeaker.manager.LightManager;
 import com.haier.ai.bluetoothspeaker.manager.SpeakerAlarmManager;
 import com.haier.ai.bluetoothspeaker.manager.WifiDevManager;
 import com.haier.ai.bluetoothspeaker.service.BluetoothService;
 import com.haier.ai.bluetoothspeaker.ui.ClockAlarmActivity;
+
+import static com.baidu.speech.EventManagerFactory.TAG;
 
 /**
  * author: qu
@@ -66,7 +70,8 @@ public class Receiver extends BroadcastReceiver {
                 //// TODO: 16-12-21  语音提示
                 NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 if(info.getState().equals(NetworkInfo.State.DISCONNECTED)){
-                    System.out.println("wifi网络连接断开");
+                    Log.e(TAG, "wifi网络连接断开");
+                    LightManager.getInstance().netDisconnect();
                 }
                 else if(info.getState().equals(NetworkInfo.State.CONNECTED)){
 
@@ -74,8 +79,8 @@ public class Receiver extends BroadcastReceiver {
                     WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
                     //获取当前wifi名称
-                    System.out.println("连接到网络 " + wifiInfo.getSSID());
-
+                    Log.i(TAG, "连接到网络 " + wifiInfo.getSSID());
+                    LightManager.getInstance().lightNormal();
                 }
                 break;
 

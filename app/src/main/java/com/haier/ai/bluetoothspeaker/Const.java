@@ -33,6 +33,9 @@ public class Const {
     //内容请求接口
     public static final String URL_CONTENT = "content";
 
+    /**
+     * 音乐播放状态
+     */
     public static final int STATE_STOP = 0;                //播放停止
 
     public static final int STATE_PLAYING = 1;             //正在播放
