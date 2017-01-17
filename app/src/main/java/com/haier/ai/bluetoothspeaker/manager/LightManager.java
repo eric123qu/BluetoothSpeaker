@@ -9,9 +9,34 @@ package com.haier.ai.bluetoothspeaker.manager;
 public class LightManager {
     private final String TAG = "LightManager";
     public static LightManager sLightManager;
+    private final int LIGHT_STATE_NET_CONFIG = 1;
+    private final int LIGHT_STATE_NET_DISCONNECT = 2;
+    private final int LIGHT_STATE_NORMAL = 3;
+    private final int LIGHT_STATE_WAKEUP = 4;
+    private final int LIGHT_STATE_RECOGNIZE = 5;
+
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+    /**
+     *
+     * @param cmd
+     *  // 1,蓝色闪烁20hz 配对模式
+    // 2,红色闪烁20hz 网络断开
+    // 3,绿色常亮 运行状态
+    // 4,白色常亮 语音待命
+    // 5,白灯闪烁 2hz 语言命令执行
+     * @return
+     */
+    public native int notifyLightContrl(int cmd);//控制下发
+
+    public native int notifyLightInit();//使用前先初始化
+
+    public native int notifyLightClose();//使用后释放资源
 
     public LightManager(){
-
+        notifyLightInit();
     }
 
     public static LightManager getInstance(){
@@ -58,34 +83,34 @@ public class LightManager {
      * 网络配网模式
      */
     public void netConfigMode(){
-
+        notifyLightContrl(LIGHT_STATE_NET_CONFIG);
     }
 
     /**
      * 网络断开
      */
     public void netDisconnect(){
-
+        notifyLightContrl(LIGHT_STATE_NET_DISCONNECT);
     }
 
     /**
      * 通常状态下的灯光 ：绿色常亮：运行状态
      */
     public void lightNormal(){
-
+        notifyLightContrl(LIGHT_STATE_NORMAL);
     }
 
     /**
      * 语音唤醒后灯光变换： 白色常亮：语音待命
      */
     public void lightWakeup(){
-
+        notifyLightContrl(LIGHT_STATE_WAKEUP);
     }
 
     /**
      * 语音识别状态下灯光：   白灯闪烁（240次每分钟）：语音命令执行
      */
     public void lightRecognize(){
-
+        notifyLightContrl(LIGHT_STATE_RECOGNIZE);
     }
 }
