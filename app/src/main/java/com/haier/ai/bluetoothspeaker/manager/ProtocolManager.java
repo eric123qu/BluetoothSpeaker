@@ -5,6 +5,9 @@ import android.content.Context;
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 /**
  * Created by qx on 17-1-5.
@@ -16,6 +19,7 @@ public class ProtocolManager {
     private static ProtocolManager sProtocolManager;
     private static int serialNum = 1;
     private static boolean bQueryWmLeftTime = false;
+    private ExecutorService executorService;
 
     private final int tmpLen = 64;
     private final int hwSingleTemp = 45;
@@ -41,7 +45,9 @@ public class ProtocolManager {
 
 
     public ProtocolManager(){
-
+        if(executorService == null){
+            executorService = Executors.newCachedThreadPool();
+        }
     }
 
     public static ProtocolManager getInstance(){
@@ -425,7 +431,12 @@ public class ProtocolManager {
      * 向网关发送数据
      */
     public void sendData2Gateway(){
-        new Thread(networkTask).start();
+        if(executorService == null){
+            executorService = Executors.newCachedThreadPool();
+        }
+
+        executorService.execute(networkTask);
+        //new Thread(networkTask).start();
     }
 
     /**

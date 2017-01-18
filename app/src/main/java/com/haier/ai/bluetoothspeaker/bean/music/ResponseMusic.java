@@ -12,7 +12,7 @@ public class ResponseMusic {
      * retCode : 00000
      * retInfo : 操作成功
      * sn : 123456789
-     * data : {"domain":"music","url":"http://abc.com/def.mp3","song":"好久不见","singer":"陈奕迅","album":"认了吧","genre":"校园"}
+     * data : {"domain":"music","url":"http://abc.com/def.mp3","duration": "251000","song":"好久不见","singer":"陈奕迅","album":"认了吧","genre":"校园"}
      */
 
     private String retCode;
@@ -56,6 +56,7 @@ public class ResponseMusic {
         /**
          * domain : music
          * url : http://abc.com/def.mp3
+         * "duration": "251000"
          * song : 好久不见
          * singer : 陈奕迅
          * album : 认了吧
@@ -64,6 +65,7 @@ public class ResponseMusic {
 
         private String domain;
         private String url;
+        private String duration;
         private String song;
         private String singer;
         private String album;
@@ -83,6 +85,14 @@ public class ResponseMusic {
 
         public void setUrl(String url) {
             this.url = url;
+        }
+
+        public String getDuration(){
+            return duration;
+        }
+
+        public void setDuration(String duration){
+            this.duration = duration;
         }
 
         public String getSong() {

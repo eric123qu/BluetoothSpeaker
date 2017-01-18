@@ -43,7 +43,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
      * 播放云端音乐
      * @param url
      */
-    private void playUrlMusic(String url){
+    public void playUrlMusic(String url){
         if(TextUtils.isEmpty(url)){
             return;
         }
@@ -72,10 +72,12 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     /**
      * 暂停播放
      */
-    private void pauseMusic(){
+    public void pauseMusic(){
         if(sMediaPlayer == null)
             return;
 
+//        int pos = sMediaPlayer.getCurrentPosition();
+//        Log.d(TAG, "pauseMusic: pos:" + pos);
         if(sMediaPlayer.isPlaying()){
             sMediaPlayer.pause();
             musicState = Const.STATE_PAUSE;
@@ -85,7 +87,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     /**
      * 继续播放
      */
-    private void restartMusic(){
+    public void restartMusic(){
         if(sMediaPlayer == null)
             return;
 
@@ -96,7 +98,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     /**
      * 停止播放
      */
-    private void stopMusic(){
+    public void stopMusic(){
         if(sMediaPlayer == null){
             return ;
         }
@@ -141,18 +143,18 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     /**
      * 播放下一首
      */
-    private void playNextMusic(){
+    public void playNextMusic(){
 
     }
 
     /**
      * 播放上一首
      */
-    private void playPreviousMusic(){
+    public void playPreviousMusic(){
 
     }
 
-    private int getMusicState(){
+    public int getMusicState(){
         return musicState;
     }
 
@@ -161,7 +163,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
      * @param song
      * @param singer
      */
-    private boolean playLocalMusic(String song ,String singer){
+    public boolean playLocalMusic(String song ,String singer){
         return false;
     }
 
@@ -176,4 +178,19 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         //添加本地歌曲
     }
 
+    /**
+     * 播放列表中添加歌曲
+     * @param songUrl
+     */
+    public void addNetMusic(String songUrl){
+        if(TextUtils.isEmpty(songUrl)){
+            return;
+        }
+
+        if (netMusicList == null){
+            netMusicList = new ArrayList<>();
+        }
+
+        netMusicList.add(songUrl);
+    }
 }
