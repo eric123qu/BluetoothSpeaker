@@ -1,6 +1,7 @@
 package com.haier.ai.bluetoothspeaker.manager;
 
 import android.media.MediaPlayer;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -161,10 +162,31 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     /**
      * 播放本地音乐
      * @param song
-     * @param singer
      */
-    public boolean playLocalMusic(String song ,String singer){
-        return false;
+    public boolean playLocalMusic(String song){
+        if(TextUtils.isEmpty(song)){
+            return false;
+        }
+
+        int index = hasLocalMusic(song);
+        if(index == -1){
+            return false;
+        }
+
+        String songPath = getLocalMusicPath() + localMusicList.get(index);
+
+        sMediaPlayer = new MediaPlayer();
+
+        try {
+            sMediaPlayer.setDataSource(songPath);
+            sMediaPlayer.prepare();
+            sMediaPlayer.start();
+            musicState = Const.STATE_PLAYING;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return true;
     }
 
     /**
@@ -176,6 +198,39 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         }
 
         //添加本地歌曲
+        localMusicList.add("白桦林.mp3");
+        localMusicList.add("彼岸花.mp3");
+        localMusicList.add("彩云之南.mp3");
+        localMusicList.add("但愿人长久.mp3");
+        localMusicList.add("蝶恋.mp3");
+        localMusicList.add("独角戏.mp3");
+        localMusicList.add("饿狼传说.mp3");
+        localMusicList.add("刚刚好.mp3");
+        localMusicList.add("寒衣调.mp3");
+        localMusicList.add("黄豆.mp3");
+        localMusicList.add("回到拉萨.mp3");
+        localMusicList.add("记事本.mp3");
+        localMusicList.add("酒干倘卖无.mp3");
+        localMusicList.add("酒醉的探戈.mp3");
+        localMusicList.add("就是我.mp3");
+        localMusicList.add("看月亮爬上来.mp3");
+        localMusicList.add("老街.mp3");
+        localMusicList.add("摩天轮.mp3");
+        localMusicList.add("女人花.mp3");
+        localMusicList.add("朋友.mp3");
+        localMusicList.add("骑士.mp3");
+        localMusicList.add("时间都去哪儿了.mp3");
+        localMusicList.add("涛声依旧.mp3");
+        localMusicList.add("听海.mp3");
+        localMusicList.add("同桌的你.mp3");
+        localMusicList.add("忘记你我做不到.mp3");
+        localMusicList.add("吻别.mp3");
+        localMusicList.add("下沙.mp3");
+        localMusicList.add("映山红.mp3");
+        localMusicList.add("雨蝶.mp3");
+        localMusicList.add("雨夜花.mp3");
+        localMusicList.add("终于等到你.mp3");
+        localMusicList.add("最美的太阳.mp3");
     }
 
     /**
@@ -192,5 +247,23 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         }
 
         netMusicList.add(songUrl);
+    }
+
+    public String getLocalMusicPath() {
+        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/music/";
+    }
+
+    public int hasLocalMusic(String song){
+        if(localMusicList == null){
+            return -1;
+        }
+
+        for(String sel : localMusicList){
+            if(sel.contains(song)){
+                return localMusicList.indexOf(sel);
+            }
+        }
+
+        return -1;
     }
 }
