@@ -24,6 +24,7 @@ public class ControlBean {
     private int time;   //预约时间
     private byte[] attrStatusBytes;//属性状态(60设备用)
     private List<DevInfo> devInfoList;
+    private boolean isDialog;
 
     public ControlBean(){
 
@@ -36,6 +37,13 @@ public class ControlBean {
         this.sequence = sequence;
     }*/
 
+   public void setIsDialog(boolean isDialog){
+       this.isDialog = isDialog;
+   }
+
+   public boolean getIsDialog(){
+       return this.isDialog;
+   }
     public void setOperator(String operator){
         this.operator = operator;
     }

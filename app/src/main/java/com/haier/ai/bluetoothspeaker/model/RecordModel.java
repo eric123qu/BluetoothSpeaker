@@ -11,15 +11,13 @@ import com.haier.ai.bluetoothspeaker.App;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.audio.AudioInput;
 import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
-import com.haier.ai.bluetoothspeaker.bean.food.FResponseBean;
-import com.haier.ai.bluetoothspeaker.bean.food.Para;
-import com.haier.ai.bluetoothspeaker.bean.food.ResponseBean;
-import com.haier.ai.bluetoothspeaker.bean.food.Result;
+import com.haier.ai.bluetoothspeaker.bean.box.boxNluBean;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
+import com.haier.ai.bluetoothspeaker.manager.ProtocolManager;
 import com.haier.ai.bluetoothspeaker.util.SpeechJavaBeanUtils;
 import com.haierubic.ai.ErrorCode;
 import com.haierubic.ai.IAsrRecorder;
@@ -66,6 +64,9 @@ public class RecordModel {
         initSdk();
 
         initNet();
+
+        //add 初始化录音机
+        initRecorder();
     }
 
     public void initNet(){
@@ -83,20 +84,13 @@ public class RecordModel {
             return;
         }
 
-        //log("start recorder begin.");
-        if (mRecorder == null) {
-            // 初始化录音机
-            initRecorder();
-        }
-
         int err;
         // 录音识别。
         // 通过start()方法开始录音识别。stop()方法结束并进行录音识别。cancel()方法结束不进行识别。
         // 目前只支持主动调用stop()接口的识别，即按住说。其它识别方式开发中。
-        if ((err = mRecorder.start(null)) != ErrorCode.UAI_ERR_NONE) {
+        String config = null;
+        if ((err = mRecorder.start(config)) != ErrorCode.UAI_ERR_NONE) {
             Log.d(TAG, "startRecord: fail to set audio source filter: " + err);
-            mRecorder = null;
-            //UbicAI.release();
             return;
         }
 
@@ -177,7 +171,8 @@ public class RecordModel {
     }
 
     private void initSdk(){
-        int err = UbicAI.init(null);
+        String config = null;
+        int err = UbicAI.init(config, App.getInstance());
         if (err != ErrorCode.UAI_ERR_NONE){
             Log.e(TAG, "initSdk: fail to init sdk.");
             EventBus.getDefault().post(new ErrorEvent("initSdk: fail to init sdk."));
@@ -212,7 +207,7 @@ public class RecordModel {
             // 创建ASR录音机失败。
             Log.d(TAG, "initRecorder: fail to set audio source filter:" + err);
             mRecorder = null;
-            //UbicAI.release();
+            UbicAI.release();
             return;
         }
 
@@ -242,6 +237,7 @@ public class RecordModel {
                 EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
                 //waitForWakeup();
 
+                Log.e(TAG, "onResult: asrresult:" + asrResult );
                 if(TextUtils.isEmpty(asrResult)){
                     EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
 
@@ -263,6 +259,11 @@ public class RecordModel {
                     //getNlpResult(asrResult);
                 }
             }
+
+            @Override
+            public void onVolume(double volume){
+                //Log.d(TAG, "onVolume: " + String.format("volume=%f", volume));
+            }
         };
 
         // 设置识别状态回调。
@@ -271,7 +272,7 @@ public class RecordModel {
         if ((err = mRecorder.attach(callback)) != ErrorCode.UAI_ERR_NONE) {
             Log.d(TAG, "initRecorder: fail to set audio source filter: " + err);
             mRecorder = null;
-            //UbicAI.release();
+            UbicAI.release();
             return;
         }
     }
@@ -289,6 +290,10 @@ public class RecordModel {
         return SpeechJavaBeanUtils.S2TgetText(msg);
     }
 
+    /**
+     * 创建语义理解
+     * @param asrData
+     */
     public void getNluResult(String asrData){
         // 创建语义理解对象。
         INlu nlu = UbicAI.createNlu(null);
@@ -320,9 +325,9 @@ public class RecordModel {
                 {
                     //EventBus.getDefault().post(new NluEvent(tts));
                     Gson gson = new Gson();
-                    ResponseBean resp = gson.fromJson(arg1, ResponseBean.class);
+                    boxNluBean resp = gson.fromJson(arg1, boxNluBean.class);
                     if(resp.getRetCode().equals("00000")){
-                        parseNlpResult(resp.getData());
+                        parseNlpResult(resp);
                     }else{
                         showTtsResult("对不起我没理解明白请再说一遍");
                     }
@@ -339,7 +344,8 @@ public class RecordModel {
         nlu.attach(cb);
 
         // 开始识别。保留参数用于识别配置，目前不用填。
-        nlu.start(null);
+        String config = "{\"domain\":\"box\"}";
+        nlu.start(config);
 
         // 进行语义识别。语法格式不固定，先由应用层根据协议组包请求(示例固定)，之后固定后会制作工具类。
         nlu.recog(asrData);
@@ -398,6 +404,7 @@ public class RecordModel {
         }
 
         int err;
+        //String config = null;
         if ((err = mPlayer.start(null)) != ErrorCode.UAI_ERR_NONE)
         {
             Log.e(TAG, "playTTS: " +  String.format("tts player start failed = %d", err));
@@ -456,21 +463,20 @@ public class RecordModel {
         mPlayer.attach(cb);
     }
 
-    private void parseNlpResult(FResponseBean resp){
+    private void parseNlpResult(boxNluBean resp){
         fixResponseData(resp);
 
         nlpControl(resp);
     }
 
-    private void fixResponseData(FResponseBean resp){
-        Result result = resp.getResults().get(0);
-        List<Para> params = result.getParas();
+    private void fixResponseData(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
 
         if(params == null){
             return;
         }
 
-        for (Para param:params) {
+        for (boxNluBean.DataBean.SemanticBean.ParasBean param:params) {
             String tmpKey = param.getKey();
             if(tmpKey.contains("{")){
                 String key = tmpKey.substring(1, tmpKey.length()-1);
@@ -485,175 +491,23 @@ public class RecordModel {
         }
     }
 
-    private static String song = null;
-    private static String singer = null;
-    private void nlpControl(FResponseBean resp){
-        Result result = resp.getResults().get(0);
-        List<Para> params = result.getParas();
-        String response = result.getResponse();
-        String domain = result.getDomain();
-        String tts = null;
-
-
-        if(TextUtils.isEmpty(domain)){
-            showTtsResult(response);
-            return;
+    /**
+     * 控制
+     * @param resp
+     */
+    private void nlpControl(boxNluBean resp){
+        String operands = resp.getData().getSemantic().getDomain();
+        boolean isDialog = resp.getData().getSemantic().isIs_dialog();
+        String operator = null;
+        String value = null;
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params.size() ==1){
+            operator = params.get(0).getKey();
+            value = params.get(0).getValue();
         }
 
-        if(domain.equals("Common_Music")){
-            //String song = null;
-//            String singer = null;
-
-            for (Para param:params) {
-                if(param.getKey().equals("music")){
-                    song = param.getValue();
-                }else if(param.getKey().equals("singer")){
-                    singer = param.getValue();
-                }
-            }
-
-            if(TextUtils.isEmpty(song) && TextUtils.isEmpty(singer)){
-                showTtsResult("对不起，我没能理解您在说什么。");
-                return;
-            }
-
-            StringBuilder nlp = new StringBuilder();
-            if(!TextUtils.isEmpty(song)){
-                nlp.append("歌曲：");
-                nlp.append(song);
-            }
-
-            if(!TextUtils.isEmpty(singer)){
-                nlp.append("   歌手： ");
-                nlp.append(singer);
-            }
-
-            EventBus.getDefault().post(new NluEvent(nlp.toString()));
-            //modify
-            waitForWakeup();
-
-
-
-        }else if(domain.equals("Common_Joke")){
-            showTtsResult(response);
-            //playTTS_api(response);
-        }else if(domain.equals("Common_Story")){
-            showTtsResult(response);
-            //playTTS_api(response);
-        }else if(domain.equals("Common_Weather")){
-            showTtsResult(response);
-            //playTTS_api(response);
-        }else if(domain.equals("Common_Other")){
-            showTtsResult(response);
-        }
-        else if(domain.equals("refrigerator")) {
-
-            if (params.size() == 1) {
-                String key = params.get(0).getKey();
-                String value = params.get(0).getValue();
-                switch (key) {
-                    case "query":
-
-                        break;
-                    case "overtime":
-                        break;
-                    case "food_menu":
-                        if(value.equals("西红柿炒鸡蛋")){
-                            Log.d(TAG, "playTTSMedia: play 西红柿炒鸡蛋");
-                            tts = "1、鸡蛋打散加入葱花和食盐搅拌均匀，番茄切块，锅中倒油烧至7成热倒入蛋液。2、蛋液凝固成型后用重新倒油烧热后倒入番茄煸炒。";
-                        }else if(value.equals("干煸四季豆")){
-                            tts = "蒜瓣切小颗粒，老姜切末，红椒切小粒；腌肉末：放姜末、少许生粉、一点点白糖、少许老抽（看自己喜欢颜色深浅），拌匀待用";
-                        }else if(value.equals("可乐鸡翅")){
-                            tts = "油温后，放入鸡翅。煎鸡翅的时候小心被见溅伤。将鸡翅两面都煎为金黄色，备用";
-                        }else if(value.equals("醋溜白菜")){
-                            tts = "将白菜梆洗净后从之间切开成两条，取其中一条，斜着用刀片成一片片；另外一条白菜也梆也片成片；干辣椒剪开，不吃辣的可以省去辣椒这一步骤";
-                        }else if(value.equals("青椒肉丝")){
-                            tts = "青椒切成丝，里脊肉顺纹理切成丝；把切好的肉丝放入碗内加淀粉、蛋清、少许盐抓均上浆、腌制一会。";
-                        }else if(value.equals("拍黄瓜")){
-                            tts = "热锅放入一匙芝麻油，随后加入干辣椒碎小火炒香，起锅的时候加入蒜蓉拌匀；31和2混合均匀即成腌渍料";
-                        }else if(value.equals("老醋花生")){
-                            tts = "锅里放油，冷油时就倒入花生米快速翻炒，以保证花生米能够均匀受热。3待花生米有炸开的响声后再炒一会儿，待有香味且差不多都裂开时起锅沥油";
-                        }else if(value.equals("锅包肉")){
-                            tts = "里脊肉切成片备用；把切好的里脊片放入碗中，加入1勺料酒，腌制片刻；取出后一片一片铺在淀粉上，两面都沾满淀粉；锅中加入炒菜油，建议选小锅，这样倒入的油有一定高度";
-                        }else if(value.equals("鱼香茄子")){
-                            tts = "猪肉馅加入调味料腌制20分钟，木耳提前用温水泡发后切丝，胡萝卜、冬笋切丝；锅中放半斤油，烧7成热，把茄子放入炸";
-                        }else if(value.equals("宫保鸡丁")){
-                            tts = "取嫩鸡胸肉，用刀把肉拍松，切成3毫米见方的十字花纹，再切成2厘米见方的小块，加盐、、湿淀粉拌匀。花生米事先炸好的。3炒锅上火，放底油，烧热";
-                        }
-
-                        showTtsResult(tts);
-                        //LocalMediaManager.getInstance().playTTSMedia(key, value, RespListener);
-                        break;
-                    case "adjust_brightness":
-                    case "adjust_voice":
-                    case "switch_screen":
-                        //LocalMediaManager.getInstance().playTTSMedia(key, value, RespListener);
-                        showTtsResult(response);
-                        //EventBus.getDefault().post(new NluEvent(response));
-                        //waitForWakeup();
-                        break;
-                    case "add_address":
-                        showTtsResult(response);
-                        break;
-                    case "edit_address":
-                        showTtsResult(response);
-                        break;
-                    case "setmode":
-                        showTtsResult(response);
-//                        LocalMediaManager.getInstance().playTTSMedia(key, value, RespListener);
-//                        EventBus.getDefault().post(new NluEvent(response));
-                        break;
-                    /*case "settemp":
-                        showTtsResult(response);
-                        break;*/
-                    default:
-                       // waitForWakeup();
-                        showTtsResult("对不起我有点乱，请再说一遍");
-                        break;
-                }
-            } else {
-                String key0 = params.get(0).getKey();
-                String key1 = params.get(1).getKey();
-                String value0 = params.get(0).getValue();
-                String value1 = params.get(1).getValue();
-
-                switch (key0) {
-                    case "query":
-
-                        break;
-                    case "add":
-
-
-                        break;
-                    case "delete":
-                        if (TextUtils.isEmpty(value1)) {
-
-                        } else {
-
-                        }
-
-                        break;
-                    case "adjust_tempure":
-
-                        break;
-                    case "time":
-                        showTtsResult(response);
-                        break;
-                    case "settemp":
-                        showTtsResult(response);
-                        break;
-                    case "food_menu":
-                        if(value0.equals("query")){
-                            showTtsResult("正在为您查询该食物的做法");
-                        }
-                        break;
-                    default:
-                        showTtsResult("对不起我有点乱，请再说一遍");
-                        //waitForWakeup();
-                        break;
-                }
-            }
-        }
+        ProtocolManager.getInstance().setProtocolInfo(operands, operator, value, isDialog);
+        ProtocolManager.getInstance().convertVoice2Data();
     }
 
     public void showTtsResult(String tts){

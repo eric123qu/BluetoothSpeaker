@@ -1,9 +1,14 @@
 package com.haier.ai.bluetoothspeaker.manager;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
 
+import com.haier.ai.bluetoothspeaker.ApplianceDefine;
+import com.haier.ai.bluetoothspeaker.UnisoundDefine;
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
+import com.haier.ai.bluetoothspeaker.util.BytesUtil;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +47,7 @@ public class ProtocolManager {
     private String device;//nickname
     private ControlBean control;
     private Context context;
+    private boolean isDialog;
 
 
     public ProtocolManager(){
@@ -66,11 +72,18 @@ public class ProtocolManager {
         this.value = value;
     }
 
-    public void setProtocolInfo(String operands, String operator,String value){
+    /**
+     * 初始化语音信息
+     * @param operands
+     * @param operator
+     * @param value
+     */
+    public void setProtocolInfo(String operands, String operator,String value, boolean isDialog){
         initDatas();
         this.operands = operands;
         this.operator = operator;
         this.value = value;
+        this.isDialog = isDialog;
     }
 
     public void initDatas(){
@@ -87,48 +100,53 @@ public class ProtocolManager {
         control = new ControlBean();
     }
 
-   /* public void convertVoice2Data(){
+    /**
+     * 语音数据转化成控制协议
+     */
+    public void convertVoice2Data(){
         //拼装数据
         initControlObj();
 
+        if(operands.equals(UnisoundDefine.OBJ_AC)){ // 空调
+            handlerAC();
+        }
 
         if(operator.equals(UnisoundDefine.ACT_OPEN)){//打开
             operatorOpen();
         }else if(operator.equals(UnisoundDefine.ACT_CLOSE)){
-            operatorClose();
+//            operatorClose();
         }else if(operator.equals(UnisoundDefine.ACT_STOP)) {
-            operatorStop();
+//            operatorStop();
         }else if(operator.equals(UnisoundDefine.ACT_SET)){
-            operatorSet();
+//            operatorSet();
         }else if(operator.equals(UnisoundDefine.ACT_UNSET)) {//取消设置
-            operatorUnset();
+//            operatorUnset();
         }else if(operator.equals(UnisoundDefine.ACT_START)){
-            operatorStart();
+//            operatorStart();
         }else if(operator.equals(UnisoundDefine.ACT_PAUSE)){
-            operatorPause();
+//            operatorPause();
         }else if(operator.equals(UnisoundDefine.ACT_DECREASE)){//减少
-            operatorDecrease();
+//            operatorDecrease();
         }else if(operator.equals(UnisoundDefine.ACT_INCREASE)){//增大
-            operatorIncrease();
+//            operatorIncrease();
         }else if(operator.equals(UnisoundDefine.ACT_QUERY)){//查询
-            operatorQuery();
+//            operatorQuery();
         }else if(operator.equals(UnisoundDefine.ACT_STANDBY)){//待机
 
         }else if(operator.equals(UnisoundDefine.ACT_HIBERATE )){//休眠
 
         }else if(operator.equals(UnisoundDefine.ACT_NEXT)){//下一首歌
-            operatorNext();
+//            operatorNext();
         }else if(operator.equals(UnisoundDefine.ACT_PERCEIVE)){
-            operatorPerceive();
-            bScene = true;
+//            operatorPerceive();
         }else if(operator.equals(UnisoundDefine.ACT_BATH)){
-            operatorBath();
+            //operatorBath();
         }
 
 
         formProtocol();
         sendData2Gateway();
-    }*/
+    }
 
     private void initControlObj(){
         control.setOperator(operator);
@@ -140,162 +158,69 @@ public class ProtocolManager {
     }
 
     /**
-     * 打开动作
+     * 空调控制
      */
-    /*public void operatorOpen(){
-        if(operands.equals(UnisoundDefine.OBJ_AC)) {//空调
-//            bOpenAC = true;
-            control.setAttrStatusShort((short) 1);
-            control.setDevAttr(ApplianceDefine.AIRCON_status);
-        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)) {//灯光
-            if(TextUtils.isEmpty(control.getNickName())) { //所有灯光
-                control.setDevAttr(ApplianceDefine.CMD_LmpAllOn);
-                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Light);
-            }else{
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                hk60Data[0] = (byte)0x01;
-                hk60Data[1] = (byte)0x00;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+    public void handlerAC(){
+        if(operator.equals(UnisoundDefine.ACT_OPS)){//开关控制
+            if(TextUtils.isEmpty(value)){
+                return;
             }
 
-        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)) {//窗帘
-            if(TextUtils.isEmpty(control.getNickName())) {
-                control.setDevAttr(ApplianceDefine.CMD_LmpAllOn);
-                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Window);
-            }else{
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                hk60Data[0] = (byte)0x01;
-                hk60Data[1] = (byte)0x00;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
+            if(value.equals(UnisoundDefine.ACT_OPEN)){
+                operatorOpen();
+            }else if(value.equals(UnisoundDefine.ACT_CLOSE)){
+                operatorClose();
             }
-        }else if(operands.equals(UnisoundDefine.OBJ_WATER_HEATER)){//热水器
-            control.setDevAttr(ApplianceDefine.HEATER_onOffStatus);
-            control.setAttrStatusShort((short) 1);
-        }else if(operands.equals(UnisoundDefine.OBJ_AIRCLEANER)){//空气净化器
-            control.setDevAttr(ApplianceDefine.AIRCLEANER_onoffstatus);
-            control.setAttrStatusShort((short) 1);
-        }else if(operands.equals(UnisoundDefine.OBJ_FAS)){//新风
-            control.setDevAttr(ApplianceDefine.HK_NEW_WIND);
-            hk60Data[0] = ApplianceDefine.HK_FAS_ONOFFSTATUS;
-            hk60Data[1] = (byte)0x01;
-            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-        }else if(operands.equals(UnisoundDefine.OBJ_HEATER)){//地暖
-            control.setDevAttr(ApplianceDefine.HK_WARM_STATUS);
-            hk60Data[0] = ApplianceDefine.HK_HEATER_ONOFFSTATUS;
-            hk60Data[1] = (byte)0x01;
-            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)){//窗帘
-            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
-                control.setDevAttr(ApplianceDefine.HK_ALLOPEN);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x33;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }else{
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x01;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }
-        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)){//灯光
-            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
-                control.setDevAttr(ApplianceDefine.HK_ALLOPEN);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x32;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }else{
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x01;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }
-        }else if(operands.equals(UnisoundDefine.OBJ_MEDIA_PLAYER)){//背景音乐
-            control.setDevAttr(ApplianceDefine.HK_BACKGROUND_MUSIC);
-            hk60Data[0] =  ApplianceDefine.HK_MUSIC_PLAY;
-            hk60Data[1] = (byte) 0x01;
-            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-        }else if(operands.equals(UnisoundDefine.OBJ_WASHER)){//洗衣机
-            control.setDevAttr(ApplianceDefine.WASHING_onOffStatus);
-            control.setAttrStatusShort((short) 1);
+
+        }else if(operator.equals(UnisoundDefine.ACT_SETTEMP)){
+            operatorACSetTemp();
+        }else if(operator.equals(UnisoundDefine.ACT_ADJTEMP)){
+            operatorACAdjTemp();
+        }else if(operator.equals(UnisoundDefine.ACT_SETSPEED)){
+
+        }else if(operator.equals(UnisoundDefine.ACT_SETMODE)){
+
         }
-    }*/
+    }
+
+    /**
+     * 设置空调温度
+     */
+    public void operatorACSetTemp(){
+        control.setDevAttr(ApplianceDefine.AIRCON_targetTemp);
+        int index = value.indexOf("度");
+        if(index != -1){
+            value = value.substring(0, index-1);
+        }
+
+        control.setAttrStatusShort(Short.valueOf(value));
+    }
+
+
+    public void operatorACAdjTemp(){
+
+    }
+
+    /**
+     * 打开动作
+     */
+    public void operatorOpen(){
+        control.setAttrStatusShort((short) 1);
+        control.setDevAttr(ApplianceDefine.AIRCON_status);
+    }
 
     /**
      *  关闭动作
      */
-    /*public void operatorClose(){
-        if(operands.equals(UnisoundDefine.OBJ_AC)) {//空调
-            control.setAttrStatusShort((short) 0);
-            control.setDevAttr(ApplianceDefine.AIRCON_status);
-//            bOpenAC = false;
-        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)) {//灯光
-            if(TextUtils.isEmpty(control.getNickName())) {
-                control.setDevAttr(ApplianceDefine.CMD_LmpAllOff);
-                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Light);
-            }else{
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                control.setAttrStatusShort((short) 0);
-            }
-
-        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)) {//窗帘
-            if(TextUtils.isEmpty(control.getNickName())) {
-                control.setDevAttr(ApplianceDefine.CMD_LmpAllOff);
-                control.setAttriStatusByte(ApplianceDefine.CMD_Lmp_Window);
-            }else{
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                control.setAttrStatusShort((short) 0);
-            }
-        }else if(operands.equals(UnisoundDefine.OBJ_WATER_HEATER)){//热水器
-            control.setDevAttr(ApplianceDefine.HEATER_onOffStatus);
-            control.setAttrStatusShort((short) 0);
-        }else if(operands.equals(UnisoundDefine.OBJ_AIRCLEANER)){//空气净化器
-            control.setDevAttr(ApplianceDefine.AIRCLEANER_onoffstatus);
-            control.setAttrStatusShort((short) 0);
-        }else if(operands.equals(UnisoundDefine.OBJ_FAS)){//新风
-            control.setDevAttr(ApplianceDefine.HK_NEW_WIND);
-            hk60Data[0] = ApplianceDefine.HK_FAS_ONOFFSTATUS;
-            hk60Data[1] = (byte)0x00;
-            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-        }else if(operands.equals(UnisoundDefine.OBJ_HEATER)){//地暖
-            control.setDevAttr(ApplianceDefine.HK_WARM_STATUS);
-            hk60Data[0] = ApplianceDefine.HK_HEATER_ONOFFSTATUS;
-            hk60Data[1] = (byte)0x00;
-            control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-        }else if(operands.equals(UnisoundDefine.OBJ_CURTAIN)){//窗帘
-            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
-                control.setDevAttr(ApplianceDefine.HK_ALLCLOSE);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x33;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }else {
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x00;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }
-        }else if(operands.equals(UnisoundDefine.OBJ_OUTLET)){//插座
-
-        }else if(operands.equals(UnisoundDefine.OBJ_LIGHT)){//灯光
-            if(device.equals("ALL_DEVICE")) {//打开所有窗帘
-                control.setDevAttr(ApplianceDefine.HK_ALLOPEN);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x32;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }else{
-                control.setDevAttr(ApplianceDefine.HK_OPERATOR);
-                hk60Data[0] = (byte) 0x00;
-                hk60Data[1] = (byte) 0x00;
-                control.setAttrStatusShort(BytesUtil.getShort(hk60Data));
-            }
-        }else if(operands.equals(UnisoundDefine.OBJ_WASHER)){//洗衣机
-            control.setDevAttr(ApplianceDefine.WASHING_onOffStatus);
-            control.setAttrStatusShort((short) 0);
-        }
-    }*/
+    public void operatorClose(){
+        control.setAttrStatusShort((short) 0);
+        control.setDevAttr(ApplianceDefine.AIRCON_status);
+    }
 
     /**
      * 拼装协议
      */
-    /*private void formProtocol(){
+    private void formProtocol(){
         arrayLen = 0;
         String origin_type = null;
 
@@ -425,7 +350,7 @@ public class ProtocolManager {
 
         String sData = BytesUtil.byte2Hex(sendData);
         Log.d("protocol", "sendData:"+sData);
-    }*/
+    }
 
     /**
      * 向网关发送数据
