@@ -111,7 +111,7 @@ public class ProtocolManager {
             handlerAC();
         }
 
-        if(operator.equals(UnisoundDefine.ACT_OPEN)){//打开
+        /*if(operator.equals(UnisoundDefine.ACT_OPEN)){//打开
             operatorOpen();
         }else if(operator.equals(UnisoundDefine.ACT_CLOSE)){
 //            operatorClose();
@@ -141,7 +141,7 @@ public class ProtocolManager {
 //            operatorPerceive();
         }else if(operator.equals(UnisoundDefine.ACT_BATH)){
             //operatorBath();
-        }
+        }*/
 
 
         formProtocol();
@@ -177,9 +177,9 @@ public class ProtocolManager {
         }else if(operator.equals(UnisoundDefine.ACT_ADJTEMP)){
             operatorACAdjTemp();
         }else if(operator.equals(UnisoundDefine.ACT_SETSPEED)){
-
+            operatorACSetSpeed();
         }else if(operator.equals(UnisoundDefine.ACT_SETMODE)){
-
+            operatorACSetMode();
         }
     }
 
@@ -197,8 +197,63 @@ public class ProtocolManager {
     }
 
 
-    public void operatorACAdjTemp(){
+    public void operatorACSetSpeed(){
+        short status = 1;
+        control.setDevAttr(ApplianceDefine.AIRCON_windSpeed);
+        if(value.equals(UnisoundDefine.WIND_SPEED_LOW)){//低风
+            status = 1;
+        }else if(value.equals(UnisoundDefine.WIND_SPEED_MEDIUM)) {//中风
+            status = 2;
+        }
+        else if(value.equals(UnisoundDefine.WIND_SPEED_HIGH)) {//高风
+            status = 3;
+        }
+        else if(value.equals(UnisoundDefine.WIND_SPEED_AUTO)) {//自动
+            status = 4;
+        }
+        control.setAttrStatusShort(status);
+    }
 
+    public void operatorACSetMode(){
+        short status = 1;
+
+        if(value.equals(UnisoundDefine.MODE_AUTO)){//自动
+            control.setDevAttr(ApplianceDefine.AIRCON_operation);
+            status = 1;
+        }else if(value.equals(UnisoundDefine.MODE_COOL)) {//制冷
+            control.setDevAttr(ApplianceDefine.AIRCON_operation);
+            status = 2;
+        }
+        else if(value.equals(UnisoundDefine.MODE_HEAT)) {//制热
+            control.setDevAttr(ApplianceDefine.AIRCON_operation);
+            status = 3;
+        }
+        else if(value.equals(UnisoundDefine.MODE_AIR_SUPPLY)) {//送风
+            control.setDevAttr(ApplianceDefine.AIRCON_operation);
+            status = 4;
+        }else if(value.equals(UnisoundDefine.MODE_WETTED)) {//除湿
+            control.setDevAttr(ApplianceDefine.AIRCON_operation);
+            status = 5;
+        }
+
+        control.setAttrStatusShort(status);
+    }
+
+    public void operatorACAdjTemp(){
+        control.setDevAttr(ApplianceDefine.AIRCON_tempAutoControl);
+        short status = 0;
+
+        if(TextUtils.isEmpty(value)){
+            return;
+        }
+
+        if(value.equals("调高")){
+            status = 1;
+        }else if(value.equals("调低")){
+            status = 0;
+        }
+
+        control.setAttrStatusShort(status);
     }
 
     /**
@@ -234,46 +289,22 @@ public class ProtocolManager {
         String operator = control.getOperator();
         if(operator.equals(UnisoundDefine.ACT_QUERY)){
             tmpDatas[arrayLen++] = ApplianceDefine.ORDER_QUERY;
-        }else if(operator.equals(UnisoundDefine.ACT_SET)
-                ||operator.equals(UnisoundDefine.ACT_OPEN)
-                ||operator.equals(UnisoundDefine.ACT_CLOSE)
-                ||operator.equals(UnisoundDefine.ACT_INCREASE)
-                ||operator.equals(UnisoundDefine.ACT_DECREASE)
-                ||operator.equals(UnisoundDefine.ACT_START)
-                ||operator.equals(UnisoundDefine.ACT_PAUSE)){
+        }else if(operator.equals(UnisoundDefine.ACT_OPS)
+                ||operator.equals(UnisoundDefine.ACT_SETTEMP)
+                ||operator.equals(UnisoundDefine.ACT_ADJTEMP)
+                ||operator.equals(UnisoundDefine.ACT_SETSPEED)
+                ||operator.equals(UnisoundDefine.ACT_SETMODE)){
             tmpDatas[arrayLen++] = ApplianceDefine.ORDER_CONTROL;
-        }else if(operator.equals(UnisoundDefine.ACT_SCENE)){
-            tmpDatas[arrayLen++] = ApplianceDefine.ORDER_IFTTT;
         }
 
         //设备类型(1 byte)
         tmpDatas[arrayLen++] = ApplianceDefine.GENERAL_UNKNOW;
 
         //设备种类(1 byte)
-        origin_type = control.getOriginType();
-        if(origin_type.equals(UnisoundDefine.ORIGIN_AC)){
+        //origin_type = control.getOriginType();
+        origin_type = control.getOperands();
+        if(origin_type.equals(UnisoundDefine.OBJ_AC)){
             tmpDatas[arrayLen++] = ApplianceDefine.TYPE_AIRCONDITIONER;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_AIR_CLEANER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_AIR_CLEANER;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_WATER_HEATER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_WATER_HEATER;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_FAS)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_CENTRALVENTILATION;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_HEATER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_HEATER;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_CURTAIN)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_CURTAIN;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_LIGHT)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_LIGHT;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_MUSIC)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_MUSIC;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_SCENE)){//场景
-            //tmpDatas[arrayLen++] = ApplianceDefine.TYPE_SCENE;//调试修改
-            tmpDatas[arrayLen++] = ApplianceDefine.GENERAL_UNKNOW;
-        }else if(origin_type.equals(UnisoundDefine.ACT_SCENE_DEMO)){//回家模式，离家模式
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_SCENE;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_WASHER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_WASHER;
         }
 
         //设备位置(1 byte)
@@ -288,29 +319,8 @@ public class ProtocolManager {
         //设备属性个数
         tmpDatas[arrayLen++] = (byte)0x01;
         //设备属性(2 byte)
-        if(origin_type.equals(UnisoundDefine.ORIGIN_AC)){//空调属性
+        if(origin_type.equals(UnisoundDefine.OBJ_AC)){//空调属性
             tmpDatas[arrayLen++] = ApplianceDefine.AIRCON_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_AIR_CLEANER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.AIRCLEANER_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_WATER_HEATER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.HEATER_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_FAS)){
-            tmpDatas[arrayLen++] = ApplianceDefine.HK60_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_HEATER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.HK60_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_CURTAIN)){
-            tmpDatas[arrayLen++] = ApplianceDefine.HK60_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_LIGHT)){
-            tmpDatas[arrayLen++] = ApplianceDefine.HK60_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_MUSIC)){
-            tmpDatas[arrayLen++] = ApplianceDefine.HK60_DEV;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_SCENE)){//场景
-            //tmpDatas[arrayLen++] = ApplianceDefine.HK60_DEV;
-            tmpDatas[arrayLen++] = (byte)0x00;
-        }else if(origin_type.equals(UnisoundDefine.ORIGIN_WASHER)){
-            tmpDatas[arrayLen++] = ApplianceDefine.WASHING_dev;
-        }else if(origin_type.equals(UnisoundDefine.ACT_SCENE_DEMO)){//回家模式，离家模式
-            tmpDatas[arrayLen++] = ApplianceDefine.HK60_DEV;
         }
 
         tmpDatas[arrayLen++] = control.getDevAttr();

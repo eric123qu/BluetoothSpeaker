@@ -508,6 +508,8 @@ public class RecordModel {
 
         ProtocolManager.getInstance().setProtocolInfo(operands, operator, value, isDialog);
         ProtocolManager.getInstance().convertVoice2Data();
+        //test
+        playTTS("好的");
     }
 
     public void showTtsResult(String tts){
