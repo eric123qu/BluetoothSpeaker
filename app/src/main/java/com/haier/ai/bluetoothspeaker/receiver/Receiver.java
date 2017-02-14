@@ -8,6 +8,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.manager.LightManager;
 import com.haier.ai.bluetoothspeaker.manager.SpeakerAlarmManager;
 import com.haier.ai.bluetoothspeaker.manager.WifiDevManager;
@@ -49,6 +50,8 @@ public class Receiver extends BroadcastReceiver {
 //                Intent intent1 = new Intent(context, ReconizeService.class);
 //                context.startService(intent1);
 
+                //首次唤醒
+                Const.IS_FIRST_WAKEUP = true;
                 break;
             case ACTION_WIFI_STATE_CHANGE:
                 //// TODO: 16-11-4  收到广播，搜索wifi

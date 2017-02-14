@@ -43,4 +43,6 @@ public class Const {
     public static final int STATE_PAUSE = 2;               //暂停播放
 
     public static final int STATE_BUFFING = 3;              //正在缓冲
+
+    public static boolean IS_FIRST_WAKEUP;                  //是否首次唤醒
 }

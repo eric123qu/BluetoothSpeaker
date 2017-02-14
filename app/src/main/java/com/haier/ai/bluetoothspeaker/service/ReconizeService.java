@@ -26,6 +26,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -123,26 +124,11 @@ public class ReconizeService extends Service {
         //开始识别
         RecordModel.getInstance().startRecord();//sdk mode
 
-        //RecordModel_bak.getInstance().startRecord(); //api mode
         scheduledThreadPool.schedule(new Runnable() {
 
             @Override
             public void run() {
-                /**
-                 * sdk mode
-                 */
                 RecordModel.getInstance().stopRecord(); //sdk mode
-                //RecordModel.getInstance().releaseSdk();
-
-                /**
-                 * api mode
-                 */
-                        /*String filename = RecordModel_bak.getInstance().stopRecord();
-                        Log.d(TAG, "run: record filename:" + filename);
-                        EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
-                        SystemClock.sleep(500);
-                        RecordModel_bak.getInstance().uploadRecordData(filename);*/
-
             }
         }, 3, TimeUnit.SECONDS);
 
@@ -181,6 +167,31 @@ public class ReconizeService extends Service {
 
         switch (type){
             case TYPE_WAKEUP:
+                //// TODO: 17-2-14 首次唤醒，播报你好主人，很高兴为您服务。后面就随机播报
+                if(Const.IS_FIRST_WAKEUP){
+                    player = MediaPlayer.create(this, R.raw.wp1);
+                    Const.IS_FIRST_WAKEUP = false;
+                }else{
+                    Random random=new Random();
+                    int index = random.nextInt(4);
+                    switch (index){
+                        case 0:
+                            player = MediaPlayer.create(this, R.raw.wp2);
+                            break;
+                        case 1:
+                            player = MediaPlayer.create(this, R.raw.wp3);
+                            break;
+                        case 2:
+                            player = MediaPlayer.create(this, R.raw.wp4);
+                            break;
+                        case 3:
+                            player = MediaPlayer.create(this, R.raw.wp5);
+                            break;
+                        default:
+                            player = MediaPlayer.create(this, R.raw.wp2);
+                            break;
+                    }
+                }
                 player = MediaPlayer.create(this, R.raw.wp_sucess);
                 player.setOnCompletionListener(listenr);
                 break;
