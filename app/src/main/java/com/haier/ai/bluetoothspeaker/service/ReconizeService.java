@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.R;
+import com.haier.ai.bluetoothspeaker.event.DialogEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
@@ -110,6 +111,41 @@ public class ReconizeService extends Service {
         EventBus.getDefault().post(new NluEvent(""));
 
         playLocalAudio(TYPE_WAKEUP, initWakeupListener());
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onDialogEvent(DialogEvent event){
+        //playLocalAudio(TYPE_WAKEUP, initWakeupListener());
+        playLocalAudio(TYPE_DING, null);
+
+        EventBus.getDefault().post(new ReconizeStatusEvent("开始识别"));
+        //开始识别
+        RecordModel.getInstance().startRecord();//sdk mode
+
+        //RecordModel_bak.getInstance().startRecord(); //api mode
+        scheduledThreadPool.schedule(new Runnable() {
+
+            @Override
+            public void run() {
+                /**
+                 * sdk mode
+                 */
+                RecordModel.getInstance().stopRecord(); //sdk mode
+                //RecordModel.getInstance().releaseSdk();
+
+                /**
+                 * api mode
+                 */
+                        /*String filename = RecordModel_bak.getInstance().stopRecord();
+                        Log.d(TAG, "run: record filename:" + filename);
+                        EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
+                        SystemClock.sleep(500);
+                        RecordModel_bak.getInstance().uploadRecordData(filename);*/
+
+            }
+        }, 3, TimeUnit.SECONDS);
+
     }
 
     /**

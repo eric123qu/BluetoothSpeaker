@@ -12,6 +12,7 @@ import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.audio.AudioInput;
 import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
 import com.haier.ai.bluetoothspeaker.bean.box.boxNluBean;
+import com.haier.ai.bluetoothspeaker.event.DialogEvent;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
@@ -498,15 +499,27 @@ public class RecordModel {
     private void nlpControl(boxNluBean resp){
         String operands = resp.getData().getSemantic().getDomain();
         boolean isDialog = resp.getData().getSemantic().isIs_dialog();
+
+        if(isDialog){
+            //// TODO: 17-2-14 根据response 播放提示音，开启录音
+            EventBus.getDefault().post(new DialogEvent("new dialog"));
+        }else {
+            handlerSingleCommand(resp);
+        }
+    }
+
+    private void handlerSingleCommand(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        String operands = resp.getData().getSemantic().getDomain();
         String operator = null;
         String value = null;
-        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
-        if(params.size() ==1){
+
+        if (params.size() == 1) {
             operator = params.get(0).getKey();
             value = params.get(0).getValue();
         }
 
-        ProtocolManager.getInstance().setProtocolInfo(operands, operator, value, isDialog);
+        ProtocolManager.getInstance().setProtocolInfo(operands, operator, value, false);
         ProtocolManager.getInstance().convertVoice2Data();
         //test
         playTTS("好的");
