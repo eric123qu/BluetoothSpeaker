@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.haier.ai.bluetoothspeaker.ApplianceDefine;
+import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.UnisoundDefine;
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
@@ -107,42 +108,11 @@ public class ProtocolManager {
         //拼装数据
         initControlObj();
 
-        if(operands.equals(UnisoundDefine.OBJ_AC)){ // 空调
+        if(operands.equals(Const.DOMAIN_AC)){ // 空调
             handlerAC();
+        }else if(operands.equals(Const.DOMAIN_DEVICE)){ //载体
+            handlerDevice();
         }
-
-        /*if(operator.equals(UnisoundDefine.ACT_OPEN)){//打开
-            operatorOpen();
-        }else if(operator.equals(UnisoundDefine.ACT_CLOSE)){
-//            operatorClose();
-        }else if(operator.equals(UnisoundDefine.ACT_STOP)) {
-//            operatorStop();
-        }else if(operator.equals(UnisoundDefine.ACT_SET)){
-//            operatorSet();
-        }else if(operator.equals(UnisoundDefine.ACT_UNSET)) {//取消设置
-//            operatorUnset();
-        }else if(operator.equals(UnisoundDefine.ACT_START)){
-//            operatorStart();
-        }else if(operator.equals(UnisoundDefine.ACT_PAUSE)){
-//            operatorPause();
-        }else if(operator.equals(UnisoundDefine.ACT_DECREASE)){//减少
-//            operatorDecrease();
-        }else if(operator.equals(UnisoundDefine.ACT_INCREASE)){//增大
-//            operatorIncrease();
-        }else if(operator.equals(UnisoundDefine.ACT_QUERY)){//查询
-//            operatorQuery();
-        }else if(operator.equals(UnisoundDefine.ACT_STANDBY)){//待机
-
-        }else if(operator.equals(UnisoundDefine.ACT_HIBERATE )){//休眠
-
-        }else if(operator.equals(UnisoundDefine.ACT_NEXT)){//下一首歌
-//            operatorNext();
-        }else if(operator.equals(UnisoundDefine.ACT_PERCEIVE)){
-//            operatorPerceive();
-        }else if(operator.equals(UnisoundDefine.ACT_BATH)){
-            //operatorBath();
-        }*/
-
 
         formProtocol();
         sendData2Gateway();
@@ -184,13 +154,62 @@ public class ProtocolManager {
     }
 
     /**
+     * 载体控制
+     */
+    public void handlerDevice(){
+        if(operator.equals(UnisoundDefine.ACT_OPS)){//开关控制
+            if(TextUtils.isEmpty(value)){
+                return;
+            }
+
+            if(value.equals(UnisoundDefine.ACT_OPEN)){
+                operatorOpen();
+            }else if(value.equals(UnisoundDefine.ACT_CLOSE)){
+                operatorClose();
+            }
+
+        }else if(operator.equals(UnisoundDefine.ACT_ADJLIGHT)){
+            operatorAdjLight();
+        }else if(operator.equals(UnisoundDefine.ACT_ADJVOICE)){
+
+        }
+    }
+
+    final short low = 0;
+    final short high = 1;
+    final short min = 2;
+    final short max = 3;
+    private void operatorAdjLight(){
+        short status = 0;
+
+        switch (value){
+            case UnisoundDefine.ACT_ADJHIGH:
+                status = high;
+                break;
+            case UnisoundDefine.ACT_ADJLOW:
+                status = low;
+                break;
+            case UnisoundDefine.ACT_MAXHIGH:
+                status = max;
+                break;
+            case UnisoundDefine.ACT_MAXLOW:
+                status = min;
+                break;
+            default:
+                break;
+        }
+
+        control.setDevAttr(ApplianceDefine.MODE_LED_BRIGHTNESS);
+        control.setAttrStatusShort(status);
+    }
+    /**
      * 设置空调温度
      */
     public void operatorACSetTemp(){
         control.setDevAttr(ApplianceDefine.AIRCON_targetTemp);
         int index = value.indexOf("度");
         if(index != -1){
-            value = value.substring(0, index-1);
+            value = value.substring(0, index);
         }
 
         control.setAttrStatusShort(Short.valueOf(value));
@@ -200,15 +219,15 @@ public class ProtocolManager {
     public void operatorACSetSpeed(){
         short status = 1;
         control.setDevAttr(ApplianceDefine.AIRCON_windSpeed);
-        if(value.equals(UnisoundDefine.WIND_SPEED_LOW)){//低风
+        if(value.contains(UnisoundDefine.WIND_SPEED_LOW)){//低风
             status = 1;
-        }else if(value.equals(UnisoundDefine.WIND_SPEED_MEDIUM)) {//中风
+        }else if(value.contains(UnisoundDefine.WIND_SPEED_MEDIUM)) {//中风
             status = 2;
         }
-        else if(value.equals(UnisoundDefine.WIND_SPEED_HIGH)) {//高风
+        else if(value.contains(UnisoundDefine.WIND_SPEED_HIGH)) {//高风
             status = 3;
         }
-        else if(value.equals(UnisoundDefine.WIND_SPEED_AUTO)) {//自动
+        else if(value.contains(UnisoundDefine.WIND_SPEED_AUTO)) {//自动
             status = 4;
         }
         control.setAttrStatusShort(status);
@@ -261,7 +280,7 @@ public class ProtocolManager {
      */
     public void operatorOpen(){
         control.setAttrStatusShort((short) 1);
-        control.setDevAttr(ApplianceDefine.AIRCON_status);
+        control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
     }
 
     /**
@@ -269,7 +288,7 @@ public class ProtocolManager {
      */
     public void operatorClose(){
         control.setAttrStatusShort((short) 0);
-        control.setDevAttr(ApplianceDefine.AIRCON_status);
+        control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
     }
 
     /**
@@ -277,7 +296,7 @@ public class ProtocolManager {
      */
     private void formProtocol(){
         arrayLen = 0;
-        String origin_type = null;
+        String domain = null;
 
         //header(2 byte)
         tmpDatas[arrayLen++] = header;
@@ -293,7 +312,9 @@ public class ProtocolManager {
                 ||operator.equals(UnisoundDefine.ACT_SETTEMP)
                 ||operator.equals(UnisoundDefine.ACT_ADJTEMP)
                 ||operator.equals(UnisoundDefine.ACT_SETSPEED)
-                ||operator.equals(UnisoundDefine.ACT_SETMODE)){
+                ||operator.equals(UnisoundDefine.ACT_SETMODE)
+                ||operator.equals(UnisoundDefine.ACT_ADJLIGHT)
+                ||operator.equals(UnisoundDefine.ACT_ADJVOICE)){
             tmpDatas[arrayLen++] = ApplianceDefine.ORDER_CONTROL;
         }
 
@@ -302,9 +323,11 @@ public class ProtocolManager {
 
         //设备种类(1 byte)
         //origin_type = control.getOriginType();
-        origin_type = control.getOperands();
-        if(origin_type.equals(UnisoundDefine.OBJ_AC)){
+        domain = control.getOperands();
+        if(domain.equals(Const.DOMAIN_AC)){
             tmpDatas[arrayLen++] = ApplianceDefine.TYPE_AIRCONDITIONER;
+        }else if(domain.equals(Const.DOMAIN_DEVICE)){
+            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_SPEAKER_LIGHT;
         }
 
         //设备位置(1 byte)
@@ -319,8 +342,10 @@ public class ProtocolManager {
         //设备属性个数
         tmpDatas[arrayLen++] = (byte)0x01;
         //设备属性(2 byte)
-        if(origin_type.equals(UnisoundDefine.OBJ_AC)){//空调属性
+        if(domain.equals(Const.DOMAIN_AC)){//空调属性
             tmpDatas[arrayLen++] = ApplianceDefine.AIRCON_DEV;
+        }else if(domain.equals(Const.DOMAIN_DEVICE)){
+            tmpDatas[arrayLen++] = ApplianceDefine.SPEAKER_LIGHT_dev;
         }
 
         tmpDatas[arrayLen++] = control.getDevAttr();

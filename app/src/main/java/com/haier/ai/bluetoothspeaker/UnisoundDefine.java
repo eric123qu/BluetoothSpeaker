@@ -62,6 +62,14 @@ public class UnisoundDefine {
     public final static String ACT_SETSPEED= "set_speed";                    //风速设定
     public final static String ACT_SETMODE = "set_mode";                     //模式选择
 
+    //载体
+    public final static String ACT_ADJLIGHT = "adj_light";                   //亮度调整
+    public final static String ACT_ADJVOICE = "adj_voice";                   //声音调整
+    public final static String ACT_ADJHIGH = "high";                         //亮度，声音调高
+    public final static String ACT_ADJLOW = "low";                           //亮度，声音调低
+    public final static String ACT_MAXHIGH = "maxhigh";                      //最大
+    public final static String ACT_MAXLOW = "maxlow";                        //最小
+
 
     //热水器
     public final static String ATTR_CURRENT_TEMP = "ATTR_CURRENT_TEMP";      //水温查询
@@ -100,10 +108,10 @@ public class UnisoundDefine {
      */
     //空调
     //风速取值：
-    public final static String WIND_SPEED_LOW = "WIND_SPEED_LOW";             //低速风
-    public final static String WIND_SPEED_MEDIUM = "WIND_SPEED_MEDIUM";       //中速风
-    public final static String WIND_SPEED_HIGH = "WIND_SPEED_HIGH";           //高速风
-    public final static String WIND_SPEED_STRONG = "WIND_SPEED_STRONG";       //强劲，强劲风
+    public final static String WIND_SPEED_LOW = "低风";             //低速风
+    public final static String WIND_SPEED_MEDIUM = "中风";       //中速风
+    public final static String WIND_SPEED_HIGH = "高风";           //高速风
+    public final static String WIND_SPEED_STRONG = "自动";       //强劲，强劲风
     public final static String WIND_SPEED_AUTO = "WIND_SPEED_AUTO";           //自动风
     //风向取值：
     public final static String WIND_LEFT_RIGHT = "WIND_LEFT_RIGHT";           //左右摆风，左右摆动

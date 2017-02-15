@@ -33,6 +33,20 @@ public class Const {
     //内容请求接口
     public static final String URL_CONTENT = "content";
 
+    public static final String DOMAIN_NEWS = "com_news";        //新闻
+
+    public static final String DOMAIN_LIMIT = "com_bus";        //限号查询
+
+    public static final String DOMAIN_WEATHER = "com_weather";  //天气
+
+    public static final String DOMAIN_MUSIC = "com_music";      //音乐
+
+    public static final String DOMAIN_DEVICE = "music_device";  //载体本身
+
+    public static final String DOMAIN_AC = "Air_conditioner";   //空调
+
+
+
     /**
      * 音乐播放状态
      */

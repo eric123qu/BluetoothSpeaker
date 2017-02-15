@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.IntDef;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.haier.ai.bluetoothspeaker.Const;
@@ -18,7 +19,9 @@ import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
+import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
 import com.haier.ai.bluetoothspeaker.event.WakeupEvent;
+import com.haier.ai.bluetoothspeaker.manager.MusicPlayerManager;
 import com.haier.ai.bluetoothspeaker.manager.WakeupEventManager;
 import com.haier.ai.bluetoothspeaker.model.RecordModel;
 
@@ -134,6 +137,14 @@ public class ReconizeService extends Service {
 
     }
 
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onUrlMusicEvent(UrlMusicEvent event){
+        if(TextUtils.isEmpty(event.url)){
+            return;
+        }
+
+        MusicPlayerManager.getInstance().playUrlMusic(event.url);
+    }
     /**
      * 开始语音识别
      */
@@ -174,6 +185,7 @@ public class ReconizeService extends Service {
                 }else{
                     Random random=new Random();
                     int index = random.nextInt(4);
+                    Log.d(TAG, "playLocalAudio: index" +index);
                     switch (index){
                         case 0:
                             player = MediaPlayer.create(this, R.raw.wp2);
@@ -192,7 +204,7 @@ public class ReconizeService extends Service {
                             break;
                     }
                 }
-                player = MediaPlayer.create(this, R.raw.wp_sucess);
+               // player = MediaPlayer.create(this, R.raw.wp_sucess);
                 player.setOnCompletionListener(listenr);
                 break;
             case TYPE_RERECONIZE:

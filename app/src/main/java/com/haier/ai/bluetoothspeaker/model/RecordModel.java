@@ -12,13 +12,21 @@ import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.audio.AudioInput;
 import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
 import com.haier.ai.bluetoothspeaker.bean.box.boxNluBean;
-import com.haier.ai.bluetoothspeaker.event.DialogEvent;
+import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
+import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
+import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
+import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
+import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
+import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
+import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
 import com.haier.ai.bluetoothspeaker.manager.ProtocolManager;
+import com.haier.ai.bluetoothspeaker.manager.RetrofitApiManager;
+import com.haier.ai.bluetoothspeaker.net.AIApiService;
 import com.haier.ai.bluetoothspeaker.util.SpeechJavaBeanUtils;
 import com.haierubic.ai.ErrorCode;
 import com.haierubic.ai.IAsrRecorder;
@@ -36,6 +44,10 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  * author: qu
  * date: 16-8-30
@@ -50,7 +62,6 @@ public class RecordModel {
     private static ITtsPlayer mPlayer;
     private static HttpUtils httpUtils;
     @IntDef({TYPE_AIR, TYPE_FRIDGE}) @interface ControlType{}
-
 
     public static RecordModel getInstance(){
         if(sRecordModel == null){
@@ -500,12 +511,188 @@ public class RecordModel {
         String operands = resp.getData().getSemantic().getDomain();
         boolean isDialog = resp.getData().getSemantic().isIs_dialog();
 
-        if(isDialog){
+        if(TextUtils.isEmpty(operands)){
+            playTTS("对不起我没听清楚");
+
+            return;
+        }
+
+        handlerDomain(resp, operands);
+
+        /*if(isDialog){
             //// TODO: 17-2-14 根据response 播放提示音，开启录音
             EventBus.getDefault().post(new DialogEvent("new dialog"));
         }else {
             handlerSingleCommand(resp);
+        }*/
+    }
+
+    /**
+     * 按照domain 处理
+     * @param resp
+     * @param domain
+     */
+    private void handlerDomain(boxNluBean resp, String domain){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = null;
+
+        switch (domain){
+            case Const.DOMAIN_NEWS: //新闻查询
+                params = resp.getData().getSemantic().getParas();
+                if(params != null){
+                    for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+                        if(param.getKey().equals("news_category")){
+                            String value = param.getValue();
+                            getNewsContent(value);
+                        }
+                    }
+                }
+
+                break;
+            case Const.DOMAIN_LIMIT: //限号查询
+                getLimitContent(null, null);
+                break;
+            case Const.DOMAIN_WEATHER:  //空气质量查询
+                params = resp.getData().getSemantic().getParas();
+                String date = null;
+                String city = null;
+
+                if(params != null){
+                    for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+                        if(param.getKey().equals("day")){
+                            date = param.getValue();
+                        }
+
+                        if(param.getKey().equals("loc")){
+                            city = param.getValue();
+                        }
+                    }
+
+
+                }
+                getWeatherInfo(date, city);
+                break;
+            case Const.DOMAIN_MUSIC:
+                playMusic(resp);
+                break;
+            case Const.DOMAIN_DEVICE:
+            case Const.DOMAIN_AC:
+                handlerSingleCommand(resp);
+                break;
+            default:
+                break;
         }
+    }
+
+
+    private void playMusic(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+            if(param.getKey().equals("query")){
+                String value = param.getValue();
+                if(value.equals("random")){
+                    AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+                    RequestMusic requestMusic = new RequestMusic();
+                    requestMusic.setDomain("music");
+                    RequestMusic.KeywordsEntity keywordsEntity = new RequestMusic.KeywordsEntity();
+                    requestMusic.setKeywords(keywordsEntity);
+                    aiApiService.getMusicContent("", requestMusic).enqueue(new Callback<ResponseMusic>() {
+                        @Override
+                        public void onResponse(Call<ResponseMusic> call, Response<ResponseMusic> response) {
+                            Log.d(TAG, "onResponse: ");
+                            final String url = response.body().getData().getUrl();
+                            EventBus.getDefault().post(new UrlMusicEvent(url));
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseMusic> call, Throwable t) {
+                            Log.d(TAG, "onFailure: ");
+                        }
+                    });
+                }
+            }
+
+
+        }
+
+    }
+
+    /**
+     * 获取新闻内容
+     * @param type
+     */
+    private void getNewsContent(String type){
+        if(TextUtils.isEmpty(type)){
+            return;
+        }
+
+        RequestNews requestNews = new RequestNews();
+        requestNews.setDomain("news");
+        RequestNews.KeywordsBean bean = new RequestNews.KeywordsBean();
+        bean.setNum("1");
+        bean.setType(type);
+        requestNews.setKeywords(bean);
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        aiApiService.getNewsContent("", requestNews).enqueue(new Callback<ResponseNews>() {
+            @Override
+            public void onResponse(Call<ResponseNews> call, Response<ResponseNews> response) {
+                if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                    List<ResponseNews.DataBean.NewsBean> list = response.body().getData().getNews();
+                    if(list.size() > 0){
+                        playTTS(list.get(0).getContent());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseNews> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getLimitContent(String date, String num){
+        RequestLimit requestLimit = new RequestLimit();
+
+        requestLimit.setDomain("limit");
+        RequestLimit.KeywordsBean keywordsBean = new RequestLimit.KeywordsBean();
+        if(!TextUtils.isEmpty(date)){
+            keywordsBean.setDate(date);
+        }
+
+        if(!TextUtils.isEmpty(num)){
+            keywordsBean.setNumber(num);
+        }
+
+        requestLimit.setKeywords(keywordsBean);
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        aiApiService.getLimitContent("", requestLimit).enqueue(new Callback<ResponseLimit>() {
+            @Override
+            public void onResponse(Call<ResponseLimit> call, Response<ResponseLimit> response) {
+                String tts = null;
+                if(TextUtils.isEmpty(response.body().getData().getNumber())){ //非车牌号查询
+                    tts = "限号尾号为" + response.body().getData().getNumber();
+                }else{
+                    if(response.body().getData().getIslimit().equalsIgnoreCase("No")){
+                        tts = "该车牌不限号";
+                    }else{
+                        tts = "该车牌限号";
+                    }
+                }
+
+                playTTS(tts);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseLimit> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getWeatherInfo(String date, String city){
+
     }
 
     private void handlerSingleCommand(boxNluBean resp){

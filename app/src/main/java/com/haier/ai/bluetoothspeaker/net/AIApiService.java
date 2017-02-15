@@ -1,8 +1,12 @@
 package com.haier.ai.bluetoothspeaker.net;
 
 import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
+import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
+import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
+import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -19,5 +23,19 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseMusic> getMusicContent(@Header("accessToken") String accessToken,
                                                @Body RequestMusic requestMusic);
+
+    /**
+     * 获取新闻
+     * @param accessToken
+     * @param requestNews
+     * @return
+     */
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseNews> getNewsContent(@Header("accessToken") String accessToken,
+                                             @Body RequestNews requestNews);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseLimit> getLimitContent(@Header("accessToken") String accessToken,
+                                               @Body RequestLimit requestLimit);
 
 }
