@@ -1,10 +1,13 @@
 package com.haier.ai.bluetoothspeaker.manager;
 
+import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.haier.ai.bluetoothspeaker.App;
 import com.haier.ai.bluetoothspeaker.Const;
 
 import java.io.IOException;
@@ -21,7 +24,10 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     private final String TAG = "MusicPlayerManager";
 
     public static MusicPlayerManager sMusicPlayerManager;
+    private static AudioManager sAudioManager;
     private static MediaPlayer sMediaPlayer;
+    private static final int minVoice = 0;
+    private static int maxVoice;
     private static int musicState = Const.STATE_STOP;       //音乐播放状态
     private List<String> netMusicList = null;               //云端歌曲列表
     private List<String> localMusicList = null;             //本地歌曲列表
@@ -29,6 +35,10 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
 
     public MusicPlayerManager(){
         musicState = Const.STATE_STOP;
+
+        sAudioManager = (AudioManager) App.getInstance().getSystemService(Context.AUDIO_SERVICE);
+
+        maxVoice = sAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         initLocalMusicList();
     }
 
@@ -265,5 +275,35 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         }
 
         return -1;
+    }
+
+    public void adjustSystemVoiceLow(){
+        sAudioManager.adjustStreamVolume(
+                AudioManager.STREAM_MUSIC,
+                AudioManager.ADJUST_LOWER,
+                AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
+    }
+
+    public void adjustSystemVoiceHigh(){
+        sAudioManager.adjustStreamVolume(
+                AudioManager.STREAM_MUSIC,
+                AudioManager.ADJUST_RAISE,
+                AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
+    }
+
+    public void setSystemVoiceMax(){
+        sAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVoice, 0);
+    }
+
+    public void setSystemVoiceMin(){
+        sAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+    }
+
+    private int getCurrentVoice(){
+        if(sAudioManager == null){
+            sAudioManager = (AudioManager) App.getInstance().getSystemService(Context.AUDIO_SERVICE);
+        }
+
+        return sAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
     }
 }

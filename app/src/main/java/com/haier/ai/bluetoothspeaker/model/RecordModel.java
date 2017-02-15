@@ -578,6 +578,9 @@ public class RecordModel {
             case Const.DOMAIN_AC:
                 handlerSingleCommand(resp);
                 break;
+            case Const.DOMAIN_ALARM:
+                handlerAlarmEvent(resp);
+                break;
             default:
                 break;
         }
@@ -693,6 +696,22 @@ public class RecordModel {
 
     private void getWeatherInfo(String date, String city){
 
+    }
+
+    private void handlerAlarmEvent(boxNluBean resp){
+        String clock = null; //下午
+        String day = null;   //明天
+        String time = null;  //2点
+        String event = null; //开会，睡觉
+        String hour = null;
+        String minute = null;
+        String second = null;
+
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+
+        for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+
+        }
     }
 
     private void handlerSingleCommand(boxNluBean resp){

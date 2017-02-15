@@ -45,7 +45,7 @@ public class Const {
 
     public static final String DOMAIN_AC = "Air_conditioner";   //空调
 
-
+    public static final String DOMAIN_ALARM = "com_alarm";      //闹钟提醒
 
     /**
      * 音乐播放状态

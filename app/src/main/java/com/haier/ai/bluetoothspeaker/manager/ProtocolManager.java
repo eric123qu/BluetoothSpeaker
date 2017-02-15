@@ -171,7 +171,7 @@ public class ProtocolManager {
         }else if(operator.equals(UnisoundDefine.ACT_ADJLIGHT)){
             operatorAdjLight();
         }else if(operator.equals(UnisoundDefine.ACT_ADJVOICE)){
-
+            operatorAdjVoice();
         }
     }
 
@@ -202,6 +202,26 @@ public class ProtocolManager {
         control.setDevAttr(ApplianceDefine.MODE_LED_BRIGHTNESS);
         control.setAttrStatusShort(status);
     }
+
+    private void operatorAdjVoice(){
+        switch (value){
+            case UnisoundDefine.ACT_ADJHIGH:
+                MusicPlayerManager.getInstance().adjustSystemVoiceHigh();
+                break;
+            case UnisoundDefine.ACT_ADJLOW:
+                MusicPlayerManager.getInstance().adjustSystemVoiceLow();
+                break;
+            case UnisoundDefine.ACT_MAXHIGH:
+                MusicPlayerManager.getInstance().setSystemVoiceMax();
+                break;
+            case UnisoundDefine.ACT_MAXLOW:
+                MusicPlayerManager.getInstance().setSystemVoiceMin();
+                break;
+            default:
+                break;
+        }
+    }
+
     /**
      * 设置空调温度
      */
