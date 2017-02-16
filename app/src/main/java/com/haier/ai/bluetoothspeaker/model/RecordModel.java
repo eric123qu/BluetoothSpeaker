@@ -637,15 +637,20 @@ public class RecordModel {
                     aiApiService.getMusicContent("", requestMusic).enqueue(new Callback<ResponseMusic>() {
                         @Override
                         public void onResponse(Call<ResponseMusic> call, Response<ResponseMusic> response) {
-                            Log.d(TAG, "onResponse: ");
-                            final String url = response.body().getData().getUrl();
-                            Log.d(TAG, "music url :" + url);
-                            EventBus.getDefault().post(new UrlMusicEvent(url));
+                            if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                                final String url = response.body().getData().getUrl();
+                                Log.d(TAG, "music url :" + url);
+                                EventBus.getDefault().post(new UrlMusicEvent(url));
+                            }else {
+                                playTTS("对不起没有找到相关资源");
+                            }
+
                         }
 
                         @Override
                         public void onFailure(Call<ResponseMusic> call, Throwable t) {
                             Log.d(TAG, "onFailure: ");
+                            playTTS("对不起没有找到相关资源");
                         }
                     });
                 }
@@ -823,7 +828,7 @@ public class RecordModel {
         requestOilprice.setDomain("oilprice");
         RequestOilprice.KeywordsBean keywordsBean = new RequestOilprice.KeywordsBean();
         keywordsBean.setArea(DEFALUT_OIL_CITY);
-        keywordsBean.setType("95#");
+        keywordsBean.setType("");
         requestOilprice.setKeywords(keywordsBean);
 
         AIApiService aiApiService = RetrofitApiManager.getAiApiService();
@@ -832,7 +837,18 @@ public class RecordModel {
             public void onResponse(Call<ResponseOilprice> call, Response<ResponseOilprice> response) {
                 Log.d(TAG, "onResponse: oil:" + response.body());
                 if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
-                    
+                    StringBuilder ttsOil = new StringBuilder();
+                    List<ResponseOilprice.DataBeanX.DataBean> list = response.body().getData().getData();
+
+                    for(ResponseOilprice.DataBeanX.DataBean bean : list){
+                        ttsOil.append(bean.getType());
+                        ttsOil.append(bean.getPrice());
+                        ttsOil.append("元，");
+                    }
+
+                    String tts = ttsOil.toString();
+                    Log.d(TAG, "onResponse: oilprice:" + tts);
+                    playTTS(tts);
                 }else{
                     playTTS("对不起，我没查到数据");
                 }
@@ -840,7 +856,7 @@ public class RecordModel {
 
             @Override
             public void onFailure(Call<ResponseOilprice> call, Throwable t) {
-
+                playTTS("对不起，我没查到数据");
             }
         });
     }
