@@ -69,6 +69,7 @@ public class RecordModel {
     private static IAsrRecorder mRecorder;
     private static ITtsPlayer mPlayer;
     private static HttpUtils httpUtils;
+    private static INlu nlu;
     @IntDef({TYPE_AIR, TYPE_FRIDGE}) @interface ControlType{}
     ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
 
@@ -261,7 +262,7 @@ public class RecordModel {
                 Log.e(TAG, "onResult: asrresult:" + asrResult );
                 if(TextUtils.isEmpty(asrResult)){
                     EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
-
+                    playTTS("对不起我没听清楚");
                 }else {
                     //去掉标点
                     asrResult = asrResult.replace(",", "");
@@ -317,7 +318,10 @@ public class RecordModel {
      */
     public void getNluResult(String asrData){
         // 创建语义理解对象。
-        INlu nlu = UbicAI.createNlu(null);
+        if(nlu == null){
+            nlu = UbicAI.createNlu(null);
+        }
+
 
         // 创建语义理解回调函数。
         INluCallback cb = new INluCallback() {
@@ -415,6 +419,8 @@ public class RecordModel {
 
 
     public void playTTS(String content){
+
+
         if(TextUtils.isEmpty(content)){
             return;
         }
@@ -434,7 +440,6 @@ public class RecordModel {
         mPlayer.play(content, TtsPlayerMode.TTS_PLAYER_MODE_NEW);
 
         Log.d(TAG, "playTTS: tts player start end");
-
         waitForWakeup();
     }
 
@@ -519,9 +524,15 @@ public class RecordModel {
     private void nlpControl(boxNluBean resp){
         String operands = resp.getData().getSemantic().getDomain();
         boolean isDialog = resp.getData().getSemantic().isIs_dialog();
+        String response = resp.getData().getSemantic().getResponse();
 
         if(TextUtils.isEmpty(operands)){
-            playTTS("对不起我没听清楚");
+            if(TextUtils.isEmpty(response)){
+                playTTS("对不起我没听清楚");
+            }else{
+                playTTS(response);
+            }
+
 
             return;
         }
@@ -584,6 +595,8 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_MUSIC:
                 playMusic(resp);
+                waitForWakeup();
+
                 break;
             case Const.DOMAIN_DEVICE:
             case Const.DOMAIN_AC:
@@ -626,6 +639,7 @@ public class RecordModel {
                         public void onResponse(Call<ResponseMusic> call, Response<ResponseMusic> response) {
                             Log.d(TAG, "onResponse: ");
                             final String url = response.body().getData().getUrl();
+                            Log.d(TAG, "music url :" + url);
                             EventBus.getDefault().post(new UrlMusicEvent(url));
                         }
 
@@ -698,7 +712,7 @@ public class RecordModel {
             public void onResponse(Call<ResponseLimit> call, Response<ResponseLimit> response) {
                 String tts = null;
                 if(TextUtils.isEmpty(response.body().getData().getNumber())){ //非车牌号查询
-                    tts = "限号尾号为" + response.body().getData().getNumber();
+                    tts = "限号尾号为" + response.body().getData().getLimit();
                 }else{
                     if(response.body().getData().getIslimit().equalsIgnoreCase("No")){
                         tts = "该车牌不限号";
@@ -817,6 +831,11 @@ public class RecordModel {
             @Override
             public void onResponse(Call<ResponseOilprice> call, Response<ResponseOilprice> response) {
                 Log.d(TAG, "onResponse: oil:" + response.body());
+                if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                    
+                }else{
+                    playTTS("对不起，我没查到数据");
+                }
             }
 
             @Override

@@ -114,6 +114,11 @@ public class ReconizeService extends Service {
         EventBus.getDefault().post(new ReconizeResultEvent(""));
         EventBus.getDefault().post(new NluEvent(""));
 
+        //正在播放歌曲等，则打断
+        if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PLAYING){
+            MusicPlayerManager.getInstance().stopMusic();
+        }
+
         playLocalAudio(TYPE_WAKEUP, initWakeupListener());
     }
 

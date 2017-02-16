@@ -130,7 +130,16 @@ public class boxNluBean {
             private String parser_text;
             private String row_text;
             private String user_id;
+            private String response;
             private List<ParasBean> paras;
+
+            public String getResponse() {
+                return response;
+            }
+
+            public void setResponse(String response) {
+                this.response = response;
+            }
 
             public int getClient_type_id() {
                 return client_type_id;
