@@ -1,6 +1,8 @@
 package com.haier.ai.bluetoothspeaker.net;
 
 import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
+import com.haier.ai.bluetoothspeaker.bean.Oilprice.ResponseOilprice;
 import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
 import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
@@ -38,4 +40,7 @@ public interface AIApiService {
     public Call<ResponseLimit> getLimitContent(@Header("accessToken") String accessToken,
                                                @Body RequestLimit requestLimit);
 
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseOilprice> getOilPrice(@Header("accessToken") String accessToken,
+                                              @Body RequestOilprice requestOilprice);
 }

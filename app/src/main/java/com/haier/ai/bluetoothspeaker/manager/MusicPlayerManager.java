@@ -12,6 +12,7 @@ import com.haier.ai.bluetoothspeaker.Const;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -28,6 +29,11 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     private static MediaPlayer sMediaPlayer;
     private static final int minVoice = 0;
     private static int maxVoice;
+    private static Calendar sCalendar;
+    private static String year;
+    private static String month;
+    private static String day;
+    private static String week;
     private static int musicState = Const.STATE_STOP;       //音乐播放状态
     private List<String> netMusicList = null;               //云端歌曲列表
     private List<String> localMusicList = null;             //本地歌曲列表
@@ -36,10 +42,51 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     public MusicPlayerManager(){
         musicState = Const.STATE_STOP;
 
+        getAudioInfo();
+
+        getDateInfo();
+
+        initLocalMusicList();
+    }
+
+    private void getDateInfo(){
+        sCalendar = Calendar.getInstance();
+
+        year = "" + sCalendar.get(Calendar.YEAR);
+        month = "" + sCalendar.get(Calendar.MONTH);
+        day = "" + sCalendar.get(Calendar.DAY_OF_MONTH);
+        int weekIndex = sCalendar.get(Calendar.DAY_OF_WEEK);
+        switch (weekIndex){
+            case 1:
+                week = "星期天";
+                break;
+            case 2:
+                week = "星期一";
+                break;
+            case 3:
+                week = "星期二";
+                break;
+            case 4:
+                week = "星期三";
+                break;
+            case 5:
+                week = "星期四";
+                break;
+            case 6:
+                week = "星期五";
+                break;
+            case 7:
+                week = "星期六";
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void getAudioInfo(){
         sAudioManager = (AudioManager) App.getInstance().getSystemService(Context.AUDIO_SERVICE);
 
         maxVoice = sAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        initLocalMusicList();
     }
 
     public static MusicPlayerManager getInstance(){
@@ -305,5 +352,13 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         }
 
         return sAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+    }
+
+    public String getTodayDate(){
+        return "今天是" + year + "年" + month + "月" + day + "号";
+    }
+
+    public String getTodayWeek(){
+        return "今天" + week + "哦";
     }
 }

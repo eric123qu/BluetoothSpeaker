@@ -11,6 +11,8 @@ import com.haier.ai.bluetoothspeaker.App;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.audio.AudioInput;
 import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
+import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
+import com.haier.ai.bluetoothspeaker.bean.Oilprice.ResponseOilprice;
 import com.haier.ai.bluetoothspeaker.bean.box.boxNluBean;
 import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
 import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
@@ -24,6 +26,7 @@ import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
+import com.haier.ai.bluetoothspeaker.manager.MusicPlayerManager;
 import com.haier.ai.bluetoothspeaker.manager.ProtocolManager;
 import com.haier.ai.bluetoothspeaker.manager.RetrofitApiManager;
 import com.haier.ai.bluetoothspeaker.net.AIApiService;
@@ -581,6 +584,15 @@ public class RecordModel {
             case Const.DOMAIN_ALARM:
                 handlerAlarmEvent(resp);
                 break;
+            case Const.DOMAIN_OIL:
+                handlerOilEvent(resp);
+                break;
+            case Const.DOMAIN_DAY:  //日期
+                HandlerDayEvent();
+                break;
+            case Const.DOMAIN_WEEK:
+                HandlerWeekEvent();
+                break;
             default:
                 break;
         }
@@ -710,8 +722,80 @@ public class RecordModel {
         List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
 
         for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+            if(param.getKey().equalsIgnoreCase("clock")){
+                clock = param.getValue();
+            }
 
+            if(param.getKey().equalsIgnoreCase("day")){
+                day = param.getValue();
+            }
+
+            if(param.getKey().equalsIgnoreCase("time")){
+                time = param.getValue();
+            }
+
+            if(param.getKey().equalsIgnoreCase("event")){
+                event = param.getValue();
+            }
+
+            if(param.getKey().equalsIgnoreCase("hour")){
+                hour = param.getValue();
+            }
+
+            if(param.getKey().equalsIgnoreCase("minute")){
+                minute = param.getValue();
+            }
+
+            if(param.getKey().equalsIgnoreCase("second")){
+                second = param.getValue();
+            }
         }
+
+        //分为闹钟及提醒
+
+    }
+
+    /**
+     * 油价
+     * @param resp
+     */
+    private final String DEFALUT_OIL_CITY = "北京";//北京，山东
+    private void handlerOilEvent(boxNluBean resp){
+        final RequestOilprice requestOilprice = new RequestOilprice();
+        requestOilprice.setDomain("oilprice");
+        RequestOilprice.KeywordsBean keywordsBean = new RequestOilprice.KeywordsBean();
+        keywordsBean.setArea(DEFALUT_OIL_CITY);
+        keywordsBean.setType("95#");
+        requestOilprice.setKeywords(keywordsBean);
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        aiApiService.getOilPrice("", requestOilprice).enqueue(new Callback<ResponseOilprice>() {
+            @Override
+            public void onResponse(Call<ResponseOilprice> call, Response<ResponseOilprice> response) {
+                Log.d(TAG, "onResponse: oil:" + response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ResponseOilprice> call, Throwable t) {
+
+            }
+        });
+    }
+
+    /**
+     * 当前日期
+     */
+    private void HandlerDayEvent(){
+        String day = MusicPlayerManager.getInstance().getTodayDate();
+        playTTS(day);
+    }
+
+    /**
+     * 当前星期
+     */
+    private void HandlerWeekEvent(){
+        String week = MusicPlayerManager.getInstance().getTodayWeek();
+        playTTS(week);
     }
 
     private void handlerSingleCommand(boxNluBean resp){

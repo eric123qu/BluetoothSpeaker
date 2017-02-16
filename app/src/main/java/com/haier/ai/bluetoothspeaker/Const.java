@@ -47,6 +47,14 @@ public class Const {
 
     public static final String DOMAIN_ALARM = "com_alarm";      //闹钟提醒
 
+    public static final String DOMAIN_CONTELLATION = "com_constellation";   //星座
+
+    public static final String DOMAIN_OIL = "com_oil";          //油价
+
+    public static final String DOMAIN_WEEK = "com_week";        //星期
+
+    public static final String DOMAIN_DAY = "com_day";          //几号
+
     /**
      * 音乐播放状态
      */
