@@ -31,6 +31,7 @@ public class ApplianceDefine {
     public static final byte DEV_SMARTCARE = 0x03;
     public static final byte DEV_INFRARED = 0x04;               //红外报警
     public static final byte DEV_SPEAKER = 0x05;                //音箱
+    public static final byte DEV_BOX = 0x18;                //音箱音乐
 
     /**
      * 设备种类
@@ -252,7 +253,7 @@ public class ApplianceDefine {
     public static final byte SPEAKER_MUSIC_dev = 0x0a;
     public static final byte MODE_PLAY_MODE = 0x01;                         //音乐播放状态 0 暂停 1播放
     public static final byte MODE_LOOP_STATUS = 0x02;                       // 循环状态 1 单曲 2列表 3 随机播放
-    public static final byte MODE_VOLUME = 0x03;                            //音量 0-100
+    public static final byte MODE_VOLUME = 0x03;                            //音量 0减  1加
     public static final byte MODE_MUTE_STATUS = 0x04;                       //静音状态 0 非静音 1 静音
     public static final byte MODE_PLAY_SONG = 0x05;                         //昵称填写歌名
     public static final byte MODE_PLAY_CONTROL = 0x06;                      //播放控制  1 上一首 2下一首

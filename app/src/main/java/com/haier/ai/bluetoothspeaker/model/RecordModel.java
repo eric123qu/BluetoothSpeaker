@@ -20,6 +20,8 @@ import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
 import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
 import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
+import com.haier.ai.bluetoothspeaker.bean.stock.RequestStock;
+import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
@@ -46,6 +48,9 @@ import com.lidroid.xutils.HttpUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -65,6 +70,7 @@ public class RecordModel {
     private static ITtsPlayer mPlayer;
     private static HttpUtils httpUtils;
     @IntDef({TYPE_AIR, TYPE_FRIDGE}) @interface ControlType{}
+    ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
 
     public static RecordModel getInstance(){
         if(sRecordModel == null){
@@ -537,6 +543,7 @@ public class RecordModel {
      */
     private void handlerDomain(boxNluBean resp, String domain){
         List<boxNluBean.DataBean.SemanticBean.ParasBean> params = null;
+        String value = "";
 
         switch (domain){
             case Const.DOMAIN_NEWS: //新闻查询
@@ -544,11 +551,12 @@ public class RecordModel {
                 if(params != null){
                     for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
                         if(param.getKey().equals("news_category")){
-                            String value = param.getValue();
-                            getNewsContent(value);
+                            value = param.getValue();
                         }
                     }
                 }
+
+                getNewsContent(value);
 
                 break;
             case Const.DOMAIN_LIMIT: //限号查询
@@ -592,6 +600,9 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_WEEK:
                 HandlerWeekEvent();
+                break;
+            case Const.DOMAIN_STOCK:
+                HandlerStock();
                 break;
             default:
                 break;
@@ -637,7 +648,7 @@ public class RecordModel {
      */
     private void getNewsContent(String type){
         if(TextUtils.isEmpty(type)){
-            return;
+            type = "头条";
         }
 
         RequestNews requestNews = new RequestNews();
@@ -654,7 +665,7 @@ public class RecordModel {
                 if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
                     List<ResponseNews.DataBean.NewsBean> list = response.body().getData().getNews();
                     if(list.size() > 0){
-                        playTTS(list.get(0).getContent());
+                       // playTTS(list.get(0).getContent());
                     }
                 }
             }
@@ -752,7 +763,40 @@ public class RecordModel {
         }
 
         //分为闹钟及提醒
+        if(TextUtils.isEmpty(event)){//闹钟
+            //// TODO: 17-2-16 现仅支持整点闹钟
+            if (TextUtils.isEmpty(time)){
+                playTTS(Const.TTS_REPLY_ERROR);
+                return;
+            }
+        }else{ //提醒
+            int seconds = 0;
+            if(!TextUtils.isEmpty(hour)){
+                seconds += Integer.parseInt(hour)*60*60;
+            }
 
+            if(!TextUtils.isEmpty(minute)){
+                seconds += Integer.parseInt(minute) * 60;
+            }
+
+            if(!TextUtils.isEmpty(second)){
+                seconds += Integer.parseInt(second);
+            }
+
+            Log.d(TAG, "handlerAlarmEvent: seconds=" + seconds);
+            final String ttsEvent = event;
+
+            if(seconds > 0){
+                scheduledThreadPool.schedule(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        String tts = ttsEvent + "时间到了，请注意时间";
+                        playTTS(tts);
+                    }
+                }, seconds, TimeUnit.SECONDS);
+            }
+        }
     }
 
     /**
@@ -778,6 +822,54 @@ public class RecordModel {
             @Override
             public void onFailure(Call<ResponseOilprice> call, Throwable t) {
 
+            }
+        });
+    }
+
+    private void HandlerStock(){
+        RequestStock stock = new RequestStock();
+        stock.setDomain("stock");
+        RequestStock.KeywordsBean keyworksBean = new RequestStock.KeywordsBean();
+        keyworksBean.setType("0");//0代表上证指数，1代表深证指数
+        keyworksBean.setGid("");
+        stock.setKeywords(keyworksBean);
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        aiApiService.getStockInfo("", stock).enqueue(new Callback<ResponseStock>() {
+            @Override
+            public void onResponse(Call<ResponseStock> call, Response<ResponseStock> response) {
+                Log.d(TAG, "onResponse: " + response.body());
+                if(Const.RET_CODE_SUCESS.equals(response.body().getRetCode())){
+                    ResponseStock.DataBean resp = response.body().getData();
+
+                    StringBuilder ttsStock = new StringBuilder();
+                    ttsStock.append(resp.getName());
+                    ttsStock.append("当前指数");
+                    ttsStock.append(resp.getNowpri());
+                    ttsStock.append(",");
+
+                    ttsStock.append("开盘指数");
+                    ttsStock.append(resp.getOpenPri());
+                    ttsStock.append(",");
+
+                    ttsStock.append("最高点");
+                    ttsStock.append(resp.getHighPri());
+                    ttsStock.append(",");
+
+                    ttsStock.append("最低点");
+                    ttsStock.append(resp.getLowpri());
+                    ttsStock.append(",");
+
+                    Log.d(TAG, "ttsstock:" + ttsStock.toString());
+                    playTTS(ttsStock.toString());
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseStock> call, Throwable t) {
+                Log.e(TAG, "onFailure: HandlerStock");
             }
         });
     }

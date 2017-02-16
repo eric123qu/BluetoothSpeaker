@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.haier.ai.bluetoothspeaker.manager.ProtocolManager;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -136,6 +138,7 @@ SocketService extends Service {
                     //收到保温解析
 //                    Protocol protocol = new Protocol(SocketService.this);
 //                    protocol.parseProtocol(buffer, temp);
+                    ProtocolManager.getInstance().parseProtocol(buffer, temp);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

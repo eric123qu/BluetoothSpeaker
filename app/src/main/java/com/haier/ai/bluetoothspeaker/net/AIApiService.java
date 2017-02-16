@@ -9,6 +9,8 @@ import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
 import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
 import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
+import com.haier.ai.bluetoothspeaker.bean.stock.RequestStock;
+import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -43,4 +45,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseOilprice> getOilPrice(@Header("accessToken") String accessToken,
                                               @Body RequestOilprice requestOilprice);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseStock> getStockInfo(@Header("accessToken") String accessToken,
+                                           @Body RequestStock requestStock);
 }

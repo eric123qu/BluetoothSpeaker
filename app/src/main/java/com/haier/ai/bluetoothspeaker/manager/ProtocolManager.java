@@ -8,6 +8,7 @@ import com.haier.ai.bluetoothspeaker.ApplianceDefine;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.UnisoundDefine;
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
+import com.haier.ai.bluetoothspeaker.bean.RecvControlBean;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
 import com.haier.ai.bluetoothspeaker.util.BytesUtil;
 
@@ -431,4 +432,157 @@ public class ProtocolManager {
             socketClient.socketSend(sendData);
         }
     };
+
+    /**
+     * 收到的数据报解析
+     * @param data
+     * @param length
+     * @return
+     */
+    public int parseProtocol(byte [] data, int length){
+        RecvControlBean recvControlBean = new RecvControlBean();
+        //判读包头及包尾，确定是一个完整包
+        if(data[0] !=header || data[1]!=header || data[length-1]!=end){
+            Log.e("parse", "包不完整");
+            return -1;
+        }
+
+        for(int i=2; i<length-1; i++){//dataPaylod
+            //命令序列号(1 byte)
+            recvControlBean.setSeq(data[i++]);
+            //命令(1 byte)
+            byte commandType = data[i++];
+            recvControlBean.setbCommandType(commandType);
+
+
+            //设备类型(1 byte)  0x00 未知 ;0x01 wifi家电; 0x02 60开关; 0x03 SmartCare
+            byte devType = data[i++];
+            if(devType == ApplianceDefine.DEV_WIFI){
+                recvControlBean.setDevType("wifi家电");
+            }else if(devType == ApplianceDefine.DEV_60){
+                recvControlBean.setDevType("60开关");
+            }else if(devType == ApplianceDefine.DEV_SMARTCARE){
+                recvControlBean.setDevType("SmartCare");
+            }else if(devType == ApplianceDefine.DEV_UNKNOW){
+                recvControlBean.setDevType("未知");
+            }else if(devType == ApplianceDefine.DEV_INFRARED){
+                recvControlBean.setDevType("InfraredAlarm");
+            }else if(devType == ApplianceDefine.DEV_BOX){
+                recvControlBean.setDevType("speakerbox");
+            }
+            //设备种类(1 byte)  0x01 门磁; 0x02 水浸 ；0x10 空调; 0x21 灯光; 0x22 窗帘; 0x23
+            byte devDetail = data[i++];
+            if(devDetail == ApplianceDefine.TYPE_DOOR){
+                recvControlBean.setDevDetail("门磁");
+            }else if(devDetail == ApplianceDefine.TYPE_WATER){
+                recvControlBean.setDevDetail("水浸");
+            }else if(devDetail == ApplianceDefine.TYPE_AIRCONDITIONER){
+                recvControlBean.setDevDetail("空调");
+            }else if(devDetail == ApplianceDefine.TYPE_LIGHT){
+                recvControlBean.setDevDetail("灯光");
+            }else if(devDetail == ApplianceDefine.TYPE_CURTAIN){
+                recvControlBean.setDevDetail("窗帘");
+            }else if(devDetail == ApplianceDefine.TYPE_SCENE){
+                recvControlBean.setDevDetail("模式");
+            }else if(devDetail == ApplianceDefine.TYPE_RISCO){
+                recvControlBean.setDevDetail("RISCO");
+            }else if(devDetail == ApplianceDefine.TYPE_INFRARED){
+                recvControlBean.setDevDetail("INFRARED");
+            }else if(devDetail == ApplianceDefine.TYPE_WATER_HEATER){
+                recvControlBean.setDevDetail("热水器");
+            }else if(devDetail == ApplianceDefine.DANCE_DEV){
+                recvControlBean.setDevDetail("dance");
+            }
+            //设备位置(1 byte)  0x01 客厅; 0x02 卧室; 0x03 厨房;......0xFF表示全部，0x00表示不确定
+            byte devPositio = data[i++];
+            if(devPositio == 0x01){
+                recvControlBean.setDevPosition("客厅");
+            }else if(devPositio == 0x02){
+                recvControlBean.setDevPosition("卧室");
+            }else if(devPositio == 0x03){
+                recvControlBean.setDevPosition("厨房");
+            }else if(devPositio == 0x00){
+                recvControlBean.setDevPosition("未知");
+            }else if(devPositio == 0xff){
+                recvControlBean.setDevPosition("全部");
+            }
+            ////设备序号(1 byte)
+            recvControlBean.setDevSequence(data[i++]);
+            //mac + 预留 (16byte)
+            int k=0;
+            for(k=0; k<16; k++){
+                i++;
+            }
+            //设备属性个数(1byte)
+            byte count = data[i++];
+            //
+            byte [] tmp = new byte[4];
+            for(k=0; k<count;k++){
+                //设备属性 2Byte
+                RecvControlBean.PropertyItem item = new RecvControlBean.PropertyItem();
+                tmp[0] = data[i++];
+                tmp[1] = data[i++];
+                tmp[2] = data[i++];
+                tmp[3] = data[i++];
+                recvControlBean.setDevAttr1(tmp[0]);
+                recvControlBean.setDevAttr2(tmp[1]);
+                recvControlBean.setAttrStatus1(tmp[2]);
+                recvControlBean.setAttrStatus2(tmp[3]);
+
+                recvControlBean.propertyList.add(item);
+
+            }
+            //设备昵称长
+            int nameLen = data[i++];
+            String nickName = null;
+            if(nameLen > 0) {
+                //设备昵称
+                byte[] bName = new byte[nameLen];
+                System.arraycopy(data, i, bName, 0, nameLen);
+                nickName = new String(bName);
+                recvControlBean.setNickName(nickName);
+            }
+            //包尾
+
+            handleCommand(recvControlBean);
+
+        }
+        return 0;
+    }
+
+    public void handleCommand(RecvControlBean recvControlBean){
+        switch(recvControlBean.getbCommandType()){
+            case ApplianceDefine.ORDER_REPORT_STATE:
+                if(recvControlBean.getDevType().equals("speakerbox")){
+                    byte devattr1 = recvControlBean.getDevAttr1();
+                    byte devattr2 = recvControlBean.getDevAttr2();
+//                    byte attrstatus1 = recvControlBean.getAttrStatus1();
+//                    byte attrstatus2 = recvControlBean.getAttrStatus2();
+
+                    byte [] status = new byte[2];
+                    status[0] = recvControlBean.getAttrStatus1();
+                    status[1] = recvControlBean.getAttrStatus2();
+
+                    short attrStatus = BytesUtil.getShort(status);
+                    switch (devattr2){
+                        case ApplianceDefine.MODE_VOLUME://控制音量
+                            if(0 == attrStatus){//减小
+                                MusicPlayerManager.getInstance().adjustSystemVoiceLow();
+                            }else if(1 == attrStatus){//增加
+                                MusicPlayerManager.getInstance().adjustSystemVoiceHigh();
+                            }
+                            break;
+                        case ApplianceDefine.MODE_PLAY_MODE:
+                            if(0 == attrStatus){//0 暂停 1播放
+                                MusicPlayerManager.getInstance().pauseMusic();
+                            }else if(1 == attrStatus){//
+                                MusicPlayerManager.getInstance().restartMusic();
+                            }
+                            break;
+                    }
+                }
+                break;
+
+        }
+    }
 }

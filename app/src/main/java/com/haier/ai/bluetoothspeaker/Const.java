@@ -28,7 +28,7 @@ public class Const {
 
     public static final String RET_CODE_SUCESS = "00000";
 
-    public static final String BASE_URL = "http://121.41.27.164:9030/ai-access/";
+    public static final String BASE_URL = "http://120.27.157.19:9030/ai-access/";
 
     //内容请求接口
     public static final String URL_CONTENT = "content";
@@ -51,10 +51,13 @@ public class Const {
 
     public static final String DOMAIN_OIL = "com_oil";          //油价
 
+    public static final String DOMAIN_STOCK = "com_shares";     //股票
+
     public static final String DOMAIN_WEEK = "com_week";        //星期
 
     public static final String DOMAIN_DAY = "com_day";          //几号
 
+    public static final String TTS_REPLY_ERROR = "对不起，我没听清楚";
     /**
      * 音乐播放状态
      */
