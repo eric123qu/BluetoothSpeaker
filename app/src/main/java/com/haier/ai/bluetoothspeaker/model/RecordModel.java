@@ -20,6 +20,8 @@ import com.haier.ai.bluetoothspeaker.bean.hotline.RequestHotline;
 import com.haier.ai.bluetoothspeaker.bean.hotline.ResponseHotline;
 import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
 import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
+import com.haier.ai.bluetoothspeaker.bean.movie.RequestMovie;
+import com.haier.ai.bluetoothspeaker.bean.movie.ResponseMovie;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
 import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
@@ -615,6 +617,12 @@ public class RecordModel {
             case Const.DOMAIN_HOTLINE:
                 HandlerHotline(resp);
                 break;
+            case Const.DOMAIN_MOVIE:
+                HandlerMovie(resp);
+                break;
+            case Const.DOMAIN_Child:
+            case Const.DOMAIN_Crosstalk:
+                break;
             default:
                 break;
         }
@@ -1170,6 +1178,53 @@ public class RecordModel {
             }
 
         }
+    }
+
+    private void HandlerMovie(boxNluBean resp){
+        //选前5部电影名称播报
+        RequestMovie requestMovie = new RequestMovie();
+        RequestMovie.KeywordsBean keywordsBean = new RequestMovie.KeywordsBean();
+
+        requestMovie.setDomain("movies");
+        keywordsBean.setCity("北京");
+        requestMovie.setKeywords(keywordsBean);
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        aiApiService.getMovieInfo("", requestMovie).enqueue(new Callback<ResponseMovie>() {
+            @Override
+            public void onResponse(Call<ResponseMovie> call, Response<ResponseMovie> response) {
+                if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                    ResponseMovie.DataBean data = response.body().getData();
+                    if(data == null){
+                        playTTS("对不起没有找到相关资源");
+                        return;
+                    }
+
+                    StringBuilder builder = new StringBuilder();
+                    List<ResponseMovie.DataBean.ClassificationsBean> classList = data.getClassifications();
+                    for(ResponseMovie.DataBean.ClassificationsBean bean : classList){
+                        builder.append(bean.getName());
+                        List<ResponseMovie.DataBean.ClassificationsBean.MoviesBean> movies = bean.getMovies();
+                        for(ResponseMovie.DataBean.ClassificationsBean.MoviesBean movie : movies){
+                            builder.append(movie.getTitle());
+                            builder.append(",");
+                        }
+                    }
+
+                    String ttsMovie = builder.toString();
+                    Log.d(TAG, "onResponse: movies:" + ttsMovie);
+                    playTTS(ttsMovie);
+                }else {
+                    playTTS("对不起没有找到相关资源");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMovie> call, Throwable t) {
+                playTTS("对不起没有找到相关资源");
+                Log.e(TAG, "onFailure: HandlerMovie");
+            }
+        });
     }
 
     /**

@@ -67,6 +67,12 @@ public class Const {
 
     public static final String DOMAIN_HOTLINE = "com_hotline";    //热线
 
+    public static final String DOMAIN_MOVIE = "com_movie";    //电影
+
+    public static final String DOMAIN_CROSSTALK = "com_crosstalk";    //相声
+
+    public static final String DOMAIN_CHILD = "com_child";    //儿歌
+
     public static final String TTS_REPLY_ERROR = "对不起，我没听清楚";
     /**
      * 音乐播放状态
