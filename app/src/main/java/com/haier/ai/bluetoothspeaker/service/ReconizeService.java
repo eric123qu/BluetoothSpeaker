@@ -138,7 +138,7 @@ public class ReconizeService extends Service {
             public void run() {
                 RecordModel.getInstance().stopRecord(); //sdk mode
             }
-        }, 3, TimeUnit.SECONDS);
+        }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);
 
     }
 
@@ -165,7 +165,7 @@ public class ReconizeService extends Service {
             public void run() {
                 RecordModel.getInstance().stopRecord();
             }
-        }, 3, TimeUnit.SECONDS);
+        }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);
     }
 
     public void playWakeupSucess(MediaPlayer.OnCompletionListener listenr){
@@ -259,28 +259,13 @@ public class ReconizeService extends Service {
                 //开始识别
                 RecordModel.getInstance().startRecord();//sdk mode
 
-                //RecordModel_bak.getInstance().startRecord(); //api mode
                 scheduledThreadPool.schedule(new Runnable() {
 
                     @Override
                     public void run() {
-                        /**
-                         * sdk mode
-                         */
                         RecordModel.getInstance().stopRecord(); //sdk mode
-                        //RecordModel.getInstance().releaseSdk();
-
-                        /**
-                         * api mode
-                         */
-                        /*String filename = RecordModel_bak.getInstance().stopRecord();
-                        Log.d(TAG, "run: record filename:" + filename);
-                        EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
-                        SystemClock.sleep(500);
-                        RecordModel_bak.getInstance().uploadRecordData(filename);*/
-
                     }
-                }, 3, TimeUnit.SECONDS);
+                }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);
             }
         };
     }

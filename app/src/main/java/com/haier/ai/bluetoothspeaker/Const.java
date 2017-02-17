@@ -22,6 +22,10 @@ public class Const {
     //通信类型 载体设置
     public static final int TYPE_SETTING = 3;
 
+    //语音识别间隔时间
+    public static final int RECONIZE_INTERVAL = 4;
+
+
     public static  final String WAKEUP_TAG = "com.haier.ai.wait4wakeup";
 
     public static final String RERECONIZE_TAG = "com.haier.ai.rereconize";
@@ -56,6 +60,10 @@ public class Const {
     public static final String DOMAIN_WEEK = "com_week";        //星期
 
     public static final String DOMAIN_DAY = "com_day";          //几号
+
+    public static final String DOMAIN_TRANSFER = "com_transfer";          //翻译
+
+    public static final String DOMAIN_HOLIDAY = "com_constellation";    //节假日
 
     public static final String TTS_REPLY_ERROR = "对不起，我没听清楚";
     /**

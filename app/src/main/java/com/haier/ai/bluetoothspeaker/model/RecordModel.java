@@ -22,6 +22,10 @@ import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
 import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
 import com.haier.ai.bluetoothspeaker.bean.stock.RequestStock;
 import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock;
+import com.haier.ai.bluetoothspeaker.bean.translation.RequestTrans;
+import com.haier.ai.bluetoothspeaker.bean.translation.ResponseTrans;
+import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
+import com.haier.ai.bluetoothspeaker.bean.weather.ResponseAqi;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
@@ -533,7 +537,6 @@ public class RecordModel {
                 playTTS(response);
             }
 
-
             return;
         }
 
@@ -574,24 +577,8 @@ public class RecordModel {
                 getLimitContent(null, null);
                 break;
             case Const.DOMAIN_WEATHER:  //空气质量查询
-                params = resp.getData().getSemantic().getParas();
-                String date = null;
-                String city = null;
+                handlerWeather(resp);
 
-                if(params != null){
-                    for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
-                        if(param.getKey().equals("day")){
-                            date = param.getValue();
-                        }
-
-                        if(param.getKey().equals("loc")){
-                            city = param.getValue();
-                        }
-                    }
-
-
-                }
-                getWeatherInfo(date, city);
                 break;
             case Const.DOMAIN_MUSIC:
                 playMusic(resp);
@@ -617,6 +604,9 @@ public class RecordModel {
             case Const.DOMAIN_STOCK:
                 HandlerStock();
                 break;
+            case Const.DOMAIN_TRANSFER:
+                HandlerTransfer(resp);
+                break;
             default:
                 break;
         }
@@ -625,41 +615,97 @@ public class RecordModel {
 
     private void playMusic(boxNluBean resp){
         List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        String queryValue = null;
+        String musicValue = null;
+        String singerValue = null;
+        String albumValue = null;
+
         for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
             if(param.getKey().equals("query")){
-                String value = param.getValue();
-                if(value.equals("random")){
-                    AIApiService aiApiService = RetrofitApiManager.getAiApiService();
-                    RequestMusic requestMusic = new RequestMusic();
-                    requestMusic.setDomain("music");
-                    RequestMusic.KeywordsEntity keywordsEntity = new RequestMusic.KeywordsEntity();
-                    requestMusic.setKeywords(keywordsEntity);
-                    aiApiService.getMusicContent("", requestMusic).enqueue(new Callback<ResponseMusic>() {
-                        @Override
-                        public void onResponse(Call<ResponseMusic> call, Response<ResponseMusic> response) {
-                            if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
-                                final String url = response.body().getData().getUrl();
-                                Log.d(TAG, "music url :" + url);
-                                EventBus.getDefault().post(new UrlMusicEvent(url));
-                            }else {
-                                playTTS("对不起没有找到相关资源");
-                            }
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseMusic> call, Throwable t) {
-                            Log.d(TAG, "onFailure: ");
-                            playTTS("对不起没有找到相关资源");
-                        }
-                    });
-                }
+                queryValue = param.getValue();
+            }else if(param.getKey().equals("music")){
+                musicValue = param.getValue();
+            }else if(param.getKey().equals("singer")){
+                singerValue = param.getValue();
+            }else if(param.getKey().equals("album")){
+                albumValue = param.getValue();
             }
-
-
         }
 
+        Log.d(TAG, "playMusic: musicinfo:" +queryValue +";" +musicValue + "; "+singerValue + "; "+albumValue);
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        RequestMusic requestMusic = new RequestMusic();
+        RequestMusic.KeywordsEntity keywordsEntity = new RequestMusic.KeywordsEntity();
+        requestMusic.setDomain("music");
+
+        if(!TextUtils.isEmpty(queryValue)){//随机播放
+
+        }else if(!TextUtils.isEmpty(musicValue)){//歌曲
+            keywordsEntity.setSong(musicValue);
+            if(!TextUtils.isEmpty(singerValue)){
+                keywordsEntity.setSinger(singerValue);
+            }
+        }else if(!TextUtils.isEmpty(albumValue)){//专辑
+            keywordsEntity.setAlbum(albumValue);
+            if(!TextUtils.isEmpty(singerValue)){
+                keywordsEntity.setSinger(singerValue);
+            }
+        }
+
+        requestMusic.setKeywords(keywordsEntity);
+
+        aiApiService.getMusicContent("", requestMusic).enqueue(new Callback<ResponseMusic>() {
+            @Override
+            public void onResponse(Call<ResponseMusic> call, Response<ResponseMusic> response) {
+                if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                    final String url = response.body().getData().getUrl();
+                    Log.d(TAG, "music url :" + url);
+                    if(TextUtils.isEmpty(url)){
+                        playTTS("对不起没有找到相关资源");
+                    }else
+                        EventBus.getDefault().post(new UrlMusicEvent(url));
+                }else {
+                    playTTS("对不起没有找到相关资源");
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMusic> call, Throwable t) {
+                Log.d(TAG, "onFailure: ");
+                playTTS("对不起没有找到相关资源");
+            }
+        });
     }
+            /*if(value.equals("random")){
+                AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+                RequestMusic requestMusic = new RequestMusic();
+                requestMusic.setDomain("music");
+                RequestMusic.KeywordsEntity keywordsEntity = new RequestMusic.KeywordsEntity();
+                requestMusic.setKeywords(keywordsEntity);
+                aiApiService.getMusicContent("", requestMusic).enqueue(new Callback<ResponseMusic>() {
+                    @Override
+                    public void onResponse(Call<ResponseMusic> call, Response<ResponseMusic> response) {
+                        if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                            final String url = response.body().getData().getUrl();
+                            Log.d(TAG, "music url :" + url);
+                            EventBus.getDefault().post(new UrlMusicEvent(url));
+                        }else {
+                            playTTS("对不起没有找到相关资源");
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseMusic> call, Throwable t) {
+                        Log.d(TAG, "onFailure: ");
+                        playTTS("对不起没有找到相关资源");
+                    }
+                });
+            }*/
+
+
+
 
     /**
      * 获取新闻内容
@@ -736,8 +782,73 @@ public class RecordModel {
         });
     }
 
-    private void getWeatherInfo(String date, String city){
+    private void getWeatherInfo(String date, String city, String intent){ //北京，青岛
+        if(TextUtils.isEmpty(intent)){
+            waitForWakeup();
 
+            return;
+        }
+
+        if(TextUtils.isEmpty(city)){
+            city = "青岛";
+        }
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        RequestAqi aqi = new RequestAqi();
+        RequestAqi.KeywordsBean keyBean = new RequestAqi.KeywordsBean();
+        if(intent.contains("质量")){ //查询空气质量
+            aqi.setDomain("aqi");
+            if(!TextUtils.isEmpty(date)){
+                keyBean.setDate(date);
+            }
+
+            keyBean.setCity(city);
+
+            aqi.setKeywords(keyBean);
+            aiApiService.getAqiResult("", aqi).enqueue(new Callback<ResponseAqi>() {
+                @Override
+                public void onResponse(Call<ResponseAqi> call, Response<ResponseAqi> response) {
+                    if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                        ResponseAqi.DataBean data = response.body().getData();
+
+                        StringBuilder builder = new StringBuilder();
+                        builder.append(data.getCity());
+                        builder.append("空气质量指数");
+                        builder.append(data.getAqi());
+                        builder.append(",");
+
+                        builder.append(data.getCity());
+                        builder.append("空气质量状况");
+                        builder.append(data.getAqs());
+                        builder.append(",");
+
+                        builder.append(data.getCity());
+                        builder.append("首要污染物");
+                        builder.append(data.getPp());
+                        builder.append(",");
+
+                        builder.append(data.getCity());
+                        builder.append("PM2.5值");
+                        builder.append(data.getPm25());
+                        builder.append(",");
+
+                        String tts = builder.toString();
+                        Log.d(TAG, "onResponse: aqi:" + tts);
+                        playTTS(tts);
+                    }else{
+                        playTTS("查询失败");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseAqi> call, Throwable t) {
+                    playTTS("对不起我没有查到");
+                }
+            });
+
+        }else{ //天气预报
+
+        }
     }
 
     private void handlerAlarmEvent(boxNluBean resp){
@@ -818,6 +929,27 @@ public class RecordModel {
         }
     }
 
+    private void handlerWeather(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        String intent = resp.getData().getSemantic().getIntent();
+        String date = null;
+        String city = null;
+
+        if(params != null){
+            for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+                if(param.getKey().equals("day")){
+                    date = param.getValue();
+                }
+
+                if(param.getKey().equals("loc")){
+                    city = param.getValue();
+                }
+            }
+
+
+        }
+        getWeatherInfo(date, city, intent);
+    }
     /**
      * 油价
      * @param resp
@@ -907,6 +1039,50 @@ public class RecordModel {
                 Log.e(TAG, "onFailure: HandlerStock");
             }
         });
+    }
+
+    private void HandlerTransfer(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+
+        for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+            if(param.getKey().equals("transfer")){
+                String value = param.getValue();
+                if(TextUtils.isEmpty(value)){
+                    playTTS("对不起我没听清楚");
+                }else{
+                    RequestTrans requestTrans = new RequestTrans();
+                    RequestTrans.KeywordsBean keyBean = new RequestTrans.KeywordsBean();
+
+                    requestTrans.setDomain("translation");
+                    keyBean.setFrom("auto");
+                    keyBean.setTo("en");
+                    keyBean.setQuery(value);
+
+                    requestTrans.setKeywords(keyBean);
+                    AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+                    aiApiService.getTransferResult("", requestTrans).enqueue(new Callback<ResponseTrans>() {
+                        @Override
+                        public void onResponse(Call<ResponseTrans> call, Response<ResponseTrans> response) {
+                            if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                                String result = response.body().getData().getResult();
+                                if(TextUtils.isEmpty(result)){
+                                    playTTS("对不起我无能为力");
+                                }else{
+                                    playTTS(result);
+                                }
+                            }else{
+                                playTTS("对不起我没听清楚");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseTrans> call, Throwable t) {
+                            playTTS("对不起我没听清楚");
+                        }
+                    });
+                }
+            }
+        }
     }
 
     /**

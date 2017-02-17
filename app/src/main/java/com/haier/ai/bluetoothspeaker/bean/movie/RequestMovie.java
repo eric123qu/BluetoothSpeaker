@@ -1,14 +1,14 @@
-package com.haier.ai.bluetoothspeaker.bean.weather;
+package com.haier.ai.bluetoothspeaker.bean.movie;
 
 /**
- * Created by qx on 17-2-16.
+ * Created by qx on 17-2-17.
  */
 
-public class RequestAqi {
+public class RequestMovie {
 
     /**
-     * domain : aqi
-     * keywords : {"date":"2017-01-20","city":"北京"}
+     * domain :  movies
+     * keywords : {"city":"北京"}
      */
 
     private String domain;
@@ -32,20 +32,10 @@ public class RequestAqi {
 
     public static class KeywordsBean {
         /**
-         * date : 2017-01-20
          * city : 北京
          */
 
-        private String date;
         private String city;
-
-        public String getDate() {
-            return date;
-        }
-
-        public void setDate(String date) {
-            this.date = date;
-        }
 
         public String getCity() {
             return city;
