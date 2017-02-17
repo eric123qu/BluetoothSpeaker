@@ -2,13 +2,10 @@ package com.haier.ai.bluetoothspeaker.manager;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.baidu.speech.EventListener;
 import com.baidu.speech.EventManager;
 import com.baidu.speech.EventManagerFactory;
-
-import static com.baidu.speech.EventManagerFactory.TAG;
 
 /**
  * author: qu
@@ -43,7 +40,6 @@ public class WakeupEventManager {
 
 
     public void startWakeup(String param){
-        Log.e(TAG, "startWakeup: ");
         if(TextUtils.isEmpty(param)){
             return;
         }
@@ -54,14 +50,12 @@ public class WakeupEventManager {
     }
 
     public void stopWakeup(){
-        Log.e(TAG, "stopWakeup: ");
         if(mWpEventManager != null) {
             mWpEventManager.send("wp.stop", null, null, 0, 0);
         }
     }
 
     public void registerEventListener(EventListener eventListener){
-        Log.e(TAG, "registerEventListener: ");
         this.eventListener = eventListener;
         if(eventListener != null) {
             getEventManager().registerListener(eventListener);
@@ -69,7 +63,6 @@ public class WakeupEventManager {
     }
 
     public void unregisterEventListener(){
-        Log.e(TAG, "unregisterEventListener: ");
         if(eventListener != null){
             getEventManager().unregisterListener(eventListener);
         }
