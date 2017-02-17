@@ -21,6 +21,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
+import static com.haier.ai.bluetoothspeaker.Const.register_wakeup;
+
 public class WakeupService extends Service {
     private final String TAG = "WakeupService";
     //private EventManager mWpEventManager;
@@ -68,6 +70,13 @@ public class WakeupService extends Service {
 
 
     private void registerWakeup(){
+        Log.e(TAG, "registerWakeup:========= ");
+        ++register_wakeup;
+        Log.d(TAG, "registerWakeup: count:" + Const.register_wakeup);
+        if(Const.register_wakeup > 1){
+            return;
+        }
+
         // 唤醒功能打开步骤
         // 1) 创建唤醒事件管理器
        // mWpEventManager = EventManagerFactory.create(WakeupService.this, "wp");
@@ -99,10 +108,14 @@ public class WakeupService extends Service {
         params.put("kws-file", "assets:///WakeUp.bin"); // 设置唤醒资源, 唤醒资源请到 http://yuyin.baidu.com/wake#m4 来评估和导出
        // mWpEventManager.send("wp.start", new JSONObject(params).toString(), null, 0, 0);
         try {
+            Log.i(TAG, "registerWakeup: start wake up");
             WakeupEventManager.getInstance(WakeupService.this).startWakeup(new JSONObject(params).toString());
         } catch (Exception e) {
             Toast.makeText(WakeupService.this, "请检测网络连接", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
+            Log.e(TAG, "registerWakeup: 1111");
+            //WakeupEventManager.getInstance(WakeupService.this).startWakeup(new JSONObject(params).toString());
+
         }
     }
 

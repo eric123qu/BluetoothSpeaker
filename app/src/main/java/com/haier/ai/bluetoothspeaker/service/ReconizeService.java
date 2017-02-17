@@ -15,8 +15,6 @@ import android.util.Log;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.R;
 import com.haier.ai.bluetoothspeaker.event.DialogEvent;
-import com.haier.ai.bluetoothspeaker.event.NluEvent;
-import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
@@ -108,11 +106,12 @@ public class ReconizeService extends Service {
         //关闭唤醒
         WakeupEventManager.getInstance(this).stopWakeup();
         WakeupEventManager.getInstance(this).unregisterEventListener();
+        Const.register_wakeup = 0;
         SystemClock.sleep(500);
 
-        EventBus.getDefault().post(new ReconizeStatusEvent("唤醒成功"));
+        /*EventBus.getDefault().post(new ReconizeStatusEvent("唤醒成功"));
         EventBus.getDefault().post(new ReconizeResultEvent(""));
-        EventBus.getDefault().post(new NluEvent(""));
+        EventBus.getDefault().post(new NluEvent(""));*/
 
         //正在播放歌曲等，则打断
         if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PLAYING){
@@ -128,7 +127,7 @@ public class ReconizeService extends Service {
         //playLocalAudio(TYPE_WAKEUP, initWakeupListener());
         playLocalAudio(TYPE_DING, null);
 
-        EventBus.getDefault().post(new ReconizeStatusEvent("开始识别"));
+        //EventBus.getDefault().post(new ReconizeStatusEvent("开始识别"));
         //开始识别
         RecordModel.getInstance().startRecord();//sdk mode
 
@@ -234,12 +233,12 @@ public class ReconizeService extends Service {
     /**
      * 进入待唤醒
      */
-    public void waitForWakeup(){
+    /*public void waitForWakeup(){
         Intent intent = new Intent(Const.WAKEUP_TAG);
         sendBroadcast(intent);
 
         EventBus.getDefault().post(new ReconizeStatusEvent("待唤醒"));
-    }
+    }*/
 
     /**
      * 唤醒成功监听
@@ -283,7 +282,7 @@ public class ReconizeService extends Service {
             Log.d(TAG, "onStartRecordEvent: 进入带唤醒状态");
             //// TODO: 16-9-5 进入带唤醒状态
             playLocalAudio(TYPE_SLEEP, null);
-            waitForWakeup();
+            //waitForWakeup();
             reReconizeCount= 0;
             return -1;
         }
@@ -301,7 +300,7 @@ public class ReconizeService extends Service {
 
     private void goSleep(){
         playLocalAudio(TYPE_SLEEP, null);
-        waitForWakeup();
+        //waitForWakeup();
     }
     /**
      * 暂不用broadcast

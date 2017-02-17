@@ -80,4 +80,6 @@ public class Const {
     public static final int STATE_BUFFING = 3;              //正在缓冲
 
     public static boolean IS_FIRST_WAKEUP;                  //是否首次唤醒
+
+    public static int register_wakeup = 0;
 }

@@ -32,7 +32,6 @@ import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
 import com.haier.ai.bluetoothspeaker.bean.weather.ResponseAqi;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
-import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
@@ -253,8 +252,7 @@ public class RecordModel {
             public void onError(int paramInt, String paramString) {
                 // 识别时有错误发生。
                 Log.d(TAG, String.format("onError(): errcode = %d, msg = %s", paramInt, paramString));
-                EventBus.getDefault().post(new ReconizeResultEvent("语音识别错误"));
-                //sendReReconizeEvent(true);
+                //EventBus.getDefault().post(new ReconizeResultEvent("语音识别错误"));
                 waitForWakeup();
             }
 
@@ -264,12 +262,11 @@ public class RecordModel {
                 final String msg = String.format("onResult(): errcode = %d, msg = %s", paramInt, paramString);
                 String asrResult = getAsrResult(paramString);
                 //// TODO: 16-9-29 状态显示语音识别成功
-                EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
-                //waitForWakeup();
+                //EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
 
                 Log.e(TAG, "onResult: asrresult:" + asrResult );
                 if(TextUtils.isEmpty(asrResult)){
-                    EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
+                    //EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
                     playTTS("对不起我没听清楚");
                 }else {
                     //去掉标点
@@ -280,7 +277,7 @@ public class RecordModel {
                     asrResult =asrResult.replace("，", "");
                     asrResult =asrResult.replace("，", "");
                     asrResult =asrResult.replace("？", "");
-                    EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
+                    //EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
                     //调用nlu接口，语义理解(空调)sdk
                     String nlu = formatNluRequest(asrResult, TYPE_FRIDGE);
                     getNluResult(nlu);
@@ -337,7 +334,7 @@ public class RecordModel {
             @Override
             public void onError(int arg0, String arg1) {
                 final String msg = String.format("nlu onError(): errcode = %d, msg = %s", arg0, arg1);
-                EventBus.getDefault().post(new ReconizeResultEvent("语义理解错误"));
+                //EventBus.getDefault().post(new ReconizeResultEvent("语义理解错误"));
                 //sendReReconizeEvent(true);
                 waitForWakeup();
             }
@@ -427,6 +424,7 @@ public class RecordModel {
 
 
     public void playTTS(String content){
+        Log.d(TAG, "playTTS: ");
         waitForWakeup();
 
         if(TextUtils.isEmpty(content)){
@@ -827,17 +825,18 @@ public class RecordModel {
                         builder.append(data.getAqi());
                         builder.append(",");
 
-                        builder.append(data.getCity());
+
                         builder.append("空气质量状况");
                         builder.append(data.getAqs());
                         builder.append(",");
 
-                        builder.append(data.getCity());
-                        builder.append("首要污染物");
-                        builder.append(data.getPp());
-                        builder.append(",");
 
-                        builder.append(data.getCity());
+                        if(!TextUtils.isEmpty(data.getPp())){
+                            builder.append("首要污染物");
+                            builder.append(data.getPp());
+                            builder.append(",");
+                        }
+
                         builder.append("PM2.5值");
                         builder.append(data.getPm25());
                         builder.append(",");
