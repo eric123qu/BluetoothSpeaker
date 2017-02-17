@@ -5,6 +5,8 @@ import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.ResponseOilprice;
 import com.haier.ai.bluetoothspeaker.bean.holiday.RequestHoliday;
 import com.haier.ai.bluetoothspeaker.bean.holiday.ResponseHoliday;
+import com.haier.ai.bluetoothspeaker.bean.hotline.RequestHotline;
+import com.haier.ai.bluetoothspeaker.bean.hotline.ResponseHotline;
 import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
 import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
 import com.haier.ai.bluetoothspeaker.bean.movie.RequestMovie;
@@ -73,4 +75,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseHoliday> getHolidayInfo(@Header("accessToken") String accessToken,
                                               @Body RequestHoliday requestHoliday);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseHotline> getHotlineInfo(@Header("accessToken") String accessToken,
+                                                @Body RequestHotline requestHotline);
 }

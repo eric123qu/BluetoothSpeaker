@@ -14,6 +14,10 @@ import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.ResponseOilprice;
 import com.haier.ai.bluetoothspeaker.bean.box.boxNluBean;
+import com.haier.ai.bluetoothspeaker.bean.holiday.RequestHoliday;
+import com.haier.ai.bluetoothspeaker.bean.holiday.ResponseHoliday;
+import com.haier.ai.bluetoothspeaker.bean.hotline.RequestHotline;
+import com.haier.ai.bluetoothspeaker.bean.hotline.ResponseHotline;
 import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
 import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
@@ -423,7 +427,7 @@ public class RecordModel {
 
 
     public void playTTS(String content){
-
+        waitForWakeup();
 
         if(TextUtils.isEmpty(content)){
             return;
@@ -444,7 +448,7 @@ public class RecordModel {
         mPlayer.play(content, TtsPlayerMode.TTS_PLAYER_MODE_NEW);
 
         Log.d(TAG, "playTTS: tts player start end");
-        waitForWakeup();
+
     }
 
     public void waitForWakeup(){
@@ -606,6 +610,12 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_TRANSFER:
                 HandlerTransfer(resp);
+                break;
+            case Const.DOMAIN_HOLIDAY:
+                HandlerHolidayQuery(resp);
+                break;
+            case Const.DOMAIN_HOTLINE:
+                HandlerHotline(resp);
                 break;
             default:
                 break;
@@ -1082,6 +1092,84 @@ public class RecordModel {
                     });
                 }
             }
+        }
+    }
+
+    private void HandlerHolidayQuery(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params != null){
+            if(params.get(0).getKey().equals("holiday")){
+                String value = params.get(0).getValue();
+
+                if(TextUtils.isEmpty(value)){
+                    playTTS("对不起我没听清楚");
+                }else{
+                    RequestHoliday holiday = new RequestHoliday();
+                    RequestHoliday.KeywordsBean keyBean = new RequestHoliday.KeywordsBean();
+
+                    holiday.setDomain("holiday");
+                    keyBean.setType(value);
+                    holiday.setKeywords(keyBean);
+
+                    AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+                    aiApiService.getHolidayInfo("", holiday).enqueue(new Callback<ResponseHoliday>() {
+                        @Override
+                        public void onResponse(Call<ResponseHoliday> call, Response<ResponseHoliday> response) {
+                            if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                                playTTS(response.body().getData().getDesc());
+                            }else {
+                                playTTS("对不起没有找到相关资源");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseHoliday> call, Throwable t) {
+                            Log.e(TAG, "onFailure: HandlerHolidayQuery");
+                            playTTS("对不起我没听清楚");
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private void HandlerHotline(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params != null){
+            if(params.get(0).equals("number")){
+                String value = params.get(0).getValue();
+                if(TextUtils.isEmpty(value)){
+                    playTTS("对不起没有查询到");
+                }else{
+                    RequestHotline hotline = new RequestHotline();
+                    RequestHotline.KeywordsBean keyBean = new RequestHotline.KeywordsBean();
+
+                    hotline.setDomain("hotline");
+                    keyBean.setName(value);
+                    hotline.setKeywords(keyBean);
+
+                    AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+                    aiApiService.getHotlineInfo("", hotline).enqueue(new Callback<ResponseHotline>() {
+                        @Override
+                        public void onResponse(Call<ResponseHotline> call, Response<ResponseHotline> response) {
+                            if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                                String tts = response.body().getData().getName() + response.body().getData().getPhone();
+                                playTTS(tts);
+                            }else {
+                                playTTS("对不起没有找到相关资源");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseHotline> call, Throwable t) {
+                            playTTS("对不起我没听清楚");
+                            Log.e(TAG, "onFailure: HandlerHotline");
+                        }
+                    });
+
+                }
+            }
+
         }
     }
 
