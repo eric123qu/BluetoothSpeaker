@@ -32,6 +32,8 @@ import com.haier.ai.bluetoothspeaker.bean.translation.RequestTrans;
 import com.haier.ai.bluetoothspeaker.bean.translation.ResponseTrans;
 import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
 import com.haier.ai.bluetoothspeaker.bean.weather.ResponseAqi;
+import com.haier.ai.bluetoothspeaker.bean.ximalaya.RequestXimalaya;
+import com.haier.ai.bluetoothspeaker.bean.ximalaya.ResponseXimalaya;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
@@ -586,7 +588,7 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_MUSIC:
                 playMusic(resp);
-                waitForWakeup();
+                //waitForWakeup();
 
                 break;
             case Const.DOMAIN_DEVICE:
@@ -620,9 +622,13 @@ public class RecordModel {
             case Const.DOMAIN_MOVIE:
                 HandlerMovie(resp);
                 break;
-            case Const.DOMAIN_Child:
-            case Const.DOMAIN_Crosstalk:
+            case Const.DOMAIN_CHILD:
+            case Const.DOMAIN_CROSSTALK:
+                HandlerXimalaya(resp);
                 break;
+//            case Const.DOMAIN_CONTELLATION://星座
+//            HandlerContellation(resp);
+//                break;
             default:
                 break;
         }
@@ -877,6 +883,8 @@ public class RecordModel {
         String minute = null;
         String second = null;
 
+        String program = null;  //收看电视节目 天下足球，新闻联播
+
         List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
 
         for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
@@ -907,8 +915,16 @@ public class RecordModel {
             if(param.getKey().equalsIgnoreCase("second")){
                 second = param.getValue();
             }
+
+            if(param.getKey().equalsIgnoreCase("program")){
+                program = param.getValue();
+            }
         }
 
+        if(!TextUtils.isEmpty(program)){//收看电视节目
+            playTTS("闹钟已为您设置好");
+            return;
+        }
         //分为闹钟及提醒
         if(TextUtils.isEmpty(event)){//闹钟
             //// TODO: 17-2-16 现仅支持整点闹钟
@@ -1223,6 +1239,63 @@ public class RecordModel {
             public void onFailure(Call<ResponseMovie> call, Throwable t) {
                 playTTS("对不起没有找到相关资源");
                 Log.e(TAG, "onFailure: HandlerMovie");
+            }
+        });
+    }
+
+    private void HandlerXimalaya(boxNluBean resp){
+        String intent = resp.getData().getSemantic().getIntent();
+        String queryValue = null;
+
+        if(TextUtils.isEmpty(intent)){
+            playTTS("没有相关领域资源");
+            return;
+        }
+
+        if(!intent.equals("相声") && !intent.equals("儿歌")){
+            playTTS("没有相关领域资源");
+            return;
+        }
+
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params.get(0).getKey().equals("query")){
+            if(intent.equals("相声")){
+                queryValue = "来一段相声";
+            }else if(intent.equals("儿歌")){
+                queryValue = "来一首儿歌";
+            }
+        }else if(params.get(0).getKey().equals("name")){
+            queryValue = params.get(0).getValue();
+        }
+
+        RequestXimalaya ximalaya = new RequestXimalaya();
+        RequestXimalaya.KeywordsBean keyBean = new RequestXimalaya.KeywordsBean();
+        ximalaya.setDomain("ximalaya");
+        keyBean.setType(intent);
+        keyBean.setNum("1");
+        keyBean.setQuery(queryValue);
+        ximalaya.setKeywords(keyBean);
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        aiApiService.getXimalayaInfo("", ximalaya).enqueue(new Callback<ResponseXimalaya>() {
+            @Override
+            public void onResponse(Call<ResponseXimalaya> call, Response<ResponseXimalaya> response) {
+                if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                    String url = response.body().getData().getTracks().get(0).getUrl();
+                    if(TextUtils.isEmpty(url)){
+                        playTTS("对不起没有找到相关资源");
+                    }else{
+                        EventBus.getDefault().post(new UrlMusicEvent(url));
+                    }
+
+                }else {
+                    playTTS("对不起没有找到相关资源");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseXimalaya> call, Throwable t) {
+                playTTS("没有找到相关领域资源");
             }
         });
     }

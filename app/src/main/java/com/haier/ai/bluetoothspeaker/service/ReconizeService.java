@@ -148,6 +148,8 @@ public class ReconizeService extends Service {
         }
 
         MusicPlayerManager.getInstance().playUrlMusic(event.url);
+
+        waitForWakeup();
     }
     /**
      * 开始语音识别
@@ -233,12 +235,12 @@ public class ReconizeService extends Service {
     /**
      * 进入待唤醒
      */
-    /*public void waitForWakeup(){
+    public void waitForWakeup(){
         Intent intent = new Intent(Const.WAKEUP_TAG);
         sendBroadcast(intent);
 
         EventBus.getDefault().post(new ReconizeStatusEvent("待唤醒"));
-    }*/
+    }
 
     /**
      * 唤醒成功监听

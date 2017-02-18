@@ -21,6 +21,8 @@ import com.haier.ai.bluetoothspeaker.bean.translation.RequestTrans;
 import com.haier.ai.bluetoothspeaker.bean.translation.ResponseTrans;
 import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
 import com.haier.ai.bluetoothspeaker.bean.weather.ResponseAqi;
+import com.haier.ai.bluetoothspeaker.bean.ximalaya.RequestXimalaya;
+import com.haier.ai.bluetoothspeaker.bean.ximalaya.ResponseXimalaya;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -79,4 +81,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseHotline> getHotlineInfo(@Header("accessToken") String accessToken,
                                                 @Body RequestHotline requestHotline);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseXimalaya> getXimalayaInfo(@Header("accessToken") String accessToken,
+                                                 @Body RequestXimalaya requestXimalaya);
 }
