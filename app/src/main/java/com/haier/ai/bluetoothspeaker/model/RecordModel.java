@@ -80,7 +80,7 @@ public class RecordModel {
     private static IAsrRecorder mRecorder;
     private static ITtsPlayer mPlayer;
     private static HttpUtils httpUtils;
-    private static INlu nlu;
+    //private static INlu nlu;
     @IntDef({TYPE_AIR, TYPE_FRIDGE}) @interface ControlType{}
     ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
 
@@ -94,6 +94,7 @@ public class RecordModel {
 
     public RecordModel(){
         // 初始化SDK。可选的返回值通过ErrorCode获取。
+        Log.d(TAG, "RecordModel: constract");
         initSdk();
 
         initNet();
@@ -327,11 +328,11 @@ public class RecordModel {
      */
     public void getNluResult(String asrData){
         // 创建语义理解对象。
-        if(nlu == null){
+        /*if(nlu == null){
             nlu = UbicAI.createNlu(null);
-        }
+        }*/
 
-
+        INlu nlu  = UbicAI.createNlu(null);
         // 创建语义理解回调函数。
         INluCallback cb = new INluCallback() {
 
@@ -439,6 +440,8 @@ public class RecordModel {
         {
             initPlayer();
         }
+
+        mPlayer.stop();
 
         int err;
         //String config = null;
