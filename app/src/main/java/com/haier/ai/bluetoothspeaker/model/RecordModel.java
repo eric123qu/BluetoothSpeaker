@@ -80,7 +80,8 @@ public class RecordModel {
     private static IAsrRecorder mRecorder;
     private static ITtsPlayer mPlayer;
     private static HttpUtils httpUtils;
-    //private static INlu nlu;
+    private static INlu nlu;
+    private static INluCallback cb;
     @IntDef({TYPE_AIR, TYPE_FRIDGE}) @interface ControlType{}
     ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
 
@@ -99,14 +100,65 @@ public class RecordModel {
 
         initNet();
 
-        //add 初始化录音机
+        //add 初始化语音识别
         initRecorder();
+
+        initNlu();
     }
 
     public void initNet(){
         if(httpUtils == null){
             httpUtils = new HttpUtils();
         }
+    }
+
+    private void initNlu(){
+        // 创建语义理解对象。
+        if(nlu == null){
+            nlu = UbicAI.createNlu(null);
+        }
+        //INlu nlu  = UbicAI.createNlu(null);
+        // 创建语义理解回调函数。
+       // INluCallback cb = new INluCallback() {
+        INluCallback cb = new INluCallback() {
+
+            @Override
+            public void onError(int arg0, String arg1) {
+                final String msg = String.format("nlu onError(): errcode = %d, msg = %s", arg0, arg1);
+                //EventBus.getDefault().post(new ReconizeResultEvent("语义理解错误"));
+                //sendReReconizeEvent(true);
+                waitForWakeup();
+            }
+
+            @Override
+            public void onResult(int arg0, String arg1) {
+                // 返回识别结果。
+                final String msg = String.format("nlu onResult(): errcode = %d, msg = %s", arg0, arg1);
+                Log.d(TAG, "onResult: nlu:" + msg);
+
+                /* String tts = parseNluResult(arg1);
+
+                if(TextUtils.isEmpty(tts)){
+                    EventBus.getDefault().post(new NluEvent("语义理解错误"));
+                    waitForWakeup();
+                }else */
+
+                {
+                    //EventBus.getDefault().post(new NluEvent(tts));
+                    Gson gson = new Gson();
+                    boxNluBean resp = gson.fromJson(arg1, boxNluBean.class);
+                    if(resp.getRetCode().equals("00000")){
+                        parseNlpResult(resp);
+                    }else{
+                        showTtsResult("对不起我没理解明白请再说一遍");
+                    }
+                }
+            }
+
+        };
+
+        // 绑定语义理解回调函数。
+        nlu.attach(cb);
     }
 
     public void startRecord(){
@@ -332,7 +384,7 @@ public class RecordModel {
             nlu = UbicAI.createNlu(null);
         }*/
 
-        INlu nlu  = UbicAI.createNlu(null);
+        /*INlu nlu  = UbicAI.createNlu(null);
         // 创建语义理解回调函数。
         INluCallback cb = new INluCallback() {
 
@@ -350,12 +402,12 @@ public class RecordModel {
                 final String msg = String.format("nlu onResult(): errcode = %d, msg = %s", arg0, arg1);
                 Log.d(TAG, "onResult: nlu:" + msg);
 
-                /* String tts = parseNluResult(arg1);
+                *//* String tts = parseNluResult(arg1);
 
                 if(TextUtils.isEmpty(tts)){
                     EventBus.getDefault().post(new NluEvent("语义理解错误"));
                     waitForWakeup();
-                }else */
+                }else *//*
 
                 {
                     //EventBus.getDefault().post(new NluEvent(tts));
@@ -376,7 +428,7 @@ public class RecordModel {
         };
 
         // 绑定语义理解回调函数。
-        nlu.attach(cb);
+        nlu.attach(cb);*/
 
         // 开始识别。保留参数用于识别配置，目前不用填。
         String config = "{\"domain\":\"box\"}";

@@ -50,6 +50,7 @@ public class Receiver extends BroadcastReceiver {
 //                Intent intent1 = new Intent(context, ReconizeService.class);
 //                context.startService(intent1);
 
+                Log.d(TAG, "onReceive: BOOT_COMPLETED");
                 //首次唤醒
                 Const.IS_FIRST_WAKEUP = true;
                 break;
