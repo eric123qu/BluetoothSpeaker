@@ -3,6 +3,8 @@ package com.haier.ai.bluetoothspeaker.net;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.ResponseOilprice;
+import com.haier.ai.bluetoothspeaker.bean.constellation.RequestConstellation;
+import com.haier.ai.bluetoothspeaker.bean.constellation.ResponseConstellation;
 import com.haier.ai.bluetoothspeaker.bean.holiday.RequestHoliday;
 import com.haier.ai.bluetoothspeaker.bean.holiday.ResponseHoliday;
 import com.haier.ai.bluetoothspeaker.bean.hotline.RequestHotline;
@@ -85,4 +87,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseXimalaya> getXimalayaInfo(@Header("accessToken") String accessToken,
                                                  @Body RequestXimalaya requestXimalaya);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseConstellation> getConstellation(@Header("accessToken") String accessToken,
+                                                       @Body RequestConstellation requestConstellation);
 }

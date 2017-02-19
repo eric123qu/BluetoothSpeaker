@@ -14,6 +14,8 @@ import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.ResponseOilprice;
 import com.haier.ai.bluetoothspeaker.bean.box.boxNluBean;
+import com.haier.ai.bluetoothspeaker.bean.constellation.RequestConstellation;
+import com.haier.ai.bluetoothspeaker.bean.constellation.ResponseConstellation;
 import com.haier.ai.bluetoothspeaker.bean.holiday.RequestHoliday;
 import com.haier.ai.bluetoothspeaker.bean.holiday.ResponseHoliday;
 import com.haier.ai.bluetoothspeaker.bean.hotline.RequestHotline;
@@ -668,9 +670,9 @@ public class RecordModel {
             case Const.DOMAIN_TRANSFER:
                 HandlerTransfer(resp);
                 break;
-            case Const.DOMAIN_HOLIDAY:
-                HandlerHolidayQuery(resp);
-                break;
+//            case Const.DOMAIN_HOLIDAY:
+//                HandlerHolidayQuery(resp);
+//                break;
             case Const.DOMAIN_HOTLINE:
                 HandlerHotline(resp);
                 break;
@@ -681,9 +683,9 @@ public class RecordModel {
             case Const.DOMAIN_CROSSTALK:
                 HandlerXimalaya(resp);
                 break;
-//            case Const.DOMAIN_CONTELLATION://星座
-//            HandlerContellation(resp);
-//                break;
+            case Const.DOMAIN_CONTELLATION://星座
+                HandlerContellation(resp);
+                break;
             default:
                 break;
         }
@@ -805,16 +807,15 @@ public class RecordModel {
             @Override
             public void onResponse(Call<ResponseNews> call, Response<ResponseNews> response) {
                 if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
-                    List<ResponseNews.DataBean.NewsBean> list = response.body().getData().getNews();
-                    if(list.size() > 0){
-                       // playTTS(list.get(0).getContent());
-                    }
+                    playTTS(response.body().getData().getNews().get(0).getContent());
+                }else{
+                    playTTS("没有找到相关资源");
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseNews> call, Throwable t) {
-
+                playTTS("没有找到相关资源");
             }
         });
     }
@@ -1353,6 +1354,99 @@ public class RecordModel {
                 playTTS("没有找到相关领域资源");
             }
         });
+    }
+
+    private void HandlerContellation(boxNluBean resp){
+        String date = "today";  //默认今天
+        String constellation = null;
+
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params != null){
+            for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
+                if(param.getKey().equals("constellation")){
+                    constellation = param.getValue();
+                }
+            }
+
+            Log.d(TAG, "HandlerContellation: constellation:" + constellation);
+            if(TextUtils.isEmpty(constellation)){
+                playTTS("我没听清楚您说的");
+            }else{
+                RequestConstellation rest = new RequestConstellation();
+                RequestConstellation.KeywordsBean keyBean = new RequestConstellation.KeywordsBean();
+                rest.setDomain("constellation");
+                keyBean.setType(date);
+                keyBean.setConsName(constellation);
+                rest.setKeywords(keyBean);
+
+                AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+                aiApiService.getConstellation("", rest).enqueue(new Callback<ResponseConstellation>() {
+                    @Override
+                    public void onResponse(Call<ResponseConstellation> call, Response<ResponseConstellation> response) {
+                        if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                            ResponseConstellation.DataEntity data = response.body().getData();
+                            String tts = null;
+
+                            if(data != null){
+                                StringBuilder builder = new StringBuilder();
+                                builder.append(data.getName());
+                                builder.append("综合指数");
+                                builder.append(data.getAll());
+                                builder.append(",");
+
+                                builder.append("幸运色");
+                                builder.append(data.getColor());
+                                builder.append(",");
+
+                                builder.append("健康指数");
+                                builder.append(data.getHealth());
+                                builder.append(",");
+
+                                builder.append("爱情指数");
+                                builder.append(data.getLove());
+                                builder.append(",");
+
+                                builder.append("财运指数");
+                                builder.append(data.getMoney());
+                                builder.append(",");
+
+                                builder.append("幸运数字");
+                                builder.append(data.getNumber());
+                                builder.append(",");
+
+                                builder.append("速配星座");
+                                builder.append(data.getQFriend());
+                                builder.append(",");
+
+                                builder.append("工作指数");
+                                builder.append(data.getWork());
+                                builder.append(",");
+
+                                builder.append("今日运势概述");
+                                builder.append(data.getSummary());
+                                builder.append(",");
+
+                                tts = builder.toString();
+                                Log.d(TAG, "onResponse: HandlerContellation :" + tts);
+                            }
+
+                            playTTS(tts);
+                        }else {
+                            Log.e(TAG, "onResponse: HandlerContellation");
+                            playTTS("对不起没有找到相关资源");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseConstellation> call, Throwable t) {
+                        playTTS("对不起我没找到相关资源");
+                        Log.e(TAG, "onFailure: HandlerContellation");
+                    }
+                });
+            }
+
+
+        }
     }
 
     /**
