@@ -21,6 +21,7 @@ import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
 import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
 import com.haier.ai.bluetoothspeaker.bean.stock.RequestStock;
 import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock;
+import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock1;
 import com.haier.ai.bluetoothspeaker.bean.translation.RequestTrans;
 import com.haier.ai.bluetoothspeaker.bean.translation.ResponseTrans;
 import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
@@ -97,4 +98,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseCalendar> getCalendarInfo(@Header("accessToken") String accessToken,
                                                    @Body RequestCalendar requestCalendar);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseStock1> getStockInfo1(@Header("accessToken") String accessToken,
+                                              @Body RequestStock requestStock);
 }

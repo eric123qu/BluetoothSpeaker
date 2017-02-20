@@ -32,6 +32,7 @@ import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
 import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
 import com.haier.ai.bluetoothspeaker.bean.stock.RequestStock;
 import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock;
+import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock1;
 import com.haier.ai.bluetoothspeaker.bean.translation.RequestTrans;
 import com.haier.ai.bluetoothspeaker.bean.translation.ResponseTrans;
 import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
@@ -676,7 +677,7 @@ public class RecordModel {
                 HandlerWeekEvent();
                 break;
             case Const.DOMAIN_STOCK:
-                HandlerStock();
+                HandlerStock(resp);
                 break;
             case Const.DOMAIN_TRANSFER:
                 HandlerTransfer(resp);
@@ -1111,52 +1112,128 @@ public class RecordModel {
         });
     }
 
-    private void HandlerStock(){
+    private void HandlerStock(boxNluBean resp){
+        //1.大盘指数 2.个股
+        String queryValue = null;
+        String shareValue = null;
+
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+
+        for(boxNluBean.DataBean.SemanticBean.ParasBean param : params) {
+            if (param.getKey().equals("query")) {
+                queryValue = param.getValue();
+            }
+
+            if(param.getKey().equals("shares")){
+                shareValue = param.getValue();
+            }
+        }
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
         RequestStock stock = new RequestStock();
         stock.setDomain("stock");
         RequestStock.KeywordsBean keyworksBean = new RequestStock.KeywordsBean();
-        keyworksBean.setType("0");//0代表上证指数，1代表深证指数
-        keyworksBean.setGid("");
-        stock.setKeywords(keyworksBean);
+        if(!TextUtils.isEmpty(queryValue)){
+            keyworksBean.setType("0");//0代表上证指数，1代表深证指数
+            keyworksBean.setGid("");
+            stock.setKeywords(keyworksBean);
 
-        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
-        aiApiService.getStockInfo("", stock).enqueue(new Callback<ResponseStock>() {
-            @Override
-            public void onResponse(Call<ResponseStock> call, Response<ResponseStock> response) {
-                Log.d(TAG, "onResponse: " + response.body());
-                if(Const.RET_CODE_SUCESS.equals(response.body().getRetCode())){
-                    ResponseStock.DataBean resp = response.body().getData();
 
-                    StringBuilder ttsStock = new StringBuilder();
-                    ttsStock.append(resp.getName());
-                    ttsStock.append("当前指数");
-                    ttsStock.append(resp.getNowpri());
-                    ttsStock.append(",");
+            aiApiService.getStockInfo("", stock).enqueue(new Callback<ResponseStock>() {
+                @Override
+                public void onResponse(Call<ResponseStock> call, Response<ResponseStock> response) {
+                    Log.d(TAG, "onResponse: " + response.body());
+                    if(Const.RET_CODE_SUCESS.equals(response.body().getRetCode())){
+                        ResponseStock.DataBean resp = response.body().getData();
 
-                    ttsStock.append("开盘指数");
-                    ttsStock.append(resp.getOpenPri());
-                    ttsStock.append(",");
+                        StringBuilder ttsStock = new StringBuilder();
+                        ttsStock.append(resp.getName());
+                        ttsStock.append("当前指数");
+                        ttsStock.append(resp.getNowpri());
+                        ttsStock.append(",");
 
-                    ttsStock.append("最高点");
-                    ttsStock.append(resp.getHighPri());
-                    ttsStock.append(",");
+                        ttsStock.append("开盘指数");
+                        ttsStock.append(resp.getOpenPri());
+                        ttsStock.append(",");
 
-                    ttsStock.append("最低点");
-                    ttsStock.append(resp.getLowpri());
-                    ttsStock.append(",");
+                        ttsStock.append("最高点");
+                        ttsStock.append(resp.getHighPri());
+                        ttsStock.append(",");
 
-                    Log.d(TAG, "ttsstock:" + ttsStock.toString());
-                    playTTS(ttsStock.toString());
+                        ttsStock.append("最低点");
+                        ttsStock.append(resp.getLowpri());
+                        ttsStock.append(",");
+
+                        Log.d(TAG, "ttsstock:" + ttsStock.toString());
+                        playTTS(ttsStock.toString());
+                    }
+
+
                 }
 
+                @Override
+                public void onFailure(Call<ResponseStock> call, Throwable t) {
+                    Log.e(TAG, "onFailure: HandlerStock");
+                    playTTS("没有查找到");
+                }
+            });
+        }
 
-            }
+        if(!TextUtils.isEmpty(shareValue)){
+            keyworksBean.setType("");//0代表上证指数，1代表深证指数
+            keyworksBean.setGid(shareValue);
+            stock.setKeywords(keyworksBean);
 
-            @Override
-            public void onFailure(Call<ResponseStock> call, Throwable t) {
-                Log.e(TAG, "onFailure: HandlerStock");
-            }
-        });
+            aiApiService.getStockInfo1("", stock).enqueue(new Callback<ResponseStock1>() {
+                @Override
+                public void onResponse(Call<ResponseStock1> call, Response<ResponseStock1> response) {
+                    if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)) {
+                        ResponseStock1.DataBean data = response.body().getData();
+
+                        StringBuilder builder = new StringBuilder();
+                        builder.append(data.getName());
+                        builder.append("当前价格");
+                        builder.append(data.getNowPic());
+                        builder.append(",");
+
+                        builder.append("开盘价");
+                        builder.append(data.getTodayStartPri());
+                        builder.append(",");
+
+                        builder.append("今日最低价");
+                        builder.append(data.getTodayMin());
+                        builder.append(",");
+
+                        builder.append("今日最高价");
+                        builder.append(data.getTodayMax());
+                        builder.append(",");
+
+                        builder.append("成交量");
+                        builder.append(data.getTraNumber());
+                        builder.append(",");
+
+                        builder.append("成交金额");
+                        builder.append(data.getTraAmount());
+                        builder.append(",");
+
+                        String tts = builder.toString();
+                        Log.d(TAG, "onResponse: stock1 tts:" + tts);
+                        playTTS(tts);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseStock1> call, Throwable t) {
+                    Log.e(TAG, "onFailure: HandlerStock1");
+                    playTTS("没有查找到");
+                }
+            });
+        }
+
+
+
+
+
     }
 
     private void HandlerTransfer(boxNluBean resp){
