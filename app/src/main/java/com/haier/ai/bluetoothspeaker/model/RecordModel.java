@@ -1224,7 +1224,7 @@ public class RecordModel {
     private void HandlerHotline(boxNluBean resp){
         List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
         if(params != null){
-            if(params.get(0).equals("number")){
+            if(params.get(0).getKey().equals("number")){
                 String value = params.get(0).getValue();
                 if(TextUtils.isEmpty(value)){
                     playTTS("对不起没有查询到");
