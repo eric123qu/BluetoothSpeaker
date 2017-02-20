@@ -22,6 +22,7 @@ import com.haier.ai.bluetoothspeaker.event.WakeupEvent;
 import com.haier.ai.bluetoothspeaker.manager.MusicPlayerManager;
 import com.haier.ai.bluetoothspeaker.manager.WakeupEventManager;
 import com.haier.ai.bluetoothspeaker.model.RecordModel;
+import com.haierubic.ai.TtsPlayerStatus;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -116,6 +117,11 @@ public class ReconizeService extends Service {
         //正在播放歌曲等，则打断
         if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PLAYING){
             MusicPlayerManager.getInstance().stopMusic();
+        }
+
+        //正播放tts 则打断
+        if(Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_PLAY){
+            RecordModel.getInstance().stopRecord();
         }
 
         playLocalAudio(TYPE_WAKEUP, initWakeupListener());

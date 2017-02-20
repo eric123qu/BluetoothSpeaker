@@ -27,10 +27,10 @@ public class ApplianceDefine {
      */
     public static final byte DEV_UNKNOW = 0x00;
     public static final byte DEV_WIFI = 0x01;
-    public static final byte DEV_60 = 0x02;
+    //public static final byte DEV_60 = 0x02;
     public static final byte DEV_SMARTCARE = 0x03;
     public static final byte DEV_INFRARED = 0x04;               //红外报警
-    public static final byte DEV_SPEAKER = 0x05;                //音箱
+    public static final byte DEV_SPEAKER = 0x02;                //音箱
     public static final byte DEV_BOX = 0x18;                //音箱音乐
 
     /**

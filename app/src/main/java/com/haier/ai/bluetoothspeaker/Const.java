@@ -1,5 +1,7 @@
 package com.haier.ai.bluetoothspeaker;
 
+import com.haierubic.ai.TtsPlayerStatus;
+
 /**
  * author: qu
  * date: 16-11-7
@@ -88,4 +90,6 @@ public class Const {
     public static boolean IS_FIRST_WAKEUP;                  //是否首次唤醒
 
     public static int register_wakeup = 0;
+
+    public static int TTS_PLAY_STATUS = TtsPlayerStatus.TTS_PLAYER_STATUS_IDLE; //tts 状态
 }

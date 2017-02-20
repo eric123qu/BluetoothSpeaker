@@ -340,7 +340,7 @@ public class ProtocolManager {
         }
 
         //设备类型(1 byte)
-        tmpDatas[arrayLen++] = ApplianceDefine.GENERAL_UNKNOW;
+        tmpDatas[arrayLen++] = ApplianceDefine.DEV_SPEAKER;
 
         //设备种类(1 byte)
         //origin_type = control.getOriginType();
@@ -459,9 +459,11 @@ public class ProtocolManager {
             byte devType = data[i++];
             if(devType == ApplianceDefine.DEV_WIFI){
                 recvControlBean.setDevType("wifi家电");
-            }else if(devType == ApplianceDefine.DEV_60){
-                recvControlBean.setDevType("60开关");
-            }else if(devType == ApplianceDefine.DEV_SMARTCARE){
+            }
+//            else if(devType == ApplianceDefine.DEV_60){
+//                recvControlBean.setDevType("60开关");
+//            }
+            else if(devType == ApplianceDefine.DEV_SMARTCARE){
                 recvControlBean.setDevType("SmartCare");
             }else if(devType == ApplianceDefine.DEV_UNKNOW){
                 recvControlBean.setDevType("未知");

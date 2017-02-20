@@ -6,9 +6,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.haier.ai.bluetoothspeaker.manager.SpeakerBluetoothManager;
-import com.haier.ai.bluetoothspeaker.thread.AcceptThread;
-
 /**
  * author: qu
  * date: 16-11-7
@@ -39,8 +36,8 @@ public class BluetoothService extends Service {
     }
 
     private void startAcceptThread(){
-        AcceptThread thread = new AcceptThread(SpeakerBluetoothManager.getInstance().getBluetoothAdapter());
-        thread.start();
+//        AcceptThread thread = new AcceptThread(SpeakerBluetoothManager.getInstance().getBluetoothAdapter());
+//        thread.start();
     }
 
     @Override

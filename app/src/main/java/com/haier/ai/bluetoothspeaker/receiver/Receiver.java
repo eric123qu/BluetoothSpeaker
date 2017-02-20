@@ -13,6 +13,8 @@ import com.haier.ai.bluetoothspeaker.manager.LightManager;
 import com.haier.ai.bluetoothspeaker.manager.SpeakerAlarmManager;
 import com.haier.ai.bluetoothspeaker.manager.WifiDevManager;
 import com.haier.ai.bluetoothspeaker.service.BluetoothService;
+import com.haier.ai.bluetoothspeaker.service.ReconizeService;
+import com.haier.ai.bluetoothspeaker.service.WakeupService;
 import com.haier.ai.bluetoothspeaker.ui.ClockAlarmActivity;
 
 import static com.baidu.speech.EventManagerFactory.TAG;
@@ -41,14 +43,14 @@ public class Receiver extends BroadcastReceiver {
                 /**
                  * 唤醒服务
                  */
-//                Intent wakeupService = new Intent(context, WakeupService.class);
-//                context.startService(wakeupService);
+                Intent wakeupService = new Intent(context, WakeupService.class);
+                context.startService(wakeupService);
 
                 /**
                  * 语音识别
                  */
-//                Intent intent1 = new Intent(context, ReconizeService.class);
-//                context.startService(intent1);
+                Intent intent1 = new Intent(context, ReconizeService.class);
+                context.startService(intent1);
 
                 Log.d(TAG, "onReceive: BOOT_COMPLETED");
                 //首次唤醒

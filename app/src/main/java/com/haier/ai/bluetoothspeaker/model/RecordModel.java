@@ -187,9 +187,11 @@ public class RecordModel {
 
     public void stopRecord(){
         Log.d(TAG, "stopRecord: ");
-
+        if(mPlayer != null){
+            mPlayer.stop();
+        }
         // 通过initOk()函数可以检测SDK的初始化状态。
-        if (UbicAI.initOk() != ErrorCode.UAI_ERR_NONE) {
+       /* if (UbicAI.initOk() != ErrorCode.UAI_ERR_NONE) {
             Log.d(TAG, "stopRecord: sdk is not init");
             return;
         }
@@ -213,7 +215,7 @@ public class RecordModel {
         }catch(Exception e){
             e.printStackTrace();
         }
-
+*/
         Log.d(TAG, "stop recorder end.");
     }
 
@@ -544,6 +546,7 @@ public class RecordModel {
             @Override
             public void onEvent(int arg0, int arg1) {
                 Log.e(TAG, "onEvent: " + String.format("onEvent(): errcode = %d, param = %d", arg0, arg1));
+                Const.TTS_PLAY_STATUS = arg0;
             }
 
             @Override
