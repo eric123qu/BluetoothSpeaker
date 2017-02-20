@@ -121,7 +121,7 @@ public class ReconizeService extends Service {
 
         //正播放tts 则打断
         if(Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_PLAY){
-            RecordModel.getInstance().stopRecord();
+            RecordModel.getInstance().stopPlayTTs();
         }
 
         playLocalAudio(TYPE_WAKEUP, initWakeupListener());
