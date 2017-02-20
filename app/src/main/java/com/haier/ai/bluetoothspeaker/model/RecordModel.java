@@ -14,6 +14,8 @@ import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.ResponseOilprice;
 import com.haier.ai.bluetoothspeaker.bean.box.boxNluBean;
+import com.haier.ai.bluetoothspeaker.bean.calendar.RequestCalendar;
+import com.haier.ai.bluetoothspeaker.bean.calendar.ResponseCalendar;
 import com.haier.ai.bluetoothspeaker.bean.constellation.RequestConstellation;
 import com.haier.ai.bluetoothspeaker.bean.constellation.ResponseConstellation;
 import com.haier.ai.bluetoothspeaker.bean.holiday.RequestHoliday;
@@ -679,9 +681,9 @@ public class RecordModel {
             case Const.DOMAIN_TRANSFER:
                 HandlerTransfer(resp);
                 break;
-//            case Const.DOMAIN_HOLIDAY:
-//                HandlerHolidayQuery(resp);
-//                break;
+            case Const.DOMAIN_HOLIDAY:
+                HandlerHolidayQuery(resp);
+                break;
             case Const.DOMAIN_HOTLINE:
                 HandlerHotline(resp);
                 break;
@@ -694,6 +696,9 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_CONTELLATION://星座
                 HandlerContellation(resp);
+                break;
+            case Const.DOMAIN_CALENDAR:
+                HandlerCalendar();
                 break;
             default:
                 break;
@@ -728,7 +733,21 @@ public class RecordModel {
 
         if(!TextUtils.isEmpty(queryValue)){//随机播放
 
-        }else if(!TextUtils.isEmpty(musicValue)){//歌曲
+        }
+
+        if(!TextUtils.isEmpty(musicValue)) {//歌曲
+            keywordsEntity.setSong(musicValue);
+        }
+
+        if(!TextUtils.isEmpty(albumValue)) {//专辑
+            keywordsEntity.setAlbum(albumValue);
+        }
+
+        if(!TextUtils.isEmpty(singerValue)){
+            keywordsEntity.setSinger(singerValue);
+        }
+
+        /*else if(!TextUtils.isEmpty(musicValue)){//歌曲
             keywordsEntity.setSong(musicValue);
             if(!TextUtils.isEmpty(singerValue)){
                 keywordsEntity.setSinger(singerValue);
@@ -738,7 +757,7 @@ public class RecordModel {
             if(!TextUtils.isEmpty(singerValue)){
                 keywordsEntity.setSinger(singerValue);
             }
-        }
+        }else*/
 
         requestMusic.setKeywords(keywordsEntity);
 
@@ -949,7 +968,8 @@ public class RecordModel {
         String second = null;
 
         String program = null;  //收看电视节目 天下足球，新闻联播
-
+        String response = resp.getData().getSemantic().getResponse();
+        playTTS(response);
         List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
 
         for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
@@ -1458,6 +1478,37 @@ public class RecordModel {
         }
     }
 
+    private void HandlerCalendar(){
+        final RequestCalendar requestCalendar = new RequestCalendar();
+        RequestCalendar.KeywordsBean keywordsBean = new RequestCalendar.KeywordsBean();
+        requestCalendar.setDomain("calendar");
+        requestCalendar.setKeywords(keywordsBean);
+
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        aiApiService.getCalendarInfo("", requestCalendar).enqueue(new Callback<ResponseCalendar>() {
+            @Override
+            public void onResponse(Call<ResponseCalendar> call, Response<ResponseCalendar> response) {
+                if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                    ResponseCalendar.DataBean data = response.body().getData();
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(data.getLunarYear());
+                    builder.append(data.getLunar());
+                    String tts = builder.toString();
+                    Log.d(TAG, "onResponse: HandlerCalendar" + tts);
+                    playTTS(tts);
+
+                }else {
+                    playTTS("对不起没有找到相关资源");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseCalendar> call, Throwable t) {
+                Log.e(TAG, "onFailure: HandlerCalendar");
+                playTTS("对不起没有找到相关资源");
+            }
+        });
+    }
     /**
      * 当前日期
      */
