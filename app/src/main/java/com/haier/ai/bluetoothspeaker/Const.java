@@ -65,7 +65,7 @@ public class Const {
 
     public static final String DOMAIN_TRANSFER = "com_transfer";          //翻译
 
-    public static final String DOMAIN_HOLIDAY = "com_constellation";    //节假日
+    public static final String DOMAIN_HOLIDAY = "com_holiday";    //节假日
 
     public static final String DOMAIN_HOTLINE = "com_hotline";    //热线
 
@@ -74,6 +74,8 @@ public class Const {
     public static final String DOMAIN_CROSSTALK = "com_crosstalk";    //相声
 
     public static final String DOMAIN_CHILD = "com_child";    //儿歌
+
+    public static final String DOMAIN_CALENDAR = "com_calendar";    //农历
 
     public static final String TTS_REPLY_ERROR = "对不起，我没听清楚";
     /**

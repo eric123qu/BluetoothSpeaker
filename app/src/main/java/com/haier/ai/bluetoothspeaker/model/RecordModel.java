@@ -129,6 +129,7 @@ public class RecordModel {
                 final String msg = String.format("nlu onError(): errcode = %d, msg = %s", arg0, arg1);
                 //EventBus.getDefault().post(new ReconizeResultEvent("语义理解错误"));
                 //sendReReconizeEvent(true);
+//                LightManager.getInstance().lightNormal();
                 waitForWakeup();
             }
 
@@ -138,6 +139,7 @@ public class RecordModel {
                 final String msg = String.format("nlu onResult(): errcode = %d, msg = %s", arg0, arg1);
                 Log.d(TAG, "onResult: nlu:" + msg);
 
+//                LightManager.getInstance().lightNormal();
                 /* String tts = parseNluResult(arg1);
 
                 if(TextUtils.isEmpty(tts)){
@@ -188,6 +190,7 @@ public class RecordModel {
             return;
         }
 
+        //LightManager.getInstance().lightRecognize();
         Log.d(TAG, "startRecord: start recorder end.");
     }
 

@@ -15,6 +15,8 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.baidu.speech.EventManagerFactory.TAG;
+
 public class
 SocketService extends Service {
     // 声明一个服务器端socket
@@ -83,6 +85,7 @@ SocketService extends Service {
                         // 调用阻塞式方法来获取客户端连接的socket
                         if(serverSocket != null) {
                             socket = serverSocket.accept();
+                            Log.d(TAG, "run: =====serverSocket accept");
                             //client连接，读取data
                             if (socket != null) {
                                 AcceptClientThread clientThread = new AcceptClientThread(socket);
@@ -129,6 +132,7 @@ SocketService extends Service {
             int temp;
             // 获取客户端socket的输入流
             InputStream inputStream = null;
+            Log.d(TAG, "run: AcceptClientThread start");
             try {
                 inputStream = mSocket.getInputStream();
                 // 读取客户端socket的输入流的内容并输出

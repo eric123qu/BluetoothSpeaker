@@ -124,6 +124,8 @@ public class ReconizeService extends Service {
             RecordModel.getInstance().stopPlayTTs();
         }
 
+        //灯光显示
+        //LightManager.getInstance().lightWakeup();
         playLocalAudio(TYPE_WAKEUP, initWakeupListener());
     }
 

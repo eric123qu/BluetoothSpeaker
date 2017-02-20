@@ -440,6 +440,7 @@ public class ProtocolManager {
      * @return
      */
     public int parseProtocol(byte [] data, int length){
+        Log.d(TAG, "parseProtocol: ");
         RecvControlBean recvControlBean = new RecvControlBean();
         //判读包头及包尾，确定是一个完整包
         if(data[0] !=header || data[1]!=header || data[length-1]!=end){
