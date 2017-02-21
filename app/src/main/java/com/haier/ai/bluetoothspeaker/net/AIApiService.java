@@ -25,7 +25,9 @@ import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock1;
 import com.haier.ai.bluetoothspeaker.bean.translation.RequestTrans;
 import com.haier.ai.bluetoothspeaker.bean.translation.ResponseTrans;
 import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
+import com.haier.ai.bluetoothspeaker.bean.weather.RequestWeather;
 import com.haier.ai.bluetoothspeaker.bean.weather.ResponseAqi;
+import com.haier.ai.bluetoothspeaker.bean.weather.ResponseWeather;
 import com.haier.ai.bluetoothspeaker.bean.ximalaya.RequestXimalaya;
 import com.haier.ai.bluetoothspeaker.bean.ximalaya.ResponseXimalaya;
 
@@ -102,4 +104,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseStock1> getStockInfo1(@Header("accessToken") String accessToken,
                                               @Body RequestStock requestStock);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseWeather> getWeatherInfo(@Header("accessToken") String accessToken,
+                                               @Body RequestWeather requestWeather);
 }

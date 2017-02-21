@@ -6,9 +6,10 @@ package com.haier.ai.bluetoothspeaker.bean.weather;
 
 public class RequestWeather {
 
+
     /**
-     * domain : aqi
-     * keywords : {"date":"2017-01-20","city":"北京"}
+     * domain : weather
+     * keywords : {"city":"北京","date":""}
      */
 
     private String domain;
@@ -32,20 +33,12 @@ public class RequestWeather {
 
     public static class KeywordsBean {
         /**
-         * date : 2017-01-20
          * city : 北京
+         * date :
          */
 
-        private String date;
         private String city;
-
-        public String getDate() {
-            return date;
-        }
-
-        public void setDate(String date) {
-            this.date = date;
-        }
+        private String date;
 
         public String getCity() {
             return city;
@@ -53,6 +46,14 @@ public class RequestWeather {
 
         public void setCity(String city) {
             this.city = city;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
         }
     }
 }

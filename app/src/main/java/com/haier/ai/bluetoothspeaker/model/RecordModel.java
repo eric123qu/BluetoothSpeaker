@@ -36,7 +36,9 @@ import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock1;
 import com.haier.ai.bluetoothspeaker.bean.translation.RequestTrans;
 import com.haier.ai.bluetoothspeaker.bean.translation.ResponseTrans;
 import com.haier.ai.bluetoothspeaker.bean.weather.RequestAqi;
+import com.haier.ai.bluetoothspeaker.bean.weather.RequestWeather;
 import com.haier.ai.bluetoothspeaker.bean.weather.ResponseAqi;
+import com.haier.ai.bluetoothspeaker.bean.weather.ResponseWeather;
 import com.haier.ai.bluetoothspeaker.bean.ximalaya.RequestXimalaya;
 import com.haier.ai.bluetoothspeaker.bean.ximalaya.ResponseXimalaya;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
@@ -889,7 +891,7 @@ public class RecordModel {
         });
     }
 
-    private void getWeatherInfo(String date, String city, String intent){ //北京，青岛
+    private void getWeatherInfo(String date, String city, final String intent){ //北京，青岛
         if(TextUtils.isEmpty(intent)){
             waitForWakeup();
 
@@ -901,9 +903,11 @@ public class RecordModel {
         }
 
         AIApiService aiApiService = RetrofitApiManager.getAiApiService();
-        RequestAqi aqi = new RequestAqi();
-        RequestAqi.KeywordsBean keyBean = new RequestAqi.KeywordsBean();
+
         if(intent.contains("质量")){ //查询空气质量
+            RequestAqi aqi = new RequestAqi();
+            RequestAqi.KeywordsBean keyBean = new RequestAqi.KeywordsBean();
+
             aqi.setDomain("aqi");
             if(!TextUtils.isEmpty(date)){
                 keyBean.setDate(date);
@@ -955,7 +959,75 @@ public class RecordModel {
             });
 
         }else{ //天气预报
+            RequestWeather requestWeather = new RequestWeather();
+            RequestWeather.KeywordsBean keywordsBean = new RequestWeather.KeywordsBean();
 
+            requestWeather.setDomain("weather");
+            keywordsBean.setCity(city);
+            if(TextUtils.isEmpty(date)){
+                keywordsBean.setDate("");
+            }else if(date.equals("今天")){
+                keywordsBean.setDate("");
+            }else if(date.equals("明天")){
+
+            }else if(date.equals("后天")){
+
+            }
+
+            requestWeather.setKeywords(keywordsBean);
+            aiApiService.getWeatherInfo("", requestWeather).enqueue(new Callback<ResponseWeather>() {
+                @Override
+                public void onResponse(Call<ResponseWeather> call, Response<ResponseWeather> response) {
+                    if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                        ResponseWeather.DataBean data = response.body().getData();
+
+                        StringBuilder builder = new StringBuilder();
+                        builder.append(data.getCity());
+                        builder.append("温度");
+                        builder.append(data.getTemperature());
+                        builder.append("摄氏度,");
+
+                        builder.append("湿度");
+                        builder.append(data.getHumidity());
+                        builder.append(",");
+
+                        builder.append(data.getWinddirect());
+                        builder.append(data.getWindpower());
+                        builder.append(",");
+
+                        builder.append(data.getZiwanxian());
+                        builder.append(",");
+//                        if(intent.equals("穿衣指数") || intent.equals("天气查询"))
+                        {
+                            builder.append("穿衣指数");
+                            builder.append(data.getChuanyi());
+                            builder.append(",");
+                        }
+//                        else if(intent.equals("洗车指数") || intent.equals("天气查询"))
+                        {
+                            builder.append("洗车指数");
+                            builder.append(data.getXiche());
+                            builder.append(",");
+                        }
+
+                        builder.append("运动指数");
+                        builder.append(data.getYundong());
+                        builder.append(",");
+
+                        String ttsWeather = builder.toString();
+                        Log.d(TAG, "onResponse: ttsweather:" + ttsWeather);
+                        playTTS(ttsWeather);
+                    }else{
+                        playTTS("网络出状况了");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseWeather> call, Throwable t) {
+                    Log.e(TAG, "onFailure: weather");
+                    playTTS("网络出状况了");
+                }
+            });
         }
     }
 
