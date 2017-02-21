@@ -19,6 +19,7 @@ import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
 import com.haier.ai.bluetoothspeaker.event.WakeupEvent;
+import com.haier.ai.bluetoothspeaker.manager.LightManager;
 import com.haier.ai.bluetoothspeaker.manager.MusicPlayerManager;
 import com.haier.ai.bluetoothspeaker.manager.WakeupEventManager;
 import com.haier.ai.bluetoothspeaker.model.RecordModel;
@@ -125,7 +126,7 @@ public class ReconizeService extends Service {
         }
 
         //灯光显示
-        //LightManager.getInstance().lightWakeup();
+        LightManager.getInstance().lightWakeup();
         playLocalAudio(TYPE_WAKEUP, initWakeupListener());
     }
 

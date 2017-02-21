@@ -9,6 +9,7 @@ package com.haier.ai.bluetoothspeaker.manager;
 public class LightManager {
     private final String TAG = "LightManager";
     public static LightManager sLightManager;
+    //public static JNI sLightJni;
     private final int LIGHT_STATE_NET_CONFIG = 1;
     private final int LIGHT_STATE_NET_DISCONNECT = 2;
     private final int LIGHT_STATE_NORMAL = 3;
@@ -21,7 +22,7 @@ public class LightManager {
 
     /**
      *
-     * @param cmd
+     * @param
      *  // 1,蓝色闪烁20hz 配对模式
     // 2,红色闪烁20hz 网络断开
     // 3,绿色常亮 运行状态
@@ -31,17 +32,21 @@ public class LightManager {
 
      * @return
      */
-    public native String notifyLightCtrl(int cmd);
-    public native int notifyLightInit();
+    public static native String notifyLightCtrl(int cmd);
+    public static native int notifyLightInit();
+    public static native int lightInit();
 
     public LightManager(){
         notifyLightInit();
+        //sLightJni = new JNI();
     }
 
     public static LightManager getInstance(){
         if(sLightManager == null){
             sLightManager = new LightManager();
         }
+
+        //sLightJni.notifyLightInit();
 
         return sLightManager;
     }
@@ -111,5 +116,9 @@ public class LightManager {
      */
     public void lightRecognize(){
         notifyLightCtrl(LIGHT_STATE_RECOGNIZE);
+    }
+
+    public void bootLightShow(){
+        lightInit();
     }
 }
