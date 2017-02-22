@@ -46,6 +46,7 @@ import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
+import com.haier.ai.bluetoothspeaker.manager.LightManager;
 import com.haier.ai.bluetoothspeaker.manager.MusicPlayerManager;
 import com.haier.ai.bluetoothspeaker.manager.ProtocolManager;
 import com.haier.ai.bluetoothspeaker.manager.RetrofitApiManager;
@@ -66,6 +67,7 @@ import com.lidroid.xutils.HttpUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -134,7 +136,7 @@ public class RecordModel {
                 final String msg = String.format("nlu onError(): errcode = %d, msg = %s", arg0, arg1);
                 //EventBus.getDefault().post(new ReconizeResultEvent("语义理解错误"));
                 //sendReReconizeEvent(true);
-//                LightManager.getInstance().lightNormal();
+                LightManager.getInstance().lightNormal();
                 waitForWakeup();
             }
 
@@ -144,7 +146,7 @@ public class RecordModel {
                 final String msg = String.format("nlu onResult(): errcode = %d, msg = %s", arg0, arg1);
                 Log.d(TAG, "onResult: nlu:" + msg);
 
-//                LightManager.getInstance().lightNormal();
+                LightManager.getInstance().lightNormal();
                 /* String tts = parseNluResult(arg1);
 
                 if(TextUtils.isEmpty(tts)){
@@ -195,7 +197,7 @@ public class RecordModel {
             return;
         }
 
-        //LightManager.getInstance().lightRecognize();
+        LightManager.getInstance().lightRecognize();
         Log.d(TAG, "startRecord: start recorder end.");
     }
 
@@ -703,6 +705,9 @@ public class RecordModel {
             case Const.DOMAIN_CALENDAR:
                 HandlerCalendar();
                 break;
+            case Const.DOMAIN_CALCULATOR:
+                playTTS(resp.getData().getSemantic().getResponse());
+                break;
             default:
                 break;
         }
@@ -771,19 +776,20 @@ public class RecordModel {
                     final String url = response.body().getData().getUrl();
                     Log.d(TAG, "music url :" + url);
                     if(TextUtils.isEmpty(url)){
-                        playTTS("对不起没有找到相关资源");
+                        playNoResourceTTS();
                     }else
                         EventBus.getDefault().post(new UrlMusicEvent(url));
                 }else {
-                    playTTS("对不起没有找到相关资源");
+                    playNoResourceTTS();
+                    Log.e(TAG, "onFailure: music:net error");
                 }
 
             }
 
             @Override
             public void onFailure(Call<ResponseMusic> call, Throwable t) {
-                Log.d(TAG, "onFailure: ");
-                playTTS("对不起没有找到相关资源");
+                Log.e(TAG, "onFailure: music");
+                playNoResourceTTS();
             }
         });
     }
@@ -840,13 +846,15 @@ public class RecordModel {
                 if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
                     playTTS(response.body().getData().getNews().get(0).getContent());
                 }else{
-                    playTTS("没有找到相关资源");
+                    Log.e(TAG, "onResponse: getNewsContent,new error");
+                    playNoResourceTTS();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseNews> call, Throwable t) {
-                playTTS("没有找到相关资源");
+                playNoResourceTTS();
+                Log.e(TAG, "onFailure: getNewsContent");
             }
         });
     }
@@ -886,7 +894,8 @@ public class RecordModel {
 
             @Override
             public void onFailure(Call<ResponseLimit> call, Throwable t) {
-
+                playNoResourceTTS();
+                Log.e(TAG, "onFailure: getLimitContent");
             }
         });
     }
@@ -948,13 +957,15 @@ public class RecordModel {
                         Log.d(TAG, "onResponse: aqi:" + tts);
                         playTTS(tts);
                     }else{
-                        playTTS("查询失败");
+                        playNoResourceTTS();
+                        Log.e(TAG, "onResponse: getWeatherInfo: net error");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseAqi> call, Throwable t) {
-                    playTTS("对不起我没有查到");
+                    playNoResourceTTS();
+                    Log.e(TAG, "onFailure: getWeatherInfo");
                 }
             });
 
@@ -982,50 +993,63 @@ public class RecordModel {
                         ResponseWeather.DataBean data = response.body().getData();
 
                         StringBuilder builder = new StringBuilder();
-                        builder.append(data.getCity());
-                        builder.append("温度");
-                        builder.append(data.getTemperature());
-                        builder.append("摄氏度,");
+                        if(intent.contains("天气查询")) {
+                            builder.append(data.getCity());
+                            builder.append("温度");
+                            builder.append(data.getTemperature());
+                            builder.append("摄氏度,");
 
-                        builder.append("湿度");
-                        builder.append(data.getHumidity());
-                        builder.append(",");
+                            builder.append("湿度");
+                            builder.append(data.getHumidity());
+                            builder.append(",");
 
-                        builder.append(data.getWinddirect());
-                        builder.append(data.getWindpower());
-                        builder.append(",");
+                            builder.append(data.getWinddirect());
+                            builder.append(data.getWindpower());
+                            builder.append(",");
 
-                        builder.append(data.getZiwanxian());
-                        builder.append(",");
-//                        if(intent.equals("穿衣指数") || intent.equals("天气查询"))
-                        {
+                            builder.append(data.getZiwanxian());
+                            builder.append(",");
+                        }else if(intent.contains("穿衣指数")){
                             builder.append("穿衣指数");
                             builder.append(data.getChuanyi());
                             builder.append(",");
-                        }
-//                        else if(intent.equals("洗车指数") || intent.equals("天气查询"))
-                        {
+                        } else if(intent.contains("洗车指数")){
                             builder.append("洗车指数");
                             builder.append(data.getXiche());
                             builder.append(",");
+                        } else if(intent.contains("运动指数")){
+                            builder.append("运动指数");
+                            builder.append(data.getYundong());
+                            builder.append(",");
+                        }else if(intent.contains("感冒指数")){
+                            builder.append("感冒指数");
+                            builder.append(data.getGanmao());
+                            builder.append(",");
+                        }else if(intent.contains("空调指数")){
+                            builder.append("空调指数");
+                            builder.append(data.getKongtiao());
+                            builder.append(",");
+                        }else if(intent.contains("污染指数")){
+                            builder.append("污染指数");
+                            builder.append(data.getWuran());
+                            builder.append(",");
                         }
 
-                        builder.append("运动指数");
-                        builder.append(data.getYundong());
-                        builder.append(",");
+
 
                         String ttsWeather = builder.toString();
                         Log.d(TAG, "onResponse: ttsweather:" + ttsWeather);
                         playTTS(ttsWeather);
                     }else{
-                        playTTS("网络出状况了");
+                        playNoResourceTTS();
+                        Log.e(TAG, "onFailure: getWeatherInfo(not aqi), net error");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseWeather> call, Throwable t) {
                     Log.e(TAG, "onFailure: weather");
-                    playTTS("网络出状况了");
+                    playNoResourceTTS();
                 }
             });
         }
@@ -1173,13 +1197,15 @@ public class RecordModel {
                     Log.d(TAG, "onResponse: oilprice:" + tts);
                     playTTS(tts);
                 }else{
-                    playTTS("对不起，我没查到数据");
+                    playNoResourceTTS();
+                    Log.e(TAG, "onFailure: handlerOilEvent:net error");
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseOilprice> call, Throwable t) {
-                playTTS("对不起，我没查到数据");
+                Log.e(TAG, "onFailure: handlerOilEvent");
+                playNoResourceTTS();
             }
         });
     }
@@ -1246,7 +1272,7 @@ public class RecordModel {
                 @Override
                 public void onFailure(Call<ResponseStock> call, Throwable t) {
                     Log.e(TAG, "onFailure: HandlerStock");
-                    playTTS("没有查找到");
+                    playNoResourceTTS();
                 }
             });
         }
@@ -1333,18 +1359,20 @@ public class RecordModel {
                             if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
                                 String result = response.body().getData().getResult();
                                 if(TextUtils.isEmpty(result)){
-                                    playTTS("对不起我无能为力");
+                                    playNoResourceTTS();
                                 }else{
                                     playTTS(result);
                                 }
                             }else{
-                                playTTS("对不起我没听清楚");
+                                playNoResourceTTS();
+                                Log.e(TAG, "onResponse: HandlerTransfer: net error");
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ResponseTrans> call, Throwable t) {
-                            playTTS("对不起我没听清楚");
+                            Log.e(TAG, "onFailure: HandlerTransfer");
+                            playNoResourceTTS();
                         }
                     });
                 }
@@ -1375,14 +1403,15 @@ public class RecordModel {
                             if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
                                 playTTS(response.body().getData().getDesc());
                             }else {
-                                playTTS("对不起没有找到相关资源");
+                                Log.e(TAG, "onFailure: HandlerHolidayQuery: net error");
+                                playNoResourceTTS();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ResponseHoliday> call, Throwable t) {
                             Log.e(TAG, "onFailure: HandlerHolidayQuery");
-                            playTTS("对不起我没听清楚");
+                            playNoResourceTTS();
                         }
                     });
                 }
@@ -1396,7 +1425,7 @@ public class RecordModel {
             if(params.get(0).getKey().equals("number")){
                 String value = params.get(0).getValue();
                 if(TextUtils.isEmpty(value)){
-                    playTTS("对不起没有查询到");
+                    playNoResourceTTS();
                 }else{
                     RequestHotline hotline = new RequestHotline();
                     RequestHotline.KeywordsBean keyBean = new RequestHotline.KeywordsBean();
@@ -1413,13 +1442,14 @@ public class RecordModel {
                                 String tts = response.body().getData().getName() + response.body().getData().getPhone();
                                 playTTS(tts);
                             }else {
-                                playTTS("对不起没有找到相关资源");
+                                playNoResourceTTS();
+                                Log.e(TAG, "onResponse: HandlerHotline: net error");
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ResponseHotline> call, Throwable t) {
-                            playTTS("对不起我没听清楚");
+                            playNoResourceTTS();
                             Log.e(TAG, "onFailure: HandlerHotline");
                         }
                     });
@@ -1446,7 +1476,7 @@ public class RecordModel {
                 if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
                     ResponseMovie.DataBean data = response.body().getData();
                     if(data == null){
-                        playTTS("对不起没有找到相关资源");
+                        playNoResourceTTS();
                         return;
                     }
 
@@ -1465,13 +1495,14 @@ public class RecordModel {
                     Log.d(TAG, "onResponse: movies:" + ttsMovie);
                     playTTS(ttsMovie);
                 }else {
-                    playTTS("对不起没有找到相关资源");
+                    playNoResourceTTS();
+                    Log.e(TAG, "onFailure: HandlerMovie: net error");
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseMovie> call, Throwable t) {
-                playTTS("对不起没有找到相关资源");
+                playNoResourceTTS();
                 Log.e(TAG, "onFailure: HandlerMovie");
             }
         });
@@ -1517,19 +1548,21 @@ public class RecordModel {
                 if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
                     String url = response.body().getData().getTracks().get(0).getUrl();
                     if(TextUtils.isEmpty(url)){
-                        playTTS("对不起没有找到相关资源");
+                        playNoResourceTTS();
                     }else{
                         EventBus.getDefault().post(new UrlMusicEvent(url));
                     }
 
                 }else {
-                    playTTS("对不起没有找到相关资源");
+                    playNoResourceTTS();
+                    Log.e(TAG, "onResponse: HandlerXimalaya: net error");
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseXimalaya> call, Throwable t) {
-                playTTS("没有找到相关领域资源");
+                playNoResourceTTS();
+                Log.e(TAG, "onFailure: HandlerXimalaya");
             }
         });
     }
@@ -1610,14 +1643,14 @@ public class RecordModel {
 
                             playTTS(tts);
                         }else {
-                            Log.e(TAG, "onResponse: HandlerContellation");
-                            playTTS("对不起没有找到相关资源");
+                            Log.e(TAG, "onResponse: HandlerContellation: net error");
+                            playNoResourceTTS();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ResponseConstellation> call, Throwable t) {
-                        playTTS("对不起我没找到相关资源");
+                        playNoResourceTTS();
                         Log.e(TAG, "onFailure: HandlerContellation");
                     }
                 });
@@ -1647,14 +1680,15 @@ public class RecordModel {
                     playTTS(tts);
 
                 }else {
-                    playTTS("对不起没有找到相关资源");
+                    playNoResourceTTS();
+                    Log.e(TAG, "onFailure: HandlerCalendar: net error");
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseCalendar> call, Throwable t) {
                 Log.e(TAG, "onFailure: HandlerCalendar");
-                playTTS("对不起没有找到相关资源");
+                playNoResourceTTS();
             }
         });
     }
@@ -1710,4 +1744,30 @@ public class RecordModel {
             waitForWakeup();
         }
     };
+
+    /**
+     * 未查找到资源播放tts
+     */
+    private void playNoResourceTTS(){
+        Random random=new Random();
+        int index = random.nextInt(3);
+        String tts = null;
+
+        switch (index){
+            case 0:
+                tts = Const.TTS_REPLY_NO_RESOURCE1;
+                break;
+            case 1:
+                tts = Const.TTS_REPLY_NO_RESOURCE2;
+                break;
+            case 2:
+                tts = Const.TTS_REPLY_NO_RESOURCE3;
+                break;
+            default:
+                tts = Const.TTS_REPLY_NO_RESOURCE1;
+                break;
+        }
+
+        playTTS(tts);
+    }
 }

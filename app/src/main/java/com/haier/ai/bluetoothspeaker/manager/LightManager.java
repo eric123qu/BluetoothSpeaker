@@ -1,5 +1,7 @@
 package com.haier.ai.bluetoothspeaker.manager;
 
+import android.util.Log;
+
 /**
  * author: qu
  * date: 16-11-9
@@ -38,6 +40,7 @@ public class LightManager {
 
     public LightManager(){
         notifyLightInit();
+        Log.d(TAG, "LightManager: ");
         //sLightJni = new JNI();
     }
 

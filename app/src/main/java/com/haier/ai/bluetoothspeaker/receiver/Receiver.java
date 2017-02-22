@@ -55,6 +55,12 @@ public class Receiver extends BroadcastReceiver {
                 Log.d(TAG, "onReceive: BOOT_COMPLETED");
                 //首次唤醒
                 Const.IS_FIRST_WAKEUP = true;
+
+                //打开灯光
+                LightManager.getInstance().bootLightShow();
+
+                //呼吸灯打开
+                LightManager.getInstance().lightNormal();
                 break;
             case ACTION_WIFI_STATE_CHANGE:
                 //// TODO: 16-11-4  收到广播，搜索wifi
