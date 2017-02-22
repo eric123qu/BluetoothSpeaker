@@ -3,6 +3,7 @@ package com.haier.ai.bluetoothspeaker.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -32,6 +33,7 @@ public class Receiver extends BroadcastReceiver {
     private final String ACTION_WIFI_STATE_CHANGE = WifiManager.WIFI_STATE_CHANGED_ACTION;
     private final String ACTION_WIFI_SCAN_AVAILABLE = WifiManager.SCAN_RESULTS_AVAILABLE_ACTION;
     private final String ACTION_NETWORK_STATE_CHANGE = WifiManager.NETWORK_STATE_CHANGED_ACTION;
+    private final String netACTION = "android.net.conn.CONNECTIVITY_CHANGE";
     private final String ACTION_ALARM = "com.loonggg.alarm.clock";
 
     @Override
@@ -71,11 +73,11 @@ public class Receiver extends BroadcastReceiver {
 
                 switch (wifiState) {
                     case WifiManager.WIFI_STATE_ENABLED:
-                        //Log.d(TAG, "WiFi已启用" + DateUtils.getCurrentTime());
+                        Log.d(TAG, "WiFi已启用" );
                         WifiDevManager.getInstance().startScan();
                         break;
                     case WifiManager.WIFI_STATE_DISABLED:
-                        //Log.d(TAG, "Wifi已关闭" + DateUtils.getCurrentTime());
+                        Log.d(TAG, "Wifi已关闭" );
                         break;
                 }
 
@@ -109,6 +111,22 @@ public class Receiver extends BroadcastReceiver {
                 break;
             case ACTION_ALARM:
                 startAlarm(context, intent);
+                break;
+            case netACTION:
+                if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)){
+                    //代表网络断开
+                    Log.e(TAG, "wifi网络连接断开");
+                    LightManager.getInstance().netDisconnect();
+
+                    DeviceConst.DEVICE_NET_STATUS = DeviceConst.NET_STATUS_OFF;
+
+                    //MusicPlayerManager.getInstance().playNetError();
+                }else{
+                    //链接
+                    Log.d(TAG, "onReceive: netACTION 网络已连接");
+                    DeviceConst.DEVICE_NET_STATUS = DeviceConst.NET_STATUS_ON;
+                    LightManager.getInstance().lightNormal();
+                }
                 break;
             default:
                 break;

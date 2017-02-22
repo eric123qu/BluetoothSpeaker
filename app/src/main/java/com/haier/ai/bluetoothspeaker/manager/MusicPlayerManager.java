@@ -10,6 +10,7 @@ import android.util.Log;
 import com.haier.ai.bluetoothspeaker.App;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.DeviceConst;
+import com.haier.ai.bluetoothspeaker.R;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
@@ -413,5 +414,10 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
 
     public void playRandomLocalMusic() {
 
+    }
+
+    public void playNetError(){
+        MediaPlayer player = MediaPlayer.create(App.getInstance().getApplicationContext(), R.raw.neterror);
+        player.start();
     }
 }

@@ -717,6 +717,7 @@ public class RecordModel {
 //            case Const.DOMAIN_MODE:
 //                break;
             default:
+                playNoResourceTTS();
                 break;
         }
     }

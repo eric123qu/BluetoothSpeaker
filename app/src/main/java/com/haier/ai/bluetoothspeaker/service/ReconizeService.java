@@ -255,6 +255,7 @@ public class ReconizeService extends Service {
         player.start();
     }
 
+
     /**
      * 进入待唤醒
      */
@@ -263,6 +264,7 @@ public class ReconizeService extends Service {
         sendBroadcast(intent);
 
         EventBus.getDefault().post(new ReconizeStatusEvent("待唤醒"));
+        LightManager.getInstance().lightNormal();
     }
 
     /**

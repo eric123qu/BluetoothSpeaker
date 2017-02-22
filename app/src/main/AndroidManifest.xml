@@ -74,6 +74,7 @@
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
                 <action android:name="aandroid.net.wifi.SCAN_RESULTS"/>
                 <action android:name="com.loonggg.alarm.clock"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
