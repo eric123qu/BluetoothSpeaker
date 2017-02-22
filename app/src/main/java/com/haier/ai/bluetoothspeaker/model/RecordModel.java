@@ -43,6 +43,7 @@ import com.haier.ai.bluetoothspeaker.bean.ximalaya.RequestXimalaya;
 import com.haier.ai.bluetoothspeaker.bean.ximalaya.ResponseXimalaya;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
+import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
@@ -134,7 +135,7 @@ public class RecordModel {
             @Override
             public void onError(int arg0, String arg1) {
                 final String msg = String.format("nlu onError(): errcode = %d, msg = %s", arg0, arg1);
-                //EventBus.getDefault().post(new ReconizeResultEvent("语义理解错误"));
+                EventBus.getDefault().post(new ReconizeResultEvent("语义理解错误"));
                 //sendReReconizeEvent(true);
                 LightManager.getInstance().lightNormal();
                 waitForWakeup();
@@ -155,7 +156,7 @@ public class RecordModel {
                 }else */
 
                 {
-                    //EventBus.getDefault().post(new NluEvent(tts));
+                    EventBus.getDefault().post(new NluEvent(arg1));
                     Gson gson = new Gson();
                     boxNluBean resp = gson.fromJson(arg1, boxNluBean.class);
                     if(resp.getRetCode().equals("00000")){
@@ -326,7 +327,7 @@ public class RecordModel {
             public void onError(int paramInt, String paramString) {
                 // 识别时有错误发生。
                 Log.d(TAG, String.format("onError(): errcode = %d, msg = %s", paramInt, paramString));
-                //EventBus.getDefault().post(new ReconizeResultEvent("语音识别错误"));
+                EventBus.getDefault().post(new ReconizeResultEvent("语音识别错误"));
                 waitForWakeup();
             }
 
@@ -336,11 +337,11 @@ public class RecordModel {
                 final String msg = String.format("onResult(): errcode = %d, msg = %s", paramInt, paramString);
                 String asrResult = getAsrResult(paramString);
                 //// TODO: 16-9-29 状态显示语音识别成功
-                //EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
+                EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
 
                 Log.e(TAG, "onResult: asrresult:" + asrResult );
                 if(TextUtils.isEmpty(asrResult)){
-                    //EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
+                    EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
                     playTTS("对不起我没听清楚");
                 }else {
                     //去掉标点
@@ -351,7 +352,7 @@ public class RecordModel {
                     asrResult =asrResult.replace("，", "");
                     asrResult =asrResult.replace("，", "");
                     asrResult =asrResult.replace("？", "");
-                    //EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
+                    EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
                     //调用nlu接口，语义理解(空调)sdk
                     String nlu = formatNluRequest(asrResult, TYPE_FRIDGE);
                     getNluResult(nlu);
