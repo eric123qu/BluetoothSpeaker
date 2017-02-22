@@ -83,6 +83,8 @@ public class Receiver extends BroadcastReceiver {
                 if(info.getState().equals(NetworkInfo.State.DISCONNECTED)){
                     Log.e(TAG, "wifi网络连接断开");
                     LightManager.getInstance().netDisconnect();
+
+                    DeviceConst.DEVICE_NET_STATUS = DeviceConst.NET_STATUS_OFF;
                 }
                 else if(info.getState().equals(NetworkInfo.State.CONNECTED)){
 
@@ -92,6 +94,8 @@ public class Receiver extends BroadcastReceiver {
                     //获取当前wifi名称
                     Log.i(TAG, "连接到网络 " + wifiInfo.getSSID());
                     LightManager.getInstance().lightNormal();
+
+                    DeviceConst.DEVICE_NET_STATUS = DeviceConst.NET_STATUS_ON;
                 }
                 break;
 

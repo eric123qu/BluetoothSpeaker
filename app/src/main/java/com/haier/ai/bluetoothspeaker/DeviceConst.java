@@ -22,6 +22,7 @@ public class DeviceConst {
      * 声音相关
      */
     public static int MAX_VOICE;                    //系统最大音量
+
     public static int CURRENT_VOICE_LEVEL;          //当前音量大小
 
     /**
@@ -32,5 +33,16 @@ public class DeviceConst {
     public static final int LIGHT_STATUS_CLOSE = 0;
 
     public static final int LIGHT_STATUS_OPEN = 1;
+
+    /**
+     * 网络状态 0：断开  1：连接
+     */
+    public static final int NET_STATUS_ON = 1;
+
+    public static final int NET_STATUS_OFF = 0;
+
+    public static int DEVICE_NET_STATUS = NET_STATUS_ON;
+
+
 
 }

@@ -13,8 +13,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.DeviceConst;
 import com.haier.ai.bluetoothspeaker.R;
 import com.haier.ai.bluetoothspeaker.event.DialogEvent;
+import com.haier.ai.bluetoothspeaker.event.NluEvent;
+import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeStatusEvent;
 import com.haier.ai.bluetoothspeaker.event.StartRecordEvent;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
@@ -43,7 +46,8 @@ public class ReconizeService extends Service {
     private static final int TYPE_RERECONIZE = 1;
     private static final int TYPE_SLEEP = 2;
     private static final int TYPE_DING = 3;
-    @IntDef({TYPE_WAKEUP, TYPE_RERECONIZE, TYPE_SLEEP, TYPE_DING}) @interface StateType{}
+    private static final int TYPE_NETERROR = 4;
+    @IntDef({TYPE_WAKEUP, TYPE_RERECONIZE, TYPE_SLEEP, TYPE_DING, TYPE_NETERROR}) @interface StateType{}
     private MediaPlayer.OnCompletionListener completionListener;
     private MediaPlayer player = null;
     private ReReconizeReceiver mReceiver;
@@ -111,9 +115,9 @@ public class ReconizeService extends Service {
         Const.register_wakeup = 0;
         SystemClock.sleep(500);
 
-        /*EventBus.getDefault().post(new ReconizeStatusEvent("唤醒成功"));
+        EventBus.getDefault().post(new ReconizeStatusEvent("唤醒成功"));
         EventBus.getDefault().post(new ReconizeResultEvent(""));
-        EventBus.getDefault().post(new NluEvent(""));*/
+        EventBus.getDefault().post(new NluEvent(""));
 
         //正在播放歌曲等，则打断
         if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PLAYING){
@@ -125,9 +129,16 @@ public class ReconizeService extends Service {
             RecordModel.getInstance().stopPlayTTs();
         }
 
-        //灯光显示
-        LightManager.getInstance().lightWakeup();
-        playLocalAudio(TYPE_WAKEUP, initWakeupListener());
+        if(DeviceConst.DEVICE_NET_STATUS == DeviceConst.NET_STATUS_ON){
+            //灯光显示
+            LightManager.getInstance().lightWakeup();
+            playLocalAudio(TYPE_WAKEUP, initWakeupListener());
+        }else if(DeviceConst.DEVICE_NET_STATUS == DeviceConst.NET_STATUS_OFF){
+            //播放提示音，进入待唤醒
+            playLocalAudio(TYPE_NETERROR, null);
+            waitForWakeup();
+        }
+
     }
 
 
@@ -235,6 +246,9 @@ public class ReconizeService extends Service {
                 break;
             case TYPE_DING:
                 player = MediaPlayer.create(this, R.raw.start_tone);
+                break;
+            case TYPE_NETERROR:
+                player = MediaPlayer.create(this, R.raw.neterror);
                 break;
         }
 
