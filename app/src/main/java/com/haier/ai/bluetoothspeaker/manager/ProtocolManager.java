@@ -173,6 +173,8 @@ public class ProtocolManager {
             operatorAdjLight();
         }else if(operator.equals(UnisoundDefine.ACT_ADJVOICE)){
             operatorAdjVoice();
+        }else if(operator.equals(UnisoundDefine.ACT_DEVMODE)){
+            operatorDevMode();
         }
     }
 
@@ -221,6 +223,30 @@ public class ProtocolManager {
             default:
                 break;
         }
+    }
+
+    private void operatorDevMode() {
+        short status = 0;
+
+        switch (value){
+            case UnisoundDefine.MODE_STANDARD:
+                status = Const.LIGHT_MODE_STANDARD;
+                break;
+            case UnisoundDefine.MODE_READ:
+                status = Const.LIGHT_MODE_READ;
+                break;
+            case UnisoundDefine.MODE_ROMANTIC:
+                status = Const.LIGHT_MODE_ROMANTIC;
+                break;
+            case UnisoundDefine.MODE_SLEEP_LIGHT:
+                status = Const.LIGHT_MODE_SLEEP;
+                break;
+            default:
+                break;
+        }
+
+        control.setDevAttr(ApplianceDefine.MODE_LED_MODE);
+        control.setAttrStatusShort(status);
     }
 
     /**

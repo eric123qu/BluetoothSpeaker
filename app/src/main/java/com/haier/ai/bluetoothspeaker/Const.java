@@ -39,6 +39,9 @@ public class Const {
     //内容请求接口
     public static final String URL_CONTENT = "content";
 
+    /**
+     * 后台接口域
+     */
     public static final String DOMAIN_NEWS = "com_news";        //新闻
 
     public static final String DOMAIN_LIMIT = "com_bus";        //限号查询
@@ -47,7 +50,7 @@ public class Const {
 
     public static final String DOMAIN_MUSIC = "com_music";      //音乐
 
-    public static final String DOMAIN_DEVICE = "music_device";  //载体本身
+    public static final String DOMAIN_DEVICE = "music_device";  //载体本身 载体灯光模式
 
     public static final String DOMAIN_AC = "Air_conditioner";   //空调
 
@@ -81,6 +84,10 @@ public class Const {
 
     public static final String DOMAIN_OTHER = "com_other";    //调侃资源
 
+
+    /**
+     * tts 回复
+     */
     public static final String TTS_REPLY_ERROR = "对不起，我没听清楚";
 
     public static final String TTS_REPLY_NO_RESOURCE1 = "抱歉，这项技能我还在学习中";
@@ -105,4 +112,15 @@ public class Const {
     public static int register_wakeup = 0;
 
     public static int TTS_PLAY_STATUS = TtsPlayerStatus.TTS_PLAYER_STATUS_IDLE; //tts 状态
+
+    /**
+     * 载体灯光模式
+     */
+    public static short LIGHT_MODE_STANDARD = 1;  //标准
+
+    public static short LIGHT_MODE_READ = 2;  //阅读
+
+    public static short LIGHT_MODE_ROMANTIC = 3;  //浪漫
+
+    public static short LIGHT_MODE_SLEEP = 4;  //睡眠
 }

@@ -711,6 +711,8 @@ public class RecordModel {
             case Const.DOMAIN_OTHER:
                 playTTS(resp.getData().getSemantic().getResponse());
                 break;
+//            case Const.DOMAIN_MODE:
+//                break;
             default:
                 break;
         }

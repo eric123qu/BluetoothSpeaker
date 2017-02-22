@@ -65,6 +65,11 @@ public class UnisoundDefine {
     //载体
     public final static String ACT_ADJLIGHT = "adj_light";                   //亮度调整
     public final static String ACT_ADJVOICE = "adj_voice";                   //声音调整
+    public final static String ACT_DEVMODE = "ops_mode";                     //灯光情景模式
+    public final static String MODE_STANDARD = "标准";
+    public final static String MODE_READ = "阅读";
+    public final static String MODE_ROMANTIC = "浪漫";
+    public final static String MODE_SLEEP_LIGHT = "睡眠";
     public final static String ACT_ADJHIGH = "high";                         //亮度，声音调高
     public final static String ACT_ADJLOW = "low";                           //亮度，声音调低
     public final static String ACT_MAXHIGH = "maxhigh";                      //最大
