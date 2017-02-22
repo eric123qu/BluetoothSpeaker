@@ -6,9 +6,11 @@ import android.util.Log;
 
 import com.haier.ai.bluetoothspeaker.ApplianceDefine;
 import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.DeviceConst;
 import com.haier.ai.bluetoothspeaker.UnisoundDefine;
 import com.haier.ai.bluetoothspeaker.bean.ControlBean;
 import com.haier.ai.bluetoothspeaker.bean.RecvControlBean;
+import com.haier.ai.bluetoothspeaker.model.RecordModel;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
 import com.haier.ai.bluetoothspeaker.util.BytesUtil;
 
@@ -109,14 +111,18 @@ public class ProtocolManager {
         //拼装数据
         initControlObj();
 
+        int ret = 0;
+
         if(operands.equals(Const.DOMAIN_AC)){ // 空调
-            handlerAC();
+            //handlerAC();
         }else if(operands.equals(Const.DOMAIN_DEVICE)){ //载体
-            handlerDevice();
+            ret = handlerDevice();
         }
 
-        formProtocol();
-        sendData2Gateway();
+        if (0 == ret) {
+            formProtocol();
+            sendData2Gateway();
+        }
     }
 
     private void initControlObj(){
@@ -157,32 +163,36 @@ public class ProtocolManager {
     /**
      * 载体控制
      */
-    public void handlerDevice(){
+    public int handlerDevice(){
+        int ret = 0;
+
         if(operator.equals(UnisoundDefine.ACT_OPS)){//开关控制
             if(TextUtils.isEmpty(value)){
-                return;
+                return -2;
             }
 
             if(value.equals(UnisoundDefine.ACT_OPEN)){
-                operatorOpen();
+                ret = operatorOpen();
             }else if(value.equals(UnisoundDefine.ACT_CLOSE)){
-                operatorClose();
+                ret = operatorClose();
             }
 
         }else if(operator.equals(UnisoundDefine.ACT_ADJLIGHT)){
-            operatorAdjLight();
+            ret = operatorAdjLight();
         }else if(operator.equals(UnisoundDefine.ACT_ADJVOICE)){
-            operatorAdjVoice();
+            ret = operatorAdjVoice();
         }else if(operator.equals(UnisoundDefine.ACT_DEVMODE)){
-            operatorDevMode();
+            ret = operatorDevMode();
         }
+
+        return ret;
     }
 
     final short low = 0;
     final short high = 1;
     final short min = 2;
     final short max = 3;
-    private void operatorAdjLight(){
+    private int operatorAdjLight(){
         short status = 0;
 
         switch (value){
@@ -204,18 +214,28 @@ public class ProtocolManager {
 
         control.setDevAttr(ApplianceDefine.MODE_LED_BRIGHTNESS);
         control.setAttrStatusShort(status);
+
+        return 0;
     }
 
-    private void operatorAdjVoice(){
+    private int operatorAdjVoice(){
         switch (value){
             case UnisoundDefine.ACT_ADJHIGH:
-                MusicPlayerManager.getInstance().adjustSystemVoiceHigh();
+                if(DeviceConst.CURRENT_VOICE_LEVEL == DeviceConst.MAX_VOICE){
+                    RecordModel.getInstance().playTTS("当前音量已经最大了哦");
+                }else {
+                    MusicPlayerManager.getInstance().adjustSystemVoiceHigh();
+                }
                 break;
             case UnisoundDefine.ACT_ADJLOW:
                 MusicPlayerManager.getInstance().adjustSystemVoiceLow();
                 break;
             case UnisoundDefine.ACT_MAXHIGH:
-                MusicPlayerManager.getInstance().setSystemVoiceMax();
+                if(DeviceConst.CURRENT_VOICE_LEVEL == DeviceConst.MAX_VOICE){
+                    RecordModel.getInstance().playTTS("当前音量已经最大了哦");
+                }else {
+                    MusicPlayerManager.getInstance().setSystemVoiceMax();
+                }
                 break;
             case UnisoundDefine.ACT_MAXLOW:
                 MusicPlayerManager.getInstance().setSystemVoiceMin();
@@ -223,30 +243,42 @@ public class ProtocolManager {
             default:
                 break;
         }
+
+        return -1;
     }
 
-    private void operatorDevMode() {
+    private int operatorDevMode() {
+        int ret = 0;
         short status = 0;
 
         switch (value){
             case UnisoundDefine.MODE_STANDARD:
-                status = Const.LIGHT_MODE_STANDARD;
+                status = DeviceConst.LIGHT_MODE_STANDARD;
                 break;
             case UnisoundDefine.MODE_READ:
-                status = Const.LIGHT_MODE_READ;
+                status = DeviceConst.LIGHT_MODE_READ;
                 break;
             case UnisoundDefine.MODE_ROMANTIC:
-                status = Const.LIGHT_MODE_ROMANTIC;
+                status = DeviceConst.LIGHT_MODE_ROMANTIC;
                 break;
             case UnisoundDefine.MODE_SLEEP_LIGHT:
-                status = Const.LIGHT_MODE_SLEEP;
+                status = DeviceConst.LIGHT_MODE_SLEEP;
                 break;
             default:
                 break;
         }
 
-        control.setDevAttr(ApplianceDefine.MODE_LED_MODE);
-        control.setAttrStatusShort(status);
+        //判断将设置的场景跟现在的情景是否相同，
+
+        if(status == DeviceConst.CURRENT_LIGHT_MODE){
+            RecordModel.getInstance().playTTS("灯光已经是该情景模式");
+            return -1;
+        }else {
+            control.setDevAttr(ApplianceDefine.MODE_LED_MODE);
+            control.setAttrStatusShort(status);
+        }
+
+        return ret;
     }
 
     /**
@@ -325,17 +357,33 @@ public class ProtocolManager {
     /**
      * 打开动作
      */
-    public void operatorOpen(){
+    public int operatorOpen(){
+        if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_OPEN){
+            RecordModel.getInstance().playTTS("当前灯光已经打开");
+            return -1;
+        }
         control.setAttrStatusShort((short) 1);
         control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
+
+        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
+
+        return 0;
     }
 
     /**
      *  关闭动作
      */
-    public void operatorClose(){
+    public int operatorClose(){
+        if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_CLOSE){
+            RecordModel.getInstance().playTTS("当前灯光已经关闭");
+            return -1;
+        }
+
         control.setAttrStatusShort((short) 0);
         control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
+        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_CLOSE;
+
+        return 0;
     }
 
     /**

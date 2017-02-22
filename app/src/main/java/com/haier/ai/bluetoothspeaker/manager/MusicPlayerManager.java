@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.haier.ai.bluetoothspeaker.App;
 import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.DeviceConst;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     private static AudioManager sAudioManager;
     private static MediaPlayer sMediaPlayer;
     private static final int minVoice = 0;
-    private static int maxVoice;
+
     private static Calendar sCalendar;
     private static String year;
     private static String month;
@@ -86,7 +87,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     private void getAudioInfo(){
         sAudioManager = (AudioManager) App.getInstance().getSystemService(Context.AUDIO_SERVICE);
 
-        maxVoice = sAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        DeviceConst.MAX_VOICE = sAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
     }
 
     public static MusicPlayerManager getInstance(){
@@ -329,6 +330,8 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
                 AudioManager.STREAM_MUSIC,
                 AudioManager.ADJUST_LOWER,
                 AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
+
+        DeviceConst.CURRENT_VOICE_LEVEL = getCurrentVoice();
     }
 
     public void adjustSystemVoiceHigh(){
@@ -336,14 +339,18 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
                 AudioManager.STREAM_MUSIC,
                 AudioManager.ADJUST_RAISE,
                 AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
+
+        DeviceConst.CURRENT_VOICE_LEVEL = getCurrentVoice();
     }
 
     public void setSystemVoiceMax(){
-        sAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVoice, 0);
+        sAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, DeviceConst.MAX_VOICE, 0);
+        DeviceConst.CURRENT_VOICE_LEVEL = DeviceConst.MAX_VOICE;
     }
 
     public void setSystemVoiceMin(){
         sAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+        DeviceConst.CURRENT_VOICE_LEVEL = 0;
     }
 
     private int getCurrentVoice(){

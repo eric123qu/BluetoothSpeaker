@@ -9,6 +9,7 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.DeviceConst;
 import com.haier.ai.bluetoothspeaker.manager.LightManager;
 import com.haier.ai.bluetoothspeaker.manager.SpeakerAlarmManager;
 import com.haier.ai.bluetoothspeaker.manager.WifiDevManager;
@@ -56,11 +57,9 @@ public class Receiver extends BroadcastReceiver {
                 //首次唤醒
                 Const.IS_FIRST_WAKEUP = true;
 
-                //打开灯光
-                LightManager.getInstance().bootLightShow();
 
-                //呼吸灯打开
-                LightManager.getInstance().lightNormal();
+                initLightStatus();
+
                 break;
             case ACTION_WIFI_STATE_CHANGE:
                 //// TODO: 16-11-4  收到广播，搜索wifi
@@ -122,5 +121,20 @@ public class Receiver extends BroadcastReceiver {
         clockIntent.putExtra("flag", flag);
         clockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(clockIntent);
+    }
+
+    /**
+     * 开机初始化灯光状态
+     */
+    private void initLightStatus(){
+        //打开灯光
+        LightManager.getInstance().bootLightShow();
+
+        //呼吸灯打开
+        LightManager.getInstance().lightNormal();
+
+        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
+
+        DeviceConst.CURRENT_LIGHT_MODE = DeviceConst.LIGHT_MODE_STANDARD;
     }
 }

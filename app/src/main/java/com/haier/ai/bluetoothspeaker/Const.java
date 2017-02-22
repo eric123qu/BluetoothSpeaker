@@ -113,14 +113,4 @@ public class Const {
 
     public static int TTS_PLAY_STATUS = TtsPlayerStatus.TTS_PLAYER_STATUS_IDLE; //tts 状态
 
-    /**
-     * 载体灯光模式
-     */
-    public static short LIGHT_MODE_STANDARD = 1;  //标准
-
-    public static short LIGHT_MODE_READ = 2;  //阅读
-
-    public static short LIGHT_MODE_ROMANTIC = 3;  //浪漫
-
-    public static short LIGHT_MODE_SLEEP = 4;  //睡眠
 }
