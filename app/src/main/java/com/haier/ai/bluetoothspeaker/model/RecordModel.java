@@ -1728,7 +1728,7 @@ public class RecordModel {
         ProtocolManager.getInstance().setProtocolInfo(operands, operator, value, false);
         ProtocolManager.getInstance().convertVoice2Data();
         //test
-        playTTS("好的");
+        //playTTS("好的");
     }
 
     public void showTtsResult(String tts){

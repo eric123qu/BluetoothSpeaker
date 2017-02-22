@@ -122,6 +122,8 @@ public class ProtocolManager {
         if (0 == ret) {
             formProtocol();
             sendData2Gateway();
+
+            RecordModel.getInstance().playTTS("好的");
         }
     }
 
