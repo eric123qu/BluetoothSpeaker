@@ -79,6 +79,8 @@ public class Const {
 
     public static final String DOMAIN_CALCULATOR = "com_calculator";    //计算器
 
+    public static final String DOMAIN_OTHER = "com_other";    //调侃资源
+
     public static final String TTS_REPLY_ERROR = "对不起，我没听清楚";
 
     public static final String TTS_REPLY_NO_RESOURCE1 = "抱歉，这项技能我还在学习中";

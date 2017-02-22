@@ -708,6 +708,9 @@ public class RecordModel {
             case Const.DOMAIN_CALCULATOR:
                 playTTS(resp.getData().getSemantic().getResponse());
                 break;
+            case Const.DOMAIN_OTHER:
+                playTTS(resp.getData().getSemantic().getResponse());
+                break;
             default:
                 break;
         }
