@@ -276,6 +276,7 @@ public class ProtocolManager {
             RecordModel.getInstance().playTTS("灯光当前已经处于该模式");
             return -1;
         }else {
+            DeviceConst.CURRENT_LIGHT_MODE  = status;
             control.setDevAttr(ApplianceDefine.MODE_LED_MODE);
             control.setAttrStatusShort(status);
         }

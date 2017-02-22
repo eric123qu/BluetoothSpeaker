@@ -199,6 +199,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.d(TAG, "onCompletion: music play complated");
+        DeviceConst.MUSIC_STATE = Const.STATE_STOP;
     }
 
     @Override

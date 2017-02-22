@@ -48,4 +48,9 @@ public class DeviceConst {
      */
     public static int MUSIC_STATE = Const.STATE_STOP;       //音乐播放状态
 
+    /**
+     * 是否是初次使用语义
+     */
+    public static boolean FIRST_USE_NLU = true;
+
 }

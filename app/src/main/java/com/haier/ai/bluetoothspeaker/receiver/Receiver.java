@@ -63,6 +63,7 @@ public class Receiver extends BroadcastReceiver {
                 //首次唤醒
                 Const.IS_FIRST_WAKEUP = true;
 
+                DeviceConst.FIRST_USE_NLU = true;
 
                 initLightStatus();
 
