@@ -15,6 +15,7 @@ import com.haier.ai.bluetoothspeaker.manager.SpeakerAlarmManager;
 import com.haier.ai.bluetoothspeaker.manager.WifiDevManager;
 import com.haier.ai.bluetoothspeaker.service.BluetoothService;
 import com.haier.ai.bluetoothspeaker.service.ReconizeService;
+import com.haier.ai.bluetoothspeaker.service.SocketService;
 import com.haier.ai.bluetoothspeaker.service.WakeupService;
 import com.haier.ai.bluetoothspeaker.ui.ClockAlarmActivity;
 
@@ -52,6 +53,9 @@ public class Receiver extends BroadcastReceiver {
                  */
                 Intent intent1 = new Intent(context, ReconizeService.class);
                 context.startService(intent1);
+
+                Intent intentScoket = new Intent(context, SocketService.class);
+                context.startService(intentScoket);
 
                 Log.d(TAG, "onReceive: BOOT_COMPLETED");
                 //首次唤醒

@@ -224,7 +224,7 @@ public class ProtocolManager {
         switch (value){
             case UnisoundDefine.ACT_ADJHIGH:
                 if(DeviceConst.CURRENT_VOICE_LEVEL == DeviceConst.MAX_VOICE){
-                    RecordModel.getInstance().playTTS("当前音量已经最大了哦");
+                    RecordModel.getInstance().playTTS("当前音量已经在最大");
                 }else {
                     MusicPlayerManager.getInstance().adjustSystemVoiceHigh();
                 }
@@ -234,7 +234,7 @@ public class ProtocolManager {
                 break;
             case UnisoundDefine.ACT_MAXHIGH:
                 if(DeviceConst.CURRENT_VOICE_LEVEL == DeviceConst.MAX_VOICE){
-                    RecordModel.getInstance().playTTS("当前音量已经最大了哦");
+                    RecordModel.getInstance().playTTS("当前音量已经在最大");
                 }else {
                     MusicPlayerManager.getInstance().setSystemVoiceMax();
                 }
@@ -273,7 +273,7 @@ public class ProtocolManager {
         //判断将设置的场景跟现在的情景是否相同，
 
         if(status == DeviceConst.CURRENT_LIGHT_MODE){
-            RecordModel.getInstance().playTTS("灯光已经是该情景模式");
+            RecordModel.getInstance().playTTS("灯光当前已经处于该模式");
             return -1;
         }else {
             control.setDevAttr(ApplianceDefine.MODE_LED_MODE);
@@ -361,7 +361,7 @@ public class ProtocolManager {
      */
     public int operatorOpen(){
         if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_OPEN){
-            RecordModel.getInstance().playTTS("当前灯光已经打开");
+            RecordModel.getInstance().playTTS("当前灯光已经在打开状态。");
             return -1;
         }
         control.setAttrStatusShort((short) 1);
@@ -377,7 +377,7 @@ public class ProtocolManager {
      */
     public int operatorClose(){
         if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_CLOSE){
-            RecordModel.getInstance().playTTS("当前灯光已经关闭");
+            RecordModel.getInstance().playTTS("当前灯光已经在关闭状态。 ");
             return -1;
         }
 
@@ -546,7 +546,7 @@ public class ProtocolManager {
                 recvControlBean.setDevType("未知");
             }else if(devType == ApplianceDefine.DEV_INFRARED){
                 recvControlBean.setDevType("InfraredAlarm");
-            }else if(devType == ApplianceDefine.DEV_BOX){
+            }else if(devType == ApplianceDefine.DEV_SPEAKER){
                 recvControlBean.setDevType("speakerbox");
             }
             //设备种类(1 byte)  0x01 门磁; 0x02 水浸 ；0x10 空调; 0x21 灯光; 0x22 窗帘; 0x23
@@ -630,19 +630,20 @@ public class ProtocolManager {
     }
 
     public void handleCommand(RecvControlBean recvControlBean){
-        switch(recvControlBean.getbCommandType()){
+        byte cmd = recvControlBean.getbCommandType();
+        switch(cmd){
             case ApplianceDefine.ORDER_REPORT_STATE:
                 if(recvControlBean.getDevType().equals("speakerbox")){
+
                     byte devattr1 = recvControlBean.getDevAttr1();
                     byte devattr2 = recvControlBean.getDevAttr2();
-//                    byte attrstatus1 = recvControlBean.getAttrStatus1();
-//                    byte attrstatus2 = recvControlBean.getAttrStatus2();
 
                     byte [] status = new byte[2];
                     status[0] = recvControlBean.getAttrStatus1();
                     status[1] = recvControlBean.getAttrStatus2();
 
                     short attrStatus = BytesUtil.getShort(status);
+
                     switch (devattr2){
                         case ApplianceDefine.MODE_VOLUME://控制音量
                             if(0 == attrStatus){//减小
@@ -652,10 +653,25 @@ public class ProtocolManager {
                             }
                             break;
                         case ApplianceDefine.MODE_PLAY_MODE:
-                            if(0 == attrStatus){//0 暂停 1播放
-                                MusicPlayerManager.getInstance().pauseMusic();
-                            }else if(1 == attrStatus){//
-                                MusicPlayerManager.getInstance().restartMusic();
+                            Log.d(TAG, "handleCommand: playmusic:" + attrStatus);
+                            if(1 == attrStatus){//
+                                if(DeviceConst.MUSIC_STATE == Const.STATE_PLAYING){
+                                    MusicPlayerManager.getInstance().pauseMusic();
+                                }else if(DeviceConst.MUSIC_STATE == Const.STATE_STOP) {
+                                    MusicPlayerManager.getInstance().playRandomUrlMusic();
+                                }
+                                else if(DeviceConst.MUSIC_STATE == Const.STATE_PAUSE){
+                                    MusicPlayerManager.getInstance().restartMusic();
+                                }
+
+                            }
+                            break;
+                        case ApplianceDefine.MODE_PLAY_CONTROL:
+                            Log.d(TAG, "handleCommand: MODE_PLAY_CONTROL:" + attrStatus);
+                            if(1 == attrStatus){// 上一首
+                                MusicPlayerManager.getInstance().playRandomUrlMusic();
+                            }else if(2 == attrStatus){//
+                                MusicPlayerManager.getInstance().playRandomUrlMusic();
                             }
                             break;
                     }

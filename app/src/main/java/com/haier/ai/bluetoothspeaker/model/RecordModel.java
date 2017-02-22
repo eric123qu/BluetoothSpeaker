@@ -328,6 +328,7 @@ public class RecordModel {
                 // 识别时有错误发生。
                 Log.d(TAG, String.format("onError(): errcode = %d, msg = %s", paramInt, paramString));
                 EventBus.getDefault().post(new ReconizeResultEvent("语音识别错误"));
+                LightManager.getInstance().lightNormal();
                 waitForWakeup();
             }
 
@@ -343,6 +344,7 @@ public class RecordModel {
                 if(TextUtils.isEmpty(asrResult)){
                     EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
                     playTTS("对不起我没听清楚");
+                    LightManager.getInstance().lightNormal();
                 }else {
                     //去掉标点
                     asrResult = asrResult.replace(",", "");

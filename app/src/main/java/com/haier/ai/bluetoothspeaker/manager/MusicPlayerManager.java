@@ -10,11 +10,21 @@ import android.util.Log;
 import com.haier.ai.bluetoothspeaker.App;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.DeviceConst;
+import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
+import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
+import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
+import com.haier.ai.bluetoothspeaker.net.AIApiService;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * author: qu
@@ -35,13 +45,13 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     private static String month;
     private static String day;
     private static String week;
-    private static int musicState = Const.STATE_STOP;       //音乐播放状态
+    //private static int musicState = Const.STATE_STOP;       //音乐播放状态
     private List<String> netMusicList = null;               //云端歌曲列表
     private List<String> localMusicList = null;             //本地歌曲列表
 
 
     public MusicPlayerManager(){
-        musicState = Const.STATE_STOP;
+        DeviceConst.MUSIC_STATE = Const.STATE_STOP;
 
         getAudioInfo();
 
@@ -139,7 +149,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
 //        Log.d(TAG, "pauseMusic: pos:" + pos);
         if(sMediaPlayer.isPlaying()){
             sMediaPlayer.pause();
-            musicState = Const.STATE_PAUSE;
+            DeviceConst.MUSIC_STATE = Const.STATE_PAUSE;
         }
     }
 
@@ -151,7 +161,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             return;
 
         sMediaPlayer.start();
-        musicState = Const.STATE_PLAYING;
+        DeviceConst.MUSIC_STATE = Const.STATE_PLAYING;
     }
 
     /**
@@ -166,7 +176,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             sMediaPlayer.stop();
             sMediaPlayer.release();
             sMediaPlayer = null;
-            musicState = Const.STATE_STOP;
+            DeviceConst.MUSIC_STATE = Const.STATE_STOP;
         }
     }
 
@@ -194,7 +204,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     public void onPrepared(MediaPlayer mp) {
         if(sMediaPlayer != null){
             sMediaPlayer.start();
-            musicState = Const.STATE_PLAYING;
+            DeviceConst.MUSIC_STATE = Const.STATE_PLAYING;
         }
     }
 
@@ -214,7 +224,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     }
 
     public int getMusicState(){
-        return musicState;
+        return DeviceConst.MUSIC_STATE;
     }
 
     /**
@@ -239,7 +249,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             sMediaPlayer.setDataSource(songPath);
             sMediaPlayer.prepare();
             sMediaPlayer.start();
-            musicState = Const.STATE_PLAYING;
+            DeviceConst.MUSIC_STATE = Const.STATE_PLAYING;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -367,5 +377,41 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
 
     public String getTodayWeek(){
         return "今天" + week + "哦";
+    }
+
+    public void playRandomUrlMusic(){
+        AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+        RequestMusic requestMusic = new RequestMusic();
+        RequestMusic.KeywordsEntity keywordsEntity = new RequestMusic.KeywordsEntity();
+        requestMusic.setDomain("music");
+        requestMusic.setKeywords(keywordsEntity);
+
+        aiApiService.getMusicContent("", requestMusic).enqueue(new Callback<ResponseMusic>() {
+            @Override
+            public void onResponse(Call<ResponseMusic> call, Response<ResponseMusic> response) {
+                if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
+                    final String url = response.body().getData().getUrl();
+                    Log.d(TAG, "music url :" + url);
+                    if(TextUtils.isEmpty(url)){
+                        playRandomLocalMusic();
+                    }else
+                        EventBus.getDefault().post(new UrlMusicEvent(url));
+                }else {
+                    playRandomLocalMusic();
+                    Log.e(TAG, "onFailure: playRandomUrlMusic:net error");
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMusic> call, Throwable t) {
+                Log.e(TAG, "onFailure: playRandomUrlMusic");
+                playRandomLocalMusic();
+            }
+        });
+    }
+
+    public void playRandomLocalMusic() {
+
     }
 }
