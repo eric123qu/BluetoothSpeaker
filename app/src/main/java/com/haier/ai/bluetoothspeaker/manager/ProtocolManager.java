@@ -277,6 +277,7 @@ public class ProtocolManager {
                 break;
         }
 
+        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
         //判断将设置的场景跟现在的情景是否相同，
 
         if(status == DeviceConst.CURRENT_LIGHT_MODE){
