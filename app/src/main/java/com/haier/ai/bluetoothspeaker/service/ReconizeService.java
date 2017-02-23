@@ -35,7 +35,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class ReconizeService extends Service {
     private final String TAG = "ReconizeService";
@@ -151,13 +150,13 @@ public class ReconizeService extends Service {
         //开始识别
         RecordModel.getInstance().startRecord();//sdk mode
 
-        scheduledThreadPool.schedule(new Runnable() {
+        /*scheduledThreadPool.schedule(new Runnable() {
 
             @Override
             public void run() {
                 RecordModel.getInstance().stopRecord(); //sdk mode
             }
-        }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);
+        }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);*/
 
     }
 
@@ -180,13 +179,13 @@ public class ReconizeService extends Service {
         //开始识别
         RecordModel.getInstance().startRecord();
 
-        scheduledThreadPool.schedule(new Runnable() {
+        /*scheduledThreadPool.schedule(new Runnable() {
 
             @Override
             public void run() {
                 RecordModel.getInstance().stopRecord();
             }
-        }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);
+        }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);*/
     }
 
     public void playWakeupSucess(MediaPlayer.OnCompletionListener listenr){
@@ -285,13 +284,13 @@ public class ReconizeService extends Service {
                 //开始识别
                 RecordModel.getInstance().startRecord();//sdk mode
 
-                scheduledThreadPool.schedule(new Runnable() {
+                /*scheduledThreadPool.schedule(new Runnable() {
 
                     @Override
                     public void run() {
                         RecordModel.getInstance().stopRecord(); //sdk mode
                     }
-                }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);
+                }, Const.RECONIZE_INTERVAL, TimeUnit.SECONDS);*/
             }
         };
     }
