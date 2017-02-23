@@ -246,6 +246,12 @@ public class ProtocolManager {
                 break;
         }
 
+        if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PAUSE){  //如果音乐处在暂停状态，调节完音量后继续播放
+            MusicPlayerManager.getInstance().restartMusic();
+        }
+
+        RecordModel.getInstance().waitForWakeup();
+
         return -1;
     }
 

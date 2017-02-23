@@ -538,6 +538,13 @@ public class RecordModel {
     }
 
     public void waitForWakeup(){
+        //现在处于非 音乐播放跟音乐控制状态时， 判断音乐模块状态，若处在暂停，则停止
+        if(!sDomain.equals(Const.DOMAIN_MUSIC) && !sDomain.equals(Const.DOMAIN_MUSIC_CONTROL)) {
+            if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PAUSE){
+                MusicPlayerManager.getInstance().stopMusic();
+            }
+        }
+
         Intent intent = new Intent(Const.WAKEUP_TAG);
         App.getInstance().sendBroadcast(intent);
 
@@ -612,6 +619,7 @@ public class RecordModel {
         }
     }
 
+    private static String sDomain = null;
     /**
      * 控制
      * @param resp
@@ -630,6 +638,8 @@ public class RecordModel {
 
             return;
         }
+
+        sDomain = operands;
 
         handlerDomain(resp, operands);
 
@@ -723,8 +733,9 @@ public class RecordModel {
             case Const.DOMAIN_OTHER:
                 playTTS(resp.getData().getSemantic().getResponse());
                 break;
-//            case Const.DOMAIN_MODE:
-//                break;
+            case Const.DOMAIN_MUSIC_CONTROL:
+                HandlerMusicControl(resp);
+                break;
             default:
                 playNoResourceTTS();
                 break;
@@ -1710,6 +1721,47 @@ public class RecordModel {
             }
         });
     }
+
+    private void HandlerMusicControl(boxNluBean resp) {
+        String value = null;
+
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params.get(0).getKey().equals("ops_music")){  //暂停，继续，上一首，下一首
+            value = params.get(0).getValue();
+        }
+
+        if(TextUtils.isEmpty(value)){
+            playNoResourceTTS();
+            return;
+        }
+
+        //没有音乐在播放，回复
+        if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_STOP){
+            playTTS("对不起现在没有音乐正在播放");
+            return;
+        }
+
+        String tts = null;
+        if(value.contains("暂停")){
+            if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PLAYING){
+                MusicPlayerManager.getInstance().pauseMusic();
+               tts = "歌曲已为您暂停";
+            }
+        }else if(value.contains("继续")){
+            if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PAUSE){
+                MusicPlayerManager.getInstance().restartMusic();
+            }
+        }else if(value.contains("上一首")){
+            MusicPlayerManager.getInstance().playRandomUrlMusic();
+        }else if(value.contains("下一首")){
+            MusicPlayerManager.getInstance().playRandomUrlMusic();
+        }
+
+        Log.d(TAG, "HandlerMusicControl: value:" + value);
+
+        playTTS(tts);
+    }
+
     /**
      * 当前日期
      */

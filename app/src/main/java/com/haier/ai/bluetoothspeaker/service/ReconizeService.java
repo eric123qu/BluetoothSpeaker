@@ -121,7 +121,7 @@ public class ReconizeService extends Service {
 
         //正在播放歌曲等，则打断
         if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PLAYING){
-            MusicPlayerManager.getInstance().stopMusic();
+            MusicPlayerManager.getInstance().pauseMusic();
         }
 
         //正播放tts 则打断

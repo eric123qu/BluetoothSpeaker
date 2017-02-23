@@ -84,6 +84,8 @@ public class Const {
 
     public static final String DOMAIN_OTHER = "com_other";    //调侃资源
 
+    public static final String DOMAIN_MUSIC_CONTROL = "com_music_control";    //音乐控制
+
 
     /**
      * tts 回复

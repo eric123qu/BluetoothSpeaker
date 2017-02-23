@@ -178,8 +178,10 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             sMediaPlayer.stop();
             sMediaPlayer.release();
             sMediaPlayer = null;
-            DeviceConst.MUSIC_STATE = Const.STATE_STOP;
+
         }
+
+        DeviceConst.MUSIC_STATE = Const.STATE_STOP;
     }
 
     private void initMediaPlayer(){
