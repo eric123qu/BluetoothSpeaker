@@ -193,7 +193,8 @@ public class RecordModel {
         // 录音识别。
         // 通过start()方法开始录音识别。stop()方法结束并进行录音识别。cancel()方法结束不进行识别。
         // 目前只支持主动调用stop()接口的识别，即按住说。其它识别方式开发中。
-        String config = null;
+        //String config = null;
+        String config = "{\"vad\":\"true\"}";
         if ((err = mRecorder.start(config)) != ErrorCode.UAI_ERR_NONE) {
             Log.d(TAG, "startRecord: fail to set audio source filter: " + err);
             return;
@@ -539,7 +540,8 @@ public class RecordModel {
 
     public void waitForWakeup(){
         //现在处于非 音乐播放跟音乐控制状态时， 判断音乐模块状态，若处在暂停，则停止
-        if(!sDomain.equals(Const.DOMAIN_MUSIC) && !sDomain.equals(Const.DOMAIN_MUSIC_CONTROL)) {
+        if(!sDomain.equals(Const.DOMAIN_MUSIC) && !sDomain.equals(Const.DOMAIN_MUSIC_CONTROL)
+                && !sDomain.equals(Const.DOMAIN_CHILD)&& !sDomain.equals(Const.DOMAIN_CROSSTALK)) {
             if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PAUSE){
                 MusicPlayerManager.getInstance().stopMusic();
             }
