@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -414,7 +415,12 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     }
 
     public void playRandomLocalMusic() {
+        Random random = new Random();
+        int index = random.nextInt(localMusicList.size());
 
+        String song = localMusicList.get(index);
+
+        playLocalMusic(song);
     }
 
     public void playNetError(){

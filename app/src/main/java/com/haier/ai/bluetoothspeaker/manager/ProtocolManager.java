@@ -403,7 +403,7 @@ public class ProtocolManager {
         tmpDatas[arrayLen++] = (byte) serialNum++;
 
         //命令类型 (1 byte)
-        String operator = control.getOperator();
+        /*String operator = control.getOperator();
         if(operator.equals(UnisoundDefine.ACT_QUERY)){
             tmpDatas[arrayLen++] = ApplianceDefine.ORDER_QUERY;
         }else if(operator.equals(UnisoundDefine.ACT_OPS)
@@ -414,7 +414,9 @@ public class ProtocolManager {
                 ||operator.equals(UnisoundDefine.ACT_ADJLIGHT)
                 ||operator.equals(UnisoundDefine.ACT_ADJVOICE)){
             tmpDatas[arrayLen++] = ApplianceDefine.ORDER_CONTROL;
-        }
+        }*/
+
+        tmpDatas[arrayLen++] = ApplianceDefine.ORDER_CONTROL; //控制
 
         //设备类型(1 byte)
         tmpDatas[arrayLen++] = ApplianceDefine.DEV_SPEAKER;
@@ -674,6 +676,11 @@ public class ProtocolManager {
                             }else if(2 == attrStatus){//
                                 MusicPlayerManager.getInstance().playRandomUrlMusic();
                             }
+                            break;
+                        case ApplianceDefine.MODE_PLAY_SONG:
+                            String song = recvControlBean.getNickName();
+                            Log.d(TAG, "handleCommand: song name:" + song);
+                            MusicPlayerManager.getInstance().playLocalMusic(song);
                             break;
                     }
                 }
