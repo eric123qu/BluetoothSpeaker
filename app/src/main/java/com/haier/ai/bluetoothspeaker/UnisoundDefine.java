@@ -69,7 +69,7 @@ public class UnisoundDefine {
     public final static String MODE_STANDARD = "标准";
     public final static String MODE_READ = "阅读";
     public final static String MODE_ROMANTIC = "浪漫";
-    public final static String MODE_SLEEP_LIGHT = "睡眠";
+    public final static String MODE_SLEEP_LIGHT = "宁静";
     public final static String ACT_ADJHIGH = "high";                         //亮度，声音调高
     public final static String ACT_ADJLOW = "low";                           //亮度，声音调低
     public final static String ACT_MAXHIGH = "maxhigh";                      //最大
