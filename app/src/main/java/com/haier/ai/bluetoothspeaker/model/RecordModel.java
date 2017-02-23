@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.haier.ai.bluetoothspeaker.App;
 import com.haier.ai.bluetoothspeaker.Const;
+import com.haier.ai.bluetoothspeaker.DeviceConst;
 import com.haier.ai.bluetoothspeaker.audio.AudioInput;
 import com.haier.ai.bluetoothspeaker.audio.AudioOutput;
 import com.haier.ai.bluetoothspeaker.bean.Oilprice.RequestOilprice;
@@ -482,23 +483,31 @@ public class RecordModel {
                 break;
         }
 
+        String contextid = "";
+        if (DeviceConst.FIRST_USE_NLU){
+            contextid = "";
+            DeviceConst.FIRST_USE_NLU = false;
+        }else {
+            contextid = "123456";
+        }
+
         return String.format("{\"LIBaseinfo\":{\"category\":" + "\"" +
                 sType + "\"" +
-                ",\"city\":\"青岛\",\"contextid\":\"123456\",\"latitude\":12.8," +
+                ",\"city\":\"青岛\",\"contextid\":" + "\"" +
+                contextid + "\"" +
+                ",\"latitude\":12.8," +
                 "\"longitude\":123.5,\"query\":" + "\"" +
                 query + "\"" +
                 ",\"region\":\"李沧区\"},\"devices\":[{\"attrs\":{\"brand\":\"天意\",\"model\":\"蔚蓝\"},\"deviceModules\":[{\"moduleId\":\"C8934644F82\",\"moduleType\":\"wifimodule\"}],\"id\":\"C8934644F82\",\"name\":\"客厅空调\",\"typeInfo\":{\"typeId\":\"00000000000000008080000000041410\"}}],\"devicestate\":{\"curhumidity\":67,\"curtemp\":28,\"mode\":\"自动\",\"settemp\":26,\"windspeed\":2}}");
     }
 
-   /* private String parseNluResult(String msg){
-        if(TextUtils.isEmpty(msg)){
-            return null;
-        }
 
-        //根据nlu返回生成tts播报内容
-        return SpeechJavaBeanUtils.parseAirSpeechString(SpeechJavaBeanUtils.parseAirControl(msg));
-    }*/
-
+//    String.format("{\"LIBaseinfo\":{\"category\":" + "\"" +
+//    sType + "\"" +
+//            ",\"city\":\"青岛\",\"contextid\":\"123456\",\"latitude\":12.8," +
+//            "\"longitude\":123.5,\"query\":" + "\"" +
+//    query + "\"" +
+//            ",\"region\":\"李沧区\"},\"devices\":[{\"attrs\":{\"brand\":\"天意\",\"model\":\"蔚蓝\"},\"deviceModules\":[{\"moduleId\":\"C8934644F82\",\"moduleType\":\"wifimodule\"}],\"id\":\"C8934644F82\",\"name\":\"客厅空调\",\"typeInfo\":{\"typeId\":\"00000000000000008080000000041410\"}}],\"devicestate\":{\"curhumidity\":67,\"curtemp\":28,\"mode\":\"自动\",\"settemp\":26,\"windspeed\":2}}");
 
     public void playTTS(String content){
         Log.d(TAG, "playTTS: ");
