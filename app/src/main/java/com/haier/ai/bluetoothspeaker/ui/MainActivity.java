@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity{
         //Uri uri = SpeakerAlarmManager.getInstance().getSelectRing("Ripple");
 
         //Log.e(",ain", "onClick: " + uri.toString());
-       /* Intent wakeupService = new Intent(this, WakeupService.class);
+        /*Intent wakeupService = new Intent(this, WakeupService.class);
         startService(wakeupService);
 
         Intent intent1 = new Intent(this, ReconizeService.class);
