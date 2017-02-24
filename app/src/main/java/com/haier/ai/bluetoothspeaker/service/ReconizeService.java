@@ -145,8 +145,9 @@ public class ReconizeService extends Service {
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void onDialogEvent(DialogEvent event){
         //playLocalAudio(TYPE_WAKEUP, initWakeupListener());
-        playLocalAudio(TYPE_DING, null);
+        //playLocalAudio(TYPE_DING, null);
 
+        LightManager.getInstance().lightWakeup();
         //EventBus.getDefault().post(new ReconizeStatusEvent("开始识别"));
         //开始识别
         RecordModel.getInstance().startRecord();//sdk mode

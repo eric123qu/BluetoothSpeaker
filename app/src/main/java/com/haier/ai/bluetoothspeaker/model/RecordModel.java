@@ -42,6 +42,7 @@ import com.haier.ai.bluetoothspeaker.bean.weather.ResponseAqi;
 import com.haier.ai.bluetoothspeaker.bean.weather.ResponseWeather;
 import com.haier.ai.bluetoothspeaker.bean.ximalaya.RequestXimalaya;
 import com.haier.ai.bluetoothspeaker.bean.ximalaya.ResponseXimalaya;
+import com.haier.ai.bluetoothspeaker.event.DialogEvent;
 import com.haier.ai.bluetoothspeaker.event.ErrorEvent;
 import com.haier.ai.bluetoothspeaker.event.NluEvent;
 import com.haier.ai.bluetoothspeaker.event.ReconizeResultEvent;
@@ -63,6 +64,7 @@ import com.haierubic.ai.INluCallback;
 import com.haierubic.ai.ITtsPlayer;
 import com.haierubic.ai.ITtsPlayerCallback;
 import com.haierubic.ai.TtsPlayerMode;
+import com.haierubic.ai.TtsPlayerStatus;
 import com.haierubic.ai.UbicAI;
 import com.lidroid.xutils.HttpUtils;
 
@@ -461,7 +463,7 @@ public class RecordModel {
         nlu.attach(cb);*/
 
         // 开始识别。保留参数用于识别配置，目前不用填。
-        String config = "{\"domain\":\"dialog\"}";  //替换box 为 dialog
+        String config = "{\"domain\":\"box\"}";  //替换 box 为 dialog
         nlu.start(config);
 
         // 进行语义识别。语法格式不固定，先由应用层根据协议组包请求(示例固定)，之后固定后会制作工具类。
@@ -591,6 +593,13 @@ public class RecordModel {
             public void onEvent(int arg0, int arg1) {
                 Log.e(TAG, "onEvent: " + String.format("onEvent(): errcode = %d, param = %d", arg0, arg1));
                 Const.TTS_PLAY_STATUS = arg0;
+
+                //如果处在对话状态，tts播报完后继续进行识别
+                if(Const.ISDIALOG){
+                    if (Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_STOP){
+                        EventBus.getDefault().post(new DialogEvent(""));
+                    }
+                }
             }
 
             @Override
@@ -640,6 +649,8 @@ public class RecordModel {
         String operands = resp.getData().getSemantic().getDomain();
         boolean isDialog = resp.getData().getSemantic().isIs_dialog();
         String response = resp.getData().getSemantic().getResponse();
+
+        Const.ISDIALOG = resp.getData().getSemantic().isIs_dialog();
 
         if(TextUtils.isEmpty(operands)){
             if(TextUtils.isEmpty(response)){
@@ -748,6 +759,9 @@ public class RecordModel {
             case Const.DOMAIN_MUSIC_CONTROL:
                 HandlerMusicControl(resp);
                 break;
+            case Const.DOMAIN_GAME:
+                HandlerGame(resp);
+                break;
             default:
                 playNoResourceTTS();
                 break;
@@ -817,7 +831,8 @@ public class RecordModel {
                     final String url = response.body().getData().getUrl();
                     Log.d(TAG, "music url :" + url);
                     if(TextUtils.isEmpty(url)){
-                        playNoResourceTTS();
+                        //playNoResourceTTS();
+                        MusicPlayerManager.getInstance().playRandomLocalMusic();
                     }else {
                         EventBus.getDefault().post(new UrlMusicEvent(url));
                         String songdata = response.body().getData().toString();
@@ -1785,6 +1800,15 @@ public class RecordModel {
         Log.d(TAG, "HandlerMusicControl: value:" + value);
 
         playTTS(tts);
+    }
+
+
+    private void HandlerGame(boxNluBean resp){
+        //if(Const.ISDIALOG)
+        {
+            playTTS(resp.getData().getSemantic().getResponse());
+            //后边监听tts状态，播放结束在开启识别状态
+        }
     }
 
     /**

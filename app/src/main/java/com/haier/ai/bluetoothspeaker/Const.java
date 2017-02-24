@@ -88,6 +88,8 @@ public class Const {
 
     public static final String DOMAIN_MUSIC_CONTROL = "com_music_control";    //音乐控制
 
+    public static final String DOMAIN_GAME = "游戏";    //游戏
+
 
     /**
      * tts 回复
@@ -116,5 +118,7 @@ public class Const {
     public static int register_wakeup = 0;
 
     public static int TTS_PLAY_STATUS = TtsPlayerStatus.TTS_PLAYER_STATUS_IDLE; //tts 状态
+
+    public static boolean ISDIALOG = false;                 //多伦对话
 
 }
