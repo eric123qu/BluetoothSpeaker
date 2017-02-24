@@ -522,7 +522,10 @@ public class RecordModel {
 
     public void playTTS(String content){
         Log.d(TAG, "playTTS: ");
-        waitForWakeup();
+        if(!Const.ISDIALOG){
+            waitForWakeup();
+        }
+
 
         if(TextUtils.isEmpty(content)){
             return;
