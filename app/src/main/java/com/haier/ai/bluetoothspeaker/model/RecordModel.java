@@ -461,7 +461,7 @@ public class RecordModel {
         nlu.attach(cb);*/
 
         // 开始识别。保留参数用于识别配置，目前不用填。
-        String config = "{\"domain\":\"box\"}";
+        String config = "{\"domain\":\"dialog\"}";  //替换box 为 dialog
         nlu.start(config);
 
         // 进行语义识别。语法格式不固定，先由应用层根据协议组包请求(示例固定)，之后固定后会制作工具类。
@@ -547,11 +547,13 @@ public class RecordModel {
     }
 
     public void waitForWakeup(){
-        //现在处于非 音乐播放跟音乐控制状态时， 判断音乐模块状态，若处在暂停，则停止
-        if(!sDomain.equals(Const.DOMAIN_MUSIC) && !sDomain.equals(Const.DOMAIN_MUSIC_CONTROL)
-                && !sDomain.equals(Const.DOMAIN_CHILD)&& !sDomain.equals(Const.DOMAIN_CROSSTALK)) {
-            if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PAUSE){
-                MusicPlayerManager.getInstance().stopMusic();
+        if(!TextUtils.isEmpty(sDomain)){
+            //现在处于非 音乐播放跟音乐控制状态时， 判断音乐模块状态，若处在暂停，则停止
+            if(!sDomain.equals(Const.DOMAIN_MUSIC) && !sDomain.equals(Const.DOMAIN_MUSIC_CONTROL)
+                    && !sDomain.equals(Const.DOMAIN_CHILD)&& !sDomain.equals(Const.DOMAIN_CROSSTALK)) {
+                if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PAUSE){
+                    MusicPlayerManager.getInstance().stopMusic();
+                }
             }
         }
 
@@ -962,6 +964,10 @@ public class RecordModel {
 
             aqi.setDomain("aqi");
             if(!TextUtils.isEmpty(date)){
+                if(date.equals("今天")){
+                    date = "";
+                }
+
                 keyBean.setDate(date);
             }
 
@@ -1322,6 +1328,9 @@ public class RecordModel {
 
         if(!TextUtils.isEmpty(shareValue)){
             keyworksBean.setType("");//0代表上证指数，1代表深证指数
+            if(shareValue.contains("海尔")){
+                shareValue = "600690";
+            }
             keyworksBean.setGid(shareValue);
             stock.setKeywords(keyworksBean);
 

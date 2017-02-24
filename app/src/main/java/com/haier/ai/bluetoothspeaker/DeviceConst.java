@@ -41,7 +41,7 @@ public class DeviceConst {
 
     public static final int NET_STATUS_OFF = 0;
 
-    public static int DEVICE_NET_STATUS = NET_STATUS_ON;
+    public static int DEVICE_NET_STATUS = NET_STATUS_OFF;
 
     /**
      * 音乐状态

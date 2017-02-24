@@ -753,7 +753,7 @@ public class ProtocolManager {
                             //EventBus.getDefault().post(new LocalMusicEvent(song));
                             MusicPlayerManager.getInstance().playLocalMusic(song);
                             //todo 发送播放事件
-                            syncMusicStatus(0, "play");
+                            //syncMusicStatus(0, "play");
                             break;
                     }
                 }

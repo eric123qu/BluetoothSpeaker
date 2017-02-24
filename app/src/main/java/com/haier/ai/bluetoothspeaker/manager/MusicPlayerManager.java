@@ -164,6 +164,8 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
 
         sMediaPlayer.start();
         DeviceConst.MUSIC_STATE = Const.STATE_PLAYING;
+
+        ProtocolManager.getInstance().syncMusicStatus(0, "play");
     }
 
     /**
@@ -182,6 +184,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         }
 
         DeviceConst.MUSIC_STATE = Const.STATE_STOP;
+        ProtocolManager.getInstance().syncMusicStatus(0, "stop");
     }
 
     private void initMediaPlayer(){
@@ -210,6 +213,8 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         if(sMediaPlayer != null){
             sMediaPlayer.start();
             DeviceConst.MUSIC_STATE = Const.STATE_PLAYING;
+
+            ProtocolManager.getInstance().syncMusicStatus(0, "play");
         }
     }
 
@@ -259,6 +264,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             sMediaPlayer.prepare();
             sMediaPlayer.start();
             DeviceConst.MUSIC_STATE = Const.STATE_PLAYING;
+            ProtocolManager.getInstance().syncMusicStatus(0, "play");
         } catch (IOException e) {
             e.printStackTrace();
         }
