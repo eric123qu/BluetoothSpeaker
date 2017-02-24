@@ -155,7 +155,7 @@ public class RecordModel {
                     EventBus.getDefault().post(new NluEvent("语义理解错误"));
                     waitForWakeup();
                 }else */
-
+                try
                 {
                     EventBus.getDefault().post(new NluEvent(arg1));
                     Gson gson = new Gson();
@@ -165,6 +165,9 @@ public class RecordModel {
                     }else{
                         showTtsResult("对不起我没理解明白请再说一遍");
                     }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Log.e(TAG, "onResult: nlu exception");
                 }
             }
 
@@ -336,33 +339,38 @@ public class RecordModel {
 
             @Override
             public void onResult(int paramInt, String paramString) {
-                // 返回识别结果。
-                final String msg = String.format("onResult(): errcode = %d, msg = %s", paramInt, paramString);
-                String asrResult = getAsrResult(paramString);
-                //// TODO: 16-9-29 状态显示语音识别成功
-                EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
+                try {
+                    // 返回识别结果。
+                    final String msg = String.format("onResult(): errcode = %d, msg = %s", paramInt, paramString);
+                    String asrResult = getAsrResult(paramString);
+                    //// TODO: 16-9-29 状态显示语音识别成功
+                    EventBus.getDefault().post(new ReconizeStatusEvent("识别结束"));
 
-                Log.e(TAG, "onResult: asrresult:" + asrResult );
-                if(TextUtils.isEmpty(asrResult)){
-                    EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
-                    playTTS("对不起我没听清楚");
-                    LightManager.getInstance().lightNormal();
-                }else {
-                    //去掉标点
-                    asrResult = asrResult.replace(",", "");
-                    asrResult =asrResult.replace("。", "");
-                    //asrResult.replaceAll("?", " ");
-                    asrResult =asrResult.replace(".", "");
-                    asrResult =asrResult.replace("，", "");
-                    asrResult =asrResult.replace("，", "");
-                    asrResult =asrResult.replace("？", "");
-                    EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
-                    //调用nlu接口，语义理解(空调)sdk
-                    String nlu = formatNluRequest(asrResult, TYPE_FRIDGE);
-                    getNluResult(nlu);
+                    Log.e(TAG, "onResult: asrresult:" + asrResult);
+                    if (TextUtils.isEmpty(asrResult)) {
+                        EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
+                        playTTS("对不起我没听清楚");
+                        LightManager.getInstance().lightNormal();
+                    } else {
+                        //去掉标点
+                        asrResult = asrResult.replace(",", "");
+                        asrResult = asrResult.replace("。", "");
+                        //asrResult.replaceAll("?", " ");
+                        asrResult = asrResult.replace(".", "");
+                        asrResult = asrResult.replace("，", "");
+                        asrResult = asrResult.replace("，", "");
+                        asrResult = asrResult.replace("？", "");
+                        EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
+                        //调用nlu接口，语义理解(空调)sdk
+                        String nlu = formatNluRequest(asrResult, TYPE_FRIDGE);
+                        getNluResult(nlu);
 
-                    //冰箱(api)
-                    //getNlpResult(asrResult);
+                        //冰箱(api)
+                        //getNlpResult(asrResult);
+                    }
+                }catch (Exception e){
+                    Log.e(TAG, "onResult: asr exception");
+                    e.printStackTrace();
                 }
             }
 
@@ -808,8 +816,12 @@ public class RecordModel {
                     Log.d(TAG, "music url :" + url);
                     if(TextUtils.isEmpty(url)){
                         playNoResourceTTS();
-                    }else
+                    }else {
                         EventBus.getDefault().post(new UrlMusicEvent(url));
+                        String songdata = response.body().getData().toString();
+                        ProtocolManager.getInstance().syncMusicStatus(1, songdata);
+                    }
+
                 }else {
                     playNoResourceTTS();
                     Log.e(TAG, "onFailure: music:net error");
@@ -1064,9 +1076,9 @@ public class RecordModel {
                             builder.append("污染指数");
                             builder.append(data.getWuran());
                             builder.append(",");
+                        }else {
+                            //
                         }
-
-
 
                         String ttsWeather = builder.toString();
                         Log.d(TAG, "onResponse: ttsweather:" + ttsWeather);
@@ -1348,6 +1360,8 @@ public class RecordModel {
                         String tts = builder.toString();
                         Log.d(TAG, "onResponse: stock1 tts:" + tts);
                         playTTS(tts);
+                    }else {
+                        playNoResourceTTS();
                     }
                 }
 

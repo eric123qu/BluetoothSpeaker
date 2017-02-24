@@ -114,7 +114,7 @@ public class Receiver extends BroadcastReceiver {
                 startAlarm(context, intent);
                 break;
             case netACTION:
-                if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)){
+                /*if(intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)){
                     //代表网络断开
                     Log.e(TAG, "wifi网络连接断开");
                     LightManager.getInstance().netDisconnect();
@@ -125,6 +125,27 @@ public class Receiver extends BroadcastReceiver {
                 }else{
                     //链接
                     Log.d(TAG, "onReceive: netACTION 网络已连接");
+                    DeviceConst.DEVICE_NET_STATUS = DeviceConst.NET_STATUS_ON;
+                    LightManager.getInstance().lightNormal();
+                }
+*/
+                //test
+                ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo mobileInfo = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+                NetworkInfo wifiInfo = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+                NetworkInfo activeInfo = manager.getActiveNetworkInfo();
+//                Toast.makeText(context, "mobile:"+mobileInfo.isConnected()+"\n"+"wifi:"+wifiInfo.isConnected()
+//                        +"\n"+"active:"+activeInfo.getTypeName(), Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onReceive: net_change:" + "mobile:"+mobileInfo.isConnected()+"\n"+"wifi:"+wifiInfo.isConnected()
+                        +"\n"+"active:"+activeInfo.getTypeName());
+                if(activeInfo == null){
+                    Log.e(TAG, "onReceive: 无网络");
+                    LightManager.getInstance().netDisconnect();
+
+                    DeviceConst.DEVICE_NET_STATUS = DeviceConst.NET_STATUS_OFF;
+                }else {
+                    Log.e(TAG, "onReceive: 有网络");
                     DeviceConst.DEVICE_NET_STATUS = DeviceConst.NET_STATUS_ON;
                     LightManager.getInstance().lightNormal();
                 }

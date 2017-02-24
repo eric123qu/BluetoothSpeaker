@@ -66,6 +66,7 @@ public class UnisoundDefine {
     public final static String ACT_ADJLIGHT = "adj_light";                   //亮度调整
     public final static String ACT_ADJVOICE = "adj_voice";                   //声音调整
     public final static String ACT_DEVMODE = "ops_mode";                     //灯光情景模式
+    public final static String ACT_MUSICSYNC = "music_sync";                 //音乐播放状态同步
     public final static String MODE_STANDARD = "标准";
     public final static String MODE_READ = "阅读";
     public final static String MODE_ROMANTIC = "浪漫";
@@ -74,6 +75,9 @@ public class UnisoundDefine {
     public final static String ACT_ADJLOW = "low";                           //亮度，声音调低
     public final static String ACT_MAXHIGH = "maxhigh";                      //最大
     public final static String ACT_MAXLOW = "maxlow";                        //最小
+    public final static String ACT_PLAYSTATUS = "play_status";               //播放暂停停止
+    public final static String ACT_SONGINFO = "song_info";                   //歌曲信息
+
 
 
     //热水器

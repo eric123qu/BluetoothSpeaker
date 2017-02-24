@@ -52,6 +52,8 @@ public class Const {
 
     public static final String DOMAIN_DEVICE = "music_device";  //载体本身 载体灯光模式
 
+    public static final String DOMAIN_MUSIC_STATUS = "music_music_status";  //音箱音乐
+
     public static final String DOMAIN_AC = "Air_conditioner";   //空调
 
     public static final String DOMAIN_ALARM = "com_alarm";      //闹钟提醒

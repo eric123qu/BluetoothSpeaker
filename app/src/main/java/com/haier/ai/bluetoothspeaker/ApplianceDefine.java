@@ -251,12 +251,14 @@ public class ApplianceDefine {
      * 0x18 音箱音乐
      */
     public static final byte SPEAKER_MUSIC_dev = 0x0a;
-    public static final byte MODE_PLAY_MODE = 0x01;                         //音乐播放状态 0 暂停 1播放
+    public static final byte MODE_PLAY_MODE = 0x01;                         //音乐播放状态 0 暂停 1播放 2:停止
     public static final byte MODE_LOOP_STATUS = 0x02;                       // 循环状态 1 单曲 2列表 3 随机播放
     public static final byte MODE_VOLUME = 0x03;                            //音量 0减  1加
     public static final byte MODE_MUTE_STATUS = 0x04;                       //静音状态 0 非静音 1 静音
     public static final byte MODE_PLAY_SONG = 0x05;                         //昵称填写歌名
     public static final byte MODE_PLAY_CONTROL = 0x06;                      //播放控制  1 上一首 2下一首
+    public static final byte MODE_ALARM = 0x07;                      //播放控制  1 上一首 2下一首
+    public static final byte MODE_SONG_INFO = 0x08;                      //同步载体音乐
 
 
     /**

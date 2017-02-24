@@ -147,12 +147,12 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         if(sMediaPlayer == null)
             return;
 
-//        int pos = sMediaPlayer.getCurrentPosition();
-//        Log.d(TAG, "pauseMusic: pos:" + pos);
         if(sMediaPlayer.isPlaying()){
             sMediaPlayer.pause();
             DeviceConst.MUSIC_STATE = Const.STATE_PAUSE;
         }
+
+        ProtocolManager.getInstance().syncMusicStatus(0, "pause");
     }
 
     /**
@@ -241,6 +241,10 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             return false;
         }
 
+        if(getMusicState() == Const.STATE_PLAYING){
+            sMediaPlayer.stop();
+        }
+
         int index = hasLocalMusic(song);
         if(index == -1){
             return false;
@@ -323,7 +327,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     }
 
     public String getLocalMusicPath() {
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/music/";
+        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/Music/";
     }
 
     public int hasLocalMusic(String song){
@@ -399,8 +403,11 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
                     Log.d(TAG, "music url :" + url);
                     if(TextUtils.isEmpty(url)){
                         playRandomLocalMusic();
-                    }else
+                    }else {
+                        String songdata = response.body().getData().toString();
+                        ProtocolManager.getInstance().syncMusicStatus(1, songdata);
                         EventBus.getDefault().post(new UrlMusicEvent(url));
+                    }
                 }else {
                     playRandomLocalMusic();
                     Log.e(TAG, "onFailure: playRandomUrlMusic:net error");

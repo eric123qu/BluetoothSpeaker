@@ -17,6 +17,8 @@ import com.haier.ai.bluetoothspeaker.util.BytesUtil;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.haier.ai.bluetoothspeaker.Const.DOMAIN_MUSIC_STATUS;
+
 
 /**
  * Created by qx on 17-1-5.
@@ -30,7 +32,7 @@ public class ProtocolManager {
     private static boolean bQueryWmLeftTime = false;
     private ExecutorService executorService;
 
-    private final int tmpLen = 64;
+    private final int tmpLen = 512;
     private final int hwSingleTemp = 45;
     private final int hwTwoTemp = 60;
     private final int hwThreeTemp = 75;
@@ -83,7 +85,7 @@ public class ProtocolManager {
      * @param value
      */
     public void setProtocolInfo(String operands, String operator,String value, boolean isDialog){
-        initDatas();
+//        initDatas();
         this.operands = operands;
         this.operator = operator;
         this.value = value;
@@ -108,15 +110,18 @@ public class ProtocolManager {
      * 语音数据转化成控制协议
      */
     public void convertVoice2Data(){
+        initDatas();
         //拼装数据
         initControlObj();
 
-        int ret = 0;
+        int ret = 0;  //ret:0 播放语音并发送协议  -1：不执行 2：只发送协议
 
         if(operands.equals(Const.DOMAIN_AC)){ // 空调
             //handlerAC();
         }else if(operands.equals(Const.DOMAIN_DEVICE)){ //载体
             ret = handlerDevice();
+        }else if(operands.equals(Const.DOMAIN_MUSIC_STATUS)){ //音乐
+            ret = handlerDeviceMusic();
         }
 
         if (0 == ret) {
@@ -124,10 +129,16 @@ public class ProtocolManager {
             sendData2Gateway();
 
             RecordModel.getInstance().playTTS("好的");
+        }else if(2 == ret) {
+            formProtocol();
+            sendData2Gateway();
         }
     }
 
     private void initControlObj(){
+        if(control == null){
+            control = new ControlBean();
+        }
         control.setOperator(operator);
         control.setOperands(operands);
         control.setValue(value);
@@ -185,6 +196,15 @@ public class ProtocolManager {
             ret = operatorAdjVoice();
         }else if(operator.equals(UnisoundDefine.ACT_DEVMODE)){
             ret = operatorDevMode();
+        }
+
+        return ret;
+    }
+
+    private int handlerDeviceMusic(){
+        int ret = 0;
+        if(operator.equals(UnisoundDefine.ACT_MUSICSYNC)){
+            ret = operatorSyncMusic();
         }
 
         return ret;
@@ -292,6 +312,42 @@ public class ProtocolManager {
         }
 
         return ret;
+    }
+
+    /**
+     * 同步歌曲信息
+     * @return
+     */
+    private int operatorSyncMusic(){
+        switch (value){
+            case UnisoundDefine.ACT_PLAYSTATUS:
+                short status = -1;
+                control.setDevAttr(ApplianceDefine.MODE_PLAY_MODE);
+                if(TextUtils.isEmpty(time)){
+                    return -1;
+                }
+
+                if(time.equals("play")){
+                    status = 1;
+                }else if(time.equals("pause")){
+                    status = 0;
+                }else if(time.equals("stop")){
+                    status = 2;
+                }
+
+                if(-1 == status){
+                    return -1;
+                }
+                control.setAttrStatusShort(status);
+                break;
+            case UnisoundDefine.ACT_SONGINFO:
+                control.setDevAttr(ApplianceDefine.MODE_SONG_INFO);
+                break;
+            default:
+                break;
+        }
+
+        return 2;
     }
 
     /**
@@ -438,6 +494,8 @@ public class ProtocolManager {
             tmpDatas[arrayLen++] = ApplianceDefine.TYPE_AIRCONDITIONER;
         }else if(domain.equals(Const.DOMAIN_DEVICE)){
             tmpDatas[arrayLen++] = ApplianceDefine.TYPE_SPEAKER_LIGHT;
+        }else if(domain.equals(Const.DOMAIN_MUSIC_STATUS)){
+            tmpDatas[arrayLen++] = ApplianceDefine.TYPE_SPEAKER_MUSIC;
         }
 
         //设备位置(1 byte)
@@ -456,6 +514,8 @@ public class ProtocolManager {
             tmpDatas[arrayLen++] = ApplianceDefine.AIRCON_DEV;
         }else if(domain.equals(Const.DOMAIN_DEVICE)){
             tmpDatas[arrayLen++] = ApplianceDefine.SPEAKER_LIGHT_dev;
+        }else if(domain.equals(Const.DOMAIN_MUSIC_STATUS)){
+            tmpDatas[arrayLen++] = ApplianceDefine.SPEAKER_MUSIC_dev;
         }
 
         tmpDatas[arrayLen++] = control.getDevAttr();
@@ -690,12 +750,41 @@ public class ProtocolManager {
                         case ApplianceDefine.MODE_PLAY_SONG:
                             String song = recvControlBean.getNickName();
                             Log.d(TAG, "handleCommand: song name:" + song);
+                            //EventBus.getDefault().post(new LocalMusicEvent(song));
                             MusicPlayerManager.getInstance().playLocalMusic(song);
+                            //todo 发送播放事件
+                            syncMusicStatus(0, "play");
                             break;
                     }
                 }
                 break;
 
         }
+    }
+
+    /**
+     * 与app同步播放状态
+     * @param type 0: 音乐状态 1 同步载体歌曲信息
+     * @param name pause play  stop； 歌曲信息
+     */
+    public void syncMusicStatus(int type, String name){
+        switch (type) {
+            case 0:
+                this.value = UnisoundDefine.ACT_PLAYSTATUS;
+                this.time = name; //暂停，播放，停止
+                break;
+            case 1:
+                this.value = UnisoundDefine.ACT_SONGINFO;
+                this.device = name; //（nickname）
+                break;
+            default:
+                break;
+        }
+
+        this.operands = DOMAIN_MUSIC_STATUS;  //音箱音乐
+        this.operator = UnisoundDefine.ACT_MUSICSYNC;
+
+
+        convertVoice2Data();
     }
 }

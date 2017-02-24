@@ -71,6 +71,15 @@ public class ResponseMusic {
         private String album;
         private String genre;
 
+        @Override
+        public String toString() {
+            return "{" +
+                    "url='" + url + '\'' +
+                    ", duration='" + duration + '\'' +
+                    ", song='" + song + '\'' +
+                    '}';
+        }
+
         public String getDomain() {
             return domain;
         }
