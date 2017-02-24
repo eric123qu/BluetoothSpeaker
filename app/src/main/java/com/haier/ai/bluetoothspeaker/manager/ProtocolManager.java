@@ -727,7 +727,8 @@ public class ProtocolManager {
                             break;
                         case ApplianceDefine.MODE_PLAY_MODE:
                             Log.d(TAG, "handleCommand: playmusic:" + attrStatus);
-                            if(1 == attrStatus){//
+                            //if(1 == attrStatus)
+                            {//
                                 if(DeviceConst.MUSIC_STATE == Const.STATE_PLAYING){
                                     MusicPlayerManager.getInstance().pauseMusic();
                                 }else if(DeviceConst.MUSIC_STATE == Const.STATE_STOP) {
