@@ -1181,7 +1181,12 @@ public class RecordModel {
         }
 
         if(!TextUtils.isEmpty(program)){//收看电视节目
-            playTTS("闹钟已为您设置好");
+            if(program.contains("新闻")){
+                playTTS("好的，今天十九点我会提醒您！");
+            }else if(program.contains("天下足球")){
+                playTTS("好的，周一十九点三十分我会提醒您！");
+            }else
+                playTTS("闹钟已为您设置好");
             return;
         }
         //分为闹钟及提醒
