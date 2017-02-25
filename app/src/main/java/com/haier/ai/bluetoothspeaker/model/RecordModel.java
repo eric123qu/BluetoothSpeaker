@@ -1895,14 +1895,15 @@ public class RecordModel {
             playNoResourceTTS();
         }
 
-        String queryValue = null;
+        String queryValue = "";
         if(params.get(0).getKey().equals("name")){
             queryValue = params.get(0).getValue();
         }
 
-        if(TextUtils.isEmpty(queryValue)){
+        /*if(TextUtils.isEmpty(queryValue)){
             playNoResourceTTS();
-        }else{
+        }else*/
+            {
             RequestPoetry poetry = new RequestPoetry();
             RequestPoetry.KeywordsBean keywordsBean = new RequestPoetry.KeywordsBean();
             poetry.setDomain("poem");
