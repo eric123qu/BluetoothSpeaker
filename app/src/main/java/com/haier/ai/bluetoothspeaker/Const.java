@@ -92,6 +92,8 @@ public class Const {
 
     public static final String DOMAIN_FOOD = "food_menu";    //菜谱
 
+    public static final String DOMAIN_POETRY = "com_poetry";    //诗歌
+
 
     /**
      * tts 回复

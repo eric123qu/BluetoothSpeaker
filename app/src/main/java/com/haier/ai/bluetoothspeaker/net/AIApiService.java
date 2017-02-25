@@ -21,6 +21,8 @@ import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
 import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
 import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
+import com.haier.ai.bluetoothspeaker.bean.poetry.RequestPoetry;
+import com.haier.ai.bluetoothspeaker.bean.poetry.ResponsePoetry;
 import com.haier.ai.bluetoothspeaker.bean.stock.RequestStock;
 import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock;
 import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock1;
@@ -114,4 +116,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseMenu> getCookInfo(@Header("accessToken") String accessToken,
                                              @Body RequestMenu requestMenu);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponsePoetry> getPoetry(@Header("accessToken") String accessToken,
+                                            @Body RequestPoetry requestPoetry);
 }

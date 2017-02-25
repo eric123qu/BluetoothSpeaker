@@ -33,6 +33,8 @@ import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
 import com.haier.ai.bluetoothspeaker.bean.news.RequestNews;
 import com.haier.ai.bluetoothspeaker.bean.news.ResponseNews;
+import com.haier.ai.bluetoothspeaker.bean.poetry.RequestPoetry;
+import com.haier.ai.bluetoothspeaker.bean.poetry.ResponsePoetry;
 import com.haier.ai.bluetoothspeaker.bean.stock.RequestStock;
 import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock;
 import com.haier.ai.bluetoothspeaker.bean.stock.ResponseStock1;
@@ -769,6 +771,9 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_FOOD:
                 HandlerCookMenu(resp);
+                break;
+            case Const.DOMAIN_POETRY:
+                HandlerPoetry(resp);
                 break;
             default:
                 playNoResourceTTS();
@@ -1878,6 +1883,59 @@ public class RecordModel {
                 @Override
                 public void onFailure(Call<ResponseMenu> call, Throwable t) {
                     Log.e(TAG, "onFailure: HandlerCookMenu");
+                    playNoResourceTTS();
+                }
+            });
+        }
+    }
+
+    private void HandlerPoetry(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params == null){
+            playNoResourceTTS();
+        }
+
+        String queryValue = null;
+        if(params.get(0).getKey().equals("name")){
+            queryValue = params.get(0).getValue();
+        }
+
+        if(TextUtils.isEmpty(queryValue)){
+            playNoResourceTTS();
+        }else{
+            RequestPoetry poetry = new RequestPoetry();
+            RequestPoetry.KeywordsBean keywordsBean = new RequestPoetry.KeywordsBean();
+            poetry.setDomain("poem");
+            keywordsBean.setQuery(queryValue);
+            poetry.setKeywords(keywordsBean);
+
+            AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+            aiApiService.getPoetry("", poetry).enqueue(new Callback<ResponsePoetry>() {
+                @Override
+                public void onResponse(Call<ResponsePoetry> call, Response<ResponsePoetry> response) {
+                    if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)) {
+                        ResponsePoetry.DataBean data = response.body().getData();
+                        if(data == null){
+                            playNoResourceTTS();
+                        }else{
+                            StringBuilder builder = new StringBuilder();
+                            builder.append(data.getTitle());
+                            builder.append("。。。。。。。");
+                            builder.append(data.getContent());
+
+                            String tts = builder.toString();
+                            Log.d(TAG, "onResponse: poetry:" + tts);
+                            playTTS(tts);
+                        }
+                    }else{
+                        playNoResourceTTS();
+                        Log.e(TAG, "onResponse: HandlerCookMenu:  net error");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponsePoetry> call, Throwable t) {
+                    Log.e(TAG, "onFailure: HandlerPoetry");
                     playNoResourceTTS();
                 }
             });
