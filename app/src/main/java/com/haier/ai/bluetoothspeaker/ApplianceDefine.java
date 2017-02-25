@@ -33,6 +33,7 @@ public class ApplianceDefine {
     public static final byte DEV_SPEAKER = 0x02;                //音箱
     public static final byte DEV_BOX = 0x18;                //音箱音乐
 
+
     /**
      * 设备种类
      */
@@ -47,6 +48,7 @@ public class ApplianceDefine {
     public static final byte TYPE_SWEEPING = 0x16;             //扫地机器人
     public static final byte TYPE_SPEAKER_LIGHT = 0x17;        //音箱灯光
     public static final byte TYPE_SPEAKER_MUSIC = 0x18;                //音箱音乐
+    public static final byte TYPE_AIRMAGIC = 0x19;                //空气魔方
     public static final byte TYPE_60_AC = 0x20;                //60 空调
     public static final byte TYPE_LIGHT = 0x21;                //灯光
     public static final byte TYPE_CURTAIN = 0x22;              //窗帘
@@ -259,6 +261,18 @@ public class ApplianceDefine {
     public static final byte MODE_PLAY_CONTROL = 0x06;                      //播放控制  1 上一首 2下一首
     public static final byte MODE_ALARM = 0x07;                      //播放控制  1 上一首 2下一首
     public static final byte MODE_SONG_INFO = 0x08;                      //同步载体音乐
+
+
+    /**
+     * 0x19 空气魔方
+     */
+    public static final byte AIR_MAGIC_dev = 0x0b;
+    //public static final byte MODE_ONOFF_STATUS = 0x01;                      //开关机状态  0 关 1 开
+    public static final byte MODE_MODE_AIR = 0x02;                            //模式 1智能 2净化 3加湿 4净化加湿 5除湿 6净化除湿 7送风
+    public static final byte MODE_WIND_SPEED = 0x03;                          //1自动 2强劲 3高风 4中风 5低风 6静音
+    public static final byte MODE_SLEEP_SET = 0x04;                           //0 睡眠关闭 1 睡眠开启
+    public static final byte MODE_CHILD_LOCK = 0x05;                          //0 无童锁 1 有童锁
+    public static final byte MODE_LIGHT_SET = 0x06;                           //0 关闭灯光 1 开启灯光
 
 
     /**
