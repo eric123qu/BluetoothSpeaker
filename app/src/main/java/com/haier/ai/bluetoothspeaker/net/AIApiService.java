@@ -13,6 +13,8 @@ import com.haier.ai.bluetoothspeaker.bean.hotline.RequestHotline;
 import com.haier.ai.bluetoothspeaker.bean.hotline.ResponseHotline;
 import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
 import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
+import com.haier.ai.bluetoothspeaker.bean.menu.RequestMenu;
+import com.haier.ai.bluetoothspeaker.bean.menu.ResponseMenu;
 import com.haier.ai.bluetoothspeaker.bean.movie.RequestMovie;
 import com.haier.ai.bluetoothspeaker.bean.movie.ResponseMovie;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
@@ -108,4 +110,8 @@ public interface AIApiService {
     @POST(Const.URL_CONTENT)
     public Call<ResponseWeather> getWeatherInfo(@Header("accessToken") String accessToken,
                                                @Body RequestWeather requestWeather);
+
+    @POST(Const.URL_CONTENT)
+    public Call<ResponseMenu> getCookInfo(@Header("accessToken") String accessToken,
+                                             @Body RequestMenu requestMenu);
 }

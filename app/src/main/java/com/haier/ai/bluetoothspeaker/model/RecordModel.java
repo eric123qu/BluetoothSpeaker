@@ -25,6 +25,8 @@ import com.haier.ai.bluetoothspeaker.bean.hotline.RequestHotline;
 import com.haier.ai.bluetoothspeaker.bean.hotline.ResponseHotline;
 import com.haier.ai.bluetoothspeaker.bean.limit.RequestLimit;
 import com.haier.ai.bluetoothspeaker.bean.limit.ResponseLimit;
+import com.haier.ai.bluetoothspeaker.bean.menu.RequestMenu;
+import com.haier.ai.bluetoothspeaker.bean.menu.ResponseMenu;
 import com.haier.ai.bluetoothspeaker.bean.movie.RequestMovie;
 import com.haier.ai.bluetoothspeaker.bean.movie.ResponseMovie;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
@@ -764,6 +766,9 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_GAME:
                 HandlerGame(resp);
+                break;
+            case Const.DOMAIN_FOOD:
+                HandlerCookMenu(resp);
                 break;
             default:
                 playNoResourceTTS();
@@ -1595,15 +1600,34 @@ public class RecordModel {
         }
 
         List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
-        if(params.get(0).getKey().equals("query")){
+
+        if(params == null){
             if(intent.equals("相声")){
                 queryValue = "来一段相声";
             }else if(intent.equals("儿歌")){
                 queryValue = "来一首儿歌";
             }
-        }else if(params.get(0).getKey().equals("name")){
-            queryValue = params.get(0).getValue();
+        }else{
+
+            if(params.get(0).getKey().equals("name")){
+                queryValue = params.get(0).getValue();
+                if(TextUtils.isEmpty(queryValue)){
+                    queryValue = "来一段相声";
+                }
+            }
         }
+        /*if(params.get(0).getKey().equals("query")){
+            if(intent.equals("相声")){
+                queryValue = "来一段相声";
+            }else if(intent.equals("儿歌")){
+                queryValue = "来一首儿歌";
+            }
+        }
+        else if(params.get(0).getKey().equals("name")){
+            queryValue = params.get(0).getValue();
+        }*/
+
+
 
         RequestXimalaya ximalaya = new RequestXimalaya();
         RequestXimalaya.KeywordsBean keyBean = new RequestXimalaya.KeywordsBean();
@@ -1811,6 +1835,52 @@ public class RecordModel {
         {
             playTTS(resp.getData().getSemantic().getResponse());
             //后边监听tts状态，播放结束在开启识别状态
+        }
+    }
+
+    private void HandlerCookMenu(boxNluBean resp){
+        List<boxNluBean.DataBean.SemanticBean.ParasBean> params = resp.getData().getSemantic().getParas();
+        if(params == null){
+            playNoResourceTTS();
+        }
+
+        String queryValue = null;
+        if(params.get(0).getKey().equals("food_menu")){
+            queryValue = params.get(0).getValue();
+        }
+
+        if(TextUtils.isEmpty(queryValue)){
+            playNoResourceTTS();
+        }else{
+            RequestMenu menu = new RequestMenu();
+            RequestMenu.KeywordsBean keywordsBean = new RequestMenu.KeywordsBean();
+            menu.setDomain("cookbook");
+            keywordsBean.setName(queryValue);
+            menu.setKeywords(keywordsBean);
+
+            AIApiService aiApiService = RetrofitApiManager.getAiApiService();
+            aiApiService.getCookInfo("", menu).enqueue(new Callback<ResponseMenu>() {
+                @Override
+                public void onResponse(Call<ResponseMenu> call, Response<ResponseMenu> response) {
+                    if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)) {
+                        ResponseMenu.DataBeanX data = response.body().getData();
+                        if(TextUtils.isEmpty(data.getDesc())){
+                            playNoResourceTTS();
+                        }else{
+                            playTTS(data.getDesc());
+                        }
+                    }else{
+                        playNoResourceTTS();
+                        Log.e(TAG, "onResponse: HandlerCookMenu:  net error");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseMenu> call, Throwable t) {
+                    Log.e(TAG, "onFailure: HandlerCookMenu");
+                    playNoResourceTTS();
+                }
+            });
         }
     }
 

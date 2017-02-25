@@ -90,6 +90,8 @@ public class Const {
 
     public static final String DOMAIN_GAME = "游戏";    //游戏
 
+    public static final String DOMAIN_FOOD = "food_menu";    //菜谱
+
 
     /**
      * tts 回复
