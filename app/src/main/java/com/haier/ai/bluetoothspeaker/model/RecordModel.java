@@ -602,6 +602,7 @@ public class RecordModel {
                 Const.TTS_PLAY_STATUS = arg0;
 
                 //如果处在对话状态，tts播报完后继续进行识别
+                //// TODO: 17-2-26 天气多伦
                 if(Const.ISDIALOG){
                     if (Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_STOP){
                         EventBus.getDefault().post(new DialogEvent(""));
@@ -788,6 +789,7 @@ public class RecordModel {
         String musicValue = null;
         String singerValue = null;
         String albumValue = null;
+        String category = null;
 
         for(boxNluBean.DataBean.SemanticBean.ParasBean param : params){
             if(param.getKey().equals("query")){
@@ -798,6 +800,8 @@ public class RecordModel {
                 singerValue = param.getValue();
             }else if(param.getKey().equals("album")){
                 albumValue = param.getValue();
+            }else if(param.getKey().equals("singermusic_category")){
+                category = param.getValue();
             }
         }
 
@@ -823,6 +827,15 @@ public class RecordModel {
             keywordsEntity.setSinger(singerValue);
         }
 
+        if(!TextUtils.isEmpty(category)){
+            if(category.contains("安静")){//播放一首本地音乐
+                MusicPlayerManager.getInstance().playLocalMusic("安静");
+                return;
+            }else {
+                keywordsEntity.setGenre(category);
+            }
+        }
+
         /*else if(!TextUtils.isEmpty(musicValue)){//歌曲
             keywordsEntity.setSong(musicValue);
             if(!TextUtils.isEmpty(singerValue)){
@@ -846,6 +859,7 @@ public class RecordModel {
                     if(TextUtils.isEmpty(url)){
                         //playNoResourceTTS();
                         MusicPlayerManager.getInstance().playRandomLocalMusic();
+                        waitForWakeup();
                     }else {
                         EventBus.getDefault().post(new UrlMusicEvent(url));
                         String songdata = response.body().getData().toString();
@@ -1081,11 +1095,11 @@ public class RecordModel {
                             builder.append(",");
 
                             builder.append(data.getWinddirect());
-                            builder.append(data.getWindpower());
+                           // builder.append(data.getWindpower());
                             builder.append(",");
 
-                            builder.append(data.getZiwanxian());
-                            builder.append(",");
+                            /*builder.append(data.getZiwanxian());
+                            builder.append(",");*/
                         }else if(intent.contains("穿衣指数")){
                             builder.append("穿衣指数");
                             builder.append(data.getChuanyi());

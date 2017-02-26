@@ -122,6 +122,8 @@ public class ProtocolManager {
             ret = handlerDevice();
         }else if(operands.equals(Const.DOMAIN_MUSIC_STATUS)){ //音乐
             ret = handlerDeviceMusic();
+        }else if(operands.equals(Const.DOMAIN_AIR_MAGIC)) { //空气魔方
+            ret = handlerAirMagic();
         }
 
         if (0 == ret) {
@@ -206,6 +208,12 @@ public class ProtocolManager {
         if(operator.equals(UnisoundDefine.ACT_MUSICSYNC)){
             ret = operatorSyncMusic();
         }
+
+        return ret;
+    }
+
+    private int handlerAirMagic(){
+        int ret = 0;
 
         return ret;
     }
