@@ -564,6 +564,10 @@ public class RecordModel {
                     MusicPlayerManager.getInstance().stopMusic();
                 }
             }
+        }else{
+            if(MusicPlayerManager.getInstance().getMusicState() == Const.STATE_PAUSE){
+                MusicPlayerManager.getInstance().stopMusic();
+            }
         }
 
         Intent intent = new Intent(Const.WAKEUP_TAG);
@@ -619,6 +623,8 @@ public class RecordModel {
                         weather_dialog_index = 0;
                     }*/
                     //test end
+                /*} else {
+                    weather_dialog_index = 0;*/
                 }
             }
 
