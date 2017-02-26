@@ -102,11 +102,11 @@ public class Const {
      */
     public static final String TTS_REPLY_ERROR = "对不起，我没听清楚";
 
-    public static final String TTS_REPLY_NO_RESOURCE1 = "抱歉，这项技能我还在学习中";
+    public static final String TTS_REPLY_NO_RESOURCE1 = "抱歉，这项技能我还在学习中。";
 
-    public static final String TTS_REPLY_NO_RESOURCE2= "噢，我好累，咱们休息一下吧";
+    public static final String TTS_REPLY_NO_RESOURCE2= "抱歉，没有找到相关资源。";
 
-    public static final String TTS_REPLY_NO_RESOURCE3= "这个嘛。。。我还需要修炼修炼";
+    public static final String TTS_REPLY_NO_RESOURCE3= "这个嘛。。。我还需要修炼修炼。";
 
     /**
      * 音乐播放状态
