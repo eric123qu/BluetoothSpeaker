@@ -137,8 +137,8 @@ public class Receiver extends BroadcastReceiver {
                 NetworkInfo activeInfo = manager.getActiveNetworkInfo();
 //                Toast.makeText(context, "mobile:"+mobileInfo.isConnected()+"\n"+"wifi:"+wifiInfo.isConnected()
 //                        +"\n"+"active:"+activeInfo.getTypeName(), Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "onReceive: net_change:" + "mobile:"+mobileInfo.isConnected()+"\n"+"wifi:"+wifiInfo.isConnected()
-                        +"\n"+"active:"+activeInfo.getTypeName());
+//                Log.d(TAG, "onReceive: net_change:" + "mobile:"+mobileInfo.isConnected()+"\n"+"wifi:"+wifiInfo.isConnected()
+//                        +"\n"+"active:"+activeInfo.getTypeName());
                 if(activeInfo == null){
                     Log.e(TAG, "onReceive: 无网络");
                     LightManager.getInstance().netDisconnect();
@@ -179,7 +179,8 @@ public class Receiver extends BroadcastReceiver {
         LightManager.getInstance().bootLightShow();
 
         //呼吸灯打开
-        LightManager.getInstance().lightNormal();
+        //LightManager.getInstance().lightNormal();
+        LightManager.getInstance().netDisconnect();
 
         DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
 

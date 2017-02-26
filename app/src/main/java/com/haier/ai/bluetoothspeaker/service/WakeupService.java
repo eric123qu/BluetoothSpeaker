@@ -105,7 +105,8 @@ public class WakeupService extends Service {
         WakeupEventManager.getInstance(WakeupService.this).registerEventListener(eventListener);
         // 3) 通知唤醒管理器, 启动唤醒功能
         HashMap params = new HashMap();
-        params.put("kws-file", "assets:///xiaoyu.bin"); // 设置唤醒资源, 唤醒资源请到 http://yuyin.baidu.com/wake#m4 来评估和导出
+        params.put("kws-file", "assets:///WakeUp.bin"); // 设置唤醒资源, 唤醒资源请到 http://yuyin.baidu.com/wake#m4 来评估和导出
+        //params.put("kws-file", "assets:///xiaoyu.bin"); // 设置唤醒资源, 唤醒资源请到 http://yuyin.baidu.com/wake#m4 来评估和导出
        // mWpEventManager.send("wp.start", new JSONObject(params).toString(), null, 0, 0);
         try {
             WakeupEventManager.getInstance(WakeupService.this).startWakeup(new JSONObject(params).toString());

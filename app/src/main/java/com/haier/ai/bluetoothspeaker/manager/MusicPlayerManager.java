@@ -14,6 +14,7 @@ import com.haier.ai.bluetoothspeaker.R;
 import com.haier.ai.bluetoothspeaker.bean.music.RequestMusic;
 import com.haier.ai.bluetoothspeaker.bean.music.ResponseMusic;
 import com.haier.ai.bluetoothspeaker.event.UrlMusicEvent;
+import com.haier.ai.bluetoothspeaker.model.RecordModel;
 import com.haier.ai.bluetoothspeaker.net.AIApiService;
 
 import org.greenrobot.eventbus.EventBus;
@@ -242,6 +243,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
      * @param song
      */
     public boolean playLocalMusic(String song){
+        RecordModel.getInstance().waitForWakeup();
         if(TextUtils.isEmpty(song)){
             return false;
         }

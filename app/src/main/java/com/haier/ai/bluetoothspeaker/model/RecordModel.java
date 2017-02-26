@@ -602,11 +602,23 @@ public class RecordModel {
                 Const.TTS_PLAY_STATUS = arg0;
 
                 //如果处在对话状态，tts播报完后继续进行识别
-                //// TODO: 17-2-26 天气多伦
+                //// TODO: 17-2-26 天气多伦 test
                 if(Const.ISDIALOG){
+
                     if (Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_STOP){
+                        //天气多轮 test
+                        if(weather_dialog_index >= 3){
+                            weather_dialog_index = 0;
+                            waitForWakeup();
+                        }else
+                        //test end
                         EventBus.getDefault().post(new DialogEvent(""));
                     }
+                    //teest
+                     else{
+                        weather_dialog_index = 0;
+                    }
+                    //test end
                 }
             }
 
@@ -931,7 +943,7 @@ public class RecordModel {
             @Override
             public void onResponse(Call<ResponseNews> call, Response<ResponseNews> response) {
                 if(response.body().getRetCode().equals(Const.RET_CODE_SUCESS)){
-                    playTTS(response.body().getData().getNews().get(0).getContent());
+                    playTTS(response.body().getData().getNews().get(0).getTitle());  //只播放标题
                 }else{
                     Log.e(TAG, "onResponse: getNewsContent,new error");
                     playNoResourceTTS();
@@ -987,6 +999,7 @@ public class RecordModel {
         });
     }
 
+    static int weather_dialog_index = 0;  //test
     private void getWeatherInfo(String date, String city, final String intent){ //北京，青岛
         if(TextUtils.isEmpty(intent)){
             waitForWakeup();
@@ -1071,9 +1084,9 @@ public class RecordModel {
             }else if(date.equals("今天")){
                 keywordsBean.setDate("");
             }else if(date.equals("明天")){
-
+                keywordsBean.setDate("");
             }else if(date.equals("后天")){
-
+                keywordsBean.setDate("");
             }
 
             requestWeather.setKeywords(keywordsBean);
@@ -1084,7 +1097,11 @@ public class RecordModel {
                         ResponseWeather.DataBean data = response.body().getData();
 
                         StringBuilder builder = new StringBuilder();
-                        if(intent.contains("天气查询")) {
+                        if(intent.equals("天气查询")) {
+                            //test
+                            Const.ISDIALOG = true;
+                            ++weather_dialog_index;
+                            //test end
                             builder.append(data.getCity());
                             builder.append("温度");
                             builder.append(data.getTemperature());
@@ -1096,36 +1113,54 @@ public class RecordModel {
 
                             builder.append(data.getWinddirect());
                            // builder.append(data.getWindpower());
-                            builder.append(",");
+                            builder.append("。");
 
                             /*builder.append(data.getZiwanxian());
                             builder.append(",");*/
                         }else if(intent.contains("穿衣指数")){
-                            builder.append("穿衣指数");
+                            builder.append("穿衣指数。。。");
                             builder.append(data.getChuanyi());
                             builder.append(",");
                         } else if(intent.contains("洗车指数")){
-                            builder.append("洗车指数");
+                            builder.append("洗车指数。。。");
                             builder.append(data.getXiche());
                             builder.append(",");
                         } else if(intent.contains("运动指数")){
-                            builder.append("运动指数");
+                            builder.append("运动指数。。。");
                             builder.append(data.getYundong());
                             builder.append(",");
                         }else if(intent.contains("感冒指数")){
-                            builder.append("感冒指数");
+                            builder.append("感冒指数。。。");
                             builder.append(data.getGanmao());
                             builder.append(",");
                         }else if(intent.contains("空调指数")){
-                            builder.append("空调指数");
+                            builder.append("空调指数。。。");
                             builder.append(data.getKongtiao());
                             builder.append(",");
                         }else if(intent.contains("污染指数")){
-                            builder.append("污染指数");
+                            builder.append("污染指数。。。");
                             builder.append(data.getWuran());
                             builder.append(",");
-                        }else {
-                            //
+                        }else if(intent.contains("天气查询_多轮")){//// TODO: 17-2-26 test
+                            if(weather_dialog_index == 0){  //非多轮
+                                playTTS("对不起，我不太明白。");
+                                return;
+                            }
+
+                            Const.ISDIALOG = true;
+                            ++weather_dialog_index;
+                            builder.append(data.getCity());
+                            builder.append("温度");
+                            builder.append(data.getTemperature());
+                            builder.append("摄氏度,");
+
+                            builder.append("湿度");
+                            builder.append(data.getHumidity());
+                            builder.append(",");
+
+                            builder.append(data.getWinddirect());
+                            // builder.append(data.getWindpower());
+                            builder.append("。");
                         }
 
                         String ttsWeather = builder.toString();
@@ -1196,7 +1231,7 @@ public class RecordModel {
 
         if(!TextUtils.isEmpty(program)){//收看电视节目
             if(program.contains("新闻")){
-                playTTS("好的，今天十九点我会提醒您！");
+                playTTS("好的，十九点我会提醒您！");
             }else if(program.contains("天下足球")){
                 playTTS("好的，周一十九点三十分我会提醒您！");
             }else
