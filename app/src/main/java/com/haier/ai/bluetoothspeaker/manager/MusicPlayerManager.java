@@ -405,6 +405,7 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
     }
 
     public void playRandomUrlMusic(){
+        RecordModel.getInstance().waitForWakeup();
         AIApiService aiApiService = RetrofitApiManager.getAiApiService();
         RequestMusic requestMusic = new RequestMusic();
         RequestMusic.KeywordsEntity keywordsEntity = new RequestMusic.KeywordsEntity();
