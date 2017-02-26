@@ -615,9 +615,9 @@ public class RecordModel {
                         EventBus.getDefault().post(new DialogEvent(""));
                     }
                     //teest
-                     else{
+                     /*else{
                         weather_dialog_index = 0;
-                    }
+                    }*/
                     //test end
                 }
             }

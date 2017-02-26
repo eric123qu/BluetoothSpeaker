@@ -12,6 +12,7 @@ import android.util.Log;
 import com.haier.ai.bluetoothspeaker.Const;
 import com.haier.ai.bluetoothspeaker.DeviceConst;
 import com.haier.ai.bluetoothspeaker.manager.LightManager;
+import com.haier.ai.bluetoothspeaker.manager.MusicPlayerManager;
 import com.haier.ai.bluetoothspeaker.manager.SpeakerAlarmManager;
 import com.haier.ai.bluetoothspeaker.manager.WifiDevManager;
 import com.haier.ai.bluetoothspeaker.service.BluetoothService;
@@ -67,6 +68,7 @@ public class Receiver extends BroadcastReceiver {
 
                 initLightStatus();
 
+                initDeviceStatus();
                 break;
             case ACTION_WIFI_STATE_CHANGE:
                 //// TODO: 16-11-4  收到广播，搜索wifi
@@ -185,5 +187,11 @@ public class Receiver extends BroadcastReceiver {
         DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
 
         DeviceConst.CURRENT_LIGHT_MODE = DeviceConst.LIGHT_MODE_STANDARD;
+    }
+
+    private void initDeviceStatus(){
+        MusicPlayerManager.getInstance().getAudioInfo();
+
+        MusicPlayerManager.getInstance().getCurrentVoice();
     }
 }

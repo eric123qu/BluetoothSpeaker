@@ -97,10 +97,11 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         }
     }
 
-    private void getAudioInfo(){
+    public void getAudioInfo(){
         sAudioManager = (AudioManager) App.getInstance().getSystemService(Context.AUDIO_SERVICE);
 
         DeviceConst.MAX_VOICE = sAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        Log.d(TAG, "getAudioInfo: max_voice：" + DeviceConst.MAX_VOICE);
     }
 
     public static MusicPlayerManager getInstance(){
@@ -381,12 +382,14 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         DeviceConst.CURRENT_VOICE_LEVEL = 0;
     }
 
-    private int getCurrentVoice(){
+    public int getCurrentVoice(){
         if(sAudioManager == null){
             sAudioManager = (AudioManager) App.getInstance().getSystemService(Context.AUDIO_SERVICE);
         }
 
-        return sAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        DeviceConst.CURRENT_VOICE_LEVEL = sAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        Log.d(TAG, "getCurrentVoice: current:" + DeviceConst.CURRENT_VOICE_LEVEL);
+        return DeviceConst.CURRENT_VOICE_LEVEL;
     }
 
     public String getTodayDate(){
