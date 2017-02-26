@@ -317,6 +317,10 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         localMusicList.add("雨夜花.mp3");
         localMusicList.add("终于等到你.mp3");
         localMusicList.add("最美的太阳.mp3");
+        localMusicList.add("尘鼓.mp3");
+        localMusicList.add("渡口.mp3");
+        localMusicList.add("天空.mp3");
+        localMusicList.add("吻别.mp3");
         localMusicList.add("安静.mp3");  //播放一首安静的歌
     }
 
