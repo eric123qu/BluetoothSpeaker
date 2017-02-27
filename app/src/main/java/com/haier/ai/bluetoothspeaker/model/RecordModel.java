@@ -339,10 +339,16 @@ public class RecordModel {
             @Override
             public void onError(int paramInt, String paramString) {
                 // 识别时有错误发生。
-                Log.d(TAG, String.format("onError(): errcode = %d, msg = %s", paramInt, paramString));
-                EventBus.getDefault().post(new ReconizeResultEvent("语音识别错误"));
+                Log.d(TAG, String.format("IAsrRecorderCallback onError(): errcode = %d, msg = %s", paramInt, paramString));
+                //现修改为语音识别为空字符串或者error都给语义传空串
+                /*
+                    EventBus.getDefault().post(new ReconizeResultEvent("语音识别错误"));
                 LightManager.getInstance().lightNormal();
                 waitForWakeup();
+                */
+                //调用nlu接口，语义理解(空调)sdk
+                String nlu = formatNluRequest("", TYPE_FRIDGE);
+                getNluResult(nlu);
             }
 
             @Override
@@ -356,9 +362,11 @@ public class RecordModel {
 
                     Log.e(TAG, "onResult: asrresult:" + asrResult);
                     if (TextUtils.isEmpty(asrResult)) {
-                        EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
+                        asrResult = "";
+                        //规则按照语音识别结果来处理
+                        /*EventBus.getDefault().post(new ReconizeResultEvent("语音接口返回识别错误状态"));
                         playTTS("对不起我没听清楚");
-                        LightManager.getInstance().lightNormal();
+                        LightManager.getInstance().lightNormal();*/
                     } else {
                         //去掉标点
                         asrResult = asrResult.replace(",", "");
@@ -368,14 +376,12 @@ public class RecordModel {
                         asrResult = asrResult.replace("，", "");
                         asrResult = asrResult.replace("，", "");
                         asrResult = asrResult.replace("？", "");
-                        EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
-                        //调用nlu接口，语义理解(空调)sdk
-                        String nlu = formatNluRequest(asrResult, TYPE_FRIDGE);
-                        getNluResult(nlu);
-
-                        //冰箱(api)
-                        //getNlpResult(asrResult);
                     }
+
+                    EventBus.getDefault().post(new ReconizeResultEvent(asrResult));
+                    //调用nlu接口，语义理解(空调)sdk
+                    String nlu = formatNluRequest(asrResult, TYPE_FRIDGE);
+                    getNluResult(nlu);
                 }catch (Exception e){
                     Log.e(TAG, "onResult: asr exception");
                     e.printStackTrace();
@@ -488,7 +494,7 @@ public class RecordModel {
         String sType = null;
 
         if(TextUtils.isEmpty(query)){
-            return null;
+            query = "voiceerror";
         }
 
         switch(type){
