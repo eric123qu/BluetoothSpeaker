@@ -84,6 +84,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.haier.ai.bluetoothspeaker.Const.DOMAIN_WEATHER;
+
 /**
  * author: qu
  * date: 16-8-30
@@ -605,27 +607,40 @@ public class RecordModel {
                 Log.e(TAG, "onEvent: " + String.format("onEvent(): errcode = %d, param = %d", arg0, arg1));
                 Const.TTS_PLAY_STATUS = arg0;
 
-                //如果处在对话状态，tts播报完后继续进行识别
+                //如果处在对话状态，tts播报完后继续进行识别(此处为纯对话状态)
+                /*if(Const.ISDIALOG) {
+
+                    if (Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_STOP) {
+                        EventBus.getDefault().post(new DialogEvent(""));
+                    }
+                }*/
                 //// TODO: 17-2-26 天气多伦 test
                 if(Const.ISDIALOG){
 
                     if (Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_STOP){
                         //天气多轮 test
-                        if(weather_dialog_index >= 3){
+
+                        Log.d(TAG, "onEvent: =====1: "+weather_dialog_index + "domain:" +sDomain);
+                        if(!sDomain.equals(DOMAIN_WEATHER)){
                             weather_dialog_index = 0;
+                            Log.d(TAG, "onEvent: =====2: "+weather_dialog_index);
+                        }
+
+                        if(weather_dialog_index >= 3){
+
+                            weather_dialog_index = 0;
+                            Log.d(TAG, "onEvent: =====3: "+weather_dialog_index);
                             waitForWakeup();
-                        }else
-                        //test end
-                        EventBus.getDefault().post(new DialogEvent(""));
+                        }else {
+                            //test end
+                            EventBus.getDefault().post(new DialogEvent(""));
+                            Log.d(TAG, "onEvent: =====4: "+weather_dialog_index);
+                        }
                     }
-                    //teest
-                     /*else{
-                        weather_dialog_index = 0;
-                    }*/
-                    //test end
-                /*} else {
-                    weather_dialog_index = 0;*/
-                }
+
+                }//test
+
+                //test end
             }
 
             @Override
@@ -1106,7 +1121,8 @@ public class RecordModel {
                         if(intent.equals("天气查询")) {
                             //test
                             Const.ISDIALOG = true;
-                            ++weather_dialog_index;
+                            weather_dialog_index = 1;
+                            Log.d(TAG, "onEvent: =====6: "+weather_dialog_index);
                             //test end
                             builder.append(data.getCity());
                             builder.append("温度");
@@ -1150,11 +1166,14 @@ public class RecordModel {
                         }else if(intent.contains("天气查询_多轮")){//// TODO: 17-2-26 test
                             if(weather_dialog_index == 0){  //非多轮
                                 playTTS("对不起，我不太明白。");
+                                Log.d(TAG, "onEvent: =====7: "+weather_dialog_index);
                                 return;
                             }
 
+
                             Const.ISDIALOG = true;
                             ++weather_dialog_index;
+                            Log.d(TAG, "onEvent: =====8: "+weather_dialog_index);
                             builder.append(data.getCity());
                             builder.append("温度");
                             builder.append(data.getTemperature());
