@@ -12,6 +12,7 @@ import com.haier.ai.bluetoothspeaker.bean.ControlBean;
 import com.haier.ai.bluetoothspeaker.bean.RecvControlBean;
 import com.haier.ai.bluetoothspeaker.model.RecordModel;
 import com.haier.ai.bluetoothspeaker.net.SocketClient;
+import com.haier.ai.bluetoothspeaker.status.AcStatus;
 import com.haier.ai.bluetoothspeaker.util.BytesUtil;
 
 import java.util.concurrent.ExecutorService;
@@ -117,7 +118,7 @@ public class ProtocolManager {
         int ret = 0;  //ret:0 播放语音并发送协议  -1：不执行 2：只发送协议
 
         if(operands.equals(Const.DOMAIN_AC)){ // 空调
-            //handlerAC();
+            handlerAC();
         }else if(operands.equals(Const.DOMAIN_DEVICE)){ //载体
             ret = handlerDevice();
         }else if(operands.equals(Const.DOMAIN_MUSIC_STATUS)){ //音乐
@@ -159,9 +160,9 @@ public class ProtocolManager {
             }
 
             if(value.equals(UnisoundDefine.ACT_OPEN)){
-                operatorOpen();
+                operatorOpenAC();
             }else if(value.equals(UnisoundDefine.ACT_CLOSE)){
-                operatorClose();
+                operatorCloseAC();
             }
 
         }else if(operator.equals(UnisoundDefine.ACT_SETTEMP)){
@@ -187,9 +188,9 @@ public class ProtocolManager {
             }
 
             if(value.equals(UnisoundDefine.ACT_OPEN)){
-                ret = operatorOpen();
+                ret = operatorOpenDevice();
             }else if(value.equals(UnisoundDefine.ACT_CLOSE)){
-                ret = operatorClose();
+                ret = operatorCloseDevice();
             }
 
         }else if(operator.equals(UnisoundDefine.ACT_ADJLIGHT)){
@@ -442,9 +443,22 @@ public class ProtocolManager {
     /**
      * 打开动作
      */
-    public int operatorOpen(){
+    public int operatorOpenDevice(){
         if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_OPEN){
             RecordModel.getInstance().playTTS("当前灯光已经在打开状态。");
+            return -1;
+        }
+        control.setAttrStatusShort((short) 1);
+        control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
+
+        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
+
+        return 0;
+    }
+
+    public int operatorOpenAC(){
+        if(AcStatus.ON_OFF_STATUS == AcStatus.STATUS_ON){
+            RecordModel.getInstance().playTTS("当前空调已经在打开状态。");
             return -1;
         }
         control.setAttrStatusShort((short) 1);
@@ -458,9 +472,25 @@ public class ProtocolManager {
     /**
      *  关闭动作
      */
-    public int operatorClose(){
+    public int operatorCloseDevice(){
         if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_CLOSE){
             RecordModel.getInstance().playTTS("当前灯光已经在关闭状态。 ");
+            return -1;
+        }
+
+        control.setAttrStatusShort((short) 0);
+        control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
+        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_CLOSE;
+
+        return 0;
+    }
+
+    /**
+     *  关闭动作
+     */
+    public int operatorCloseAC(){
+        if(AcStatus.ON_OFF_STATUS == AcStatus.STATUS_OFF){
+            RecordModel.getInstance().playTTS("当前空调已经在关闭状态。 ");
             return -1;
         }
 
@@ -723,59 +753,104 @@ public class ProtocolManager {
         switch(cmd){
             case ApplianceDefine.ORDER_REPORT_STATE:
                 if(recvControlBean.getDevType().equals("speakerbox")){
-
-                    byte devattr1 = recvControlBean.getDevAttr1();
-                    byte devattr2 = recvControlBean.getDevAttr2();
-
-                    byte [] status = new byte[2];
-                    status[0] = recvControlBean.getAttrStatus1();
-                    status[1] = recvControlBean.getAttrStatus2();
-
-                    short attrStatus = BytesUtil.getShort(status);
-
-                    switch (devattr2){
-                        case ApplianceDefine.MODE_VOLUME://控制音量
-                            if(0 == attrStatus){//减小
-                                MusicPlayerManager.getInstance().adjustSystemVoiceLow();
-                            }else if(1 == attrStatus){//增加
-                                MusicPlayerManager.getInstance().adjustSystemVoiceHigh();
-                            }
-                            break;
-                        case ApplianceDefine.MODE_PLAY_MODE:
-                            Log.d(TAG, "handleCommand: playmusic:" + attrStatus);
-                            //if(1 == attrStatus)
-                            {//
-                                if(DeviceConst.MUSIC_STATE == Const.STATE_PLAYING){
-                                    MusicPlayerManager.getInstance().pauseMusic();
-                                }else if(DeviceConst.MUSIC_STATE == Const.STATE_STOP) {
-                                    MusicPlayerManager.getInstance().playRandomUrlMusic();
-                                }
-                                else if(DeviceConst.MUSIC_STATE == Const.STATE_PAUSE){
-                                    MusicPlayerManager.getInstance().restartMusic();
-                                }
-
-                            }
-                            break;
-                        case ApplianceDefine.MODE_PLAY_CONTROL:
-                            Log.d(TAG, "handleCommand: MODE_PLAY_CONTROL:" + attrStatus);
-                            if(1 == attrStatus){// 上一首
-                                MusicPlayerManager.getInstance().playRandomUrlMusic();
-                            }else if(2 == attrStatus){//
-                                MusicPlayerManager.getInstance().playRandomUrlMusic();
-                            }
-                            break;
-                        case ApplianceDefine.MODE_PLAY_SONG:
-                            String song = recvControlBean.getNickName();
-                            Log.d(TAG, "handleCommand: song name:" + song);
-                            //EventBus.getDefault().post(new LocalMusicEvent(song));
-                            MusicPlayerManager.getInstance().playLocalMusic(song);
-                            //todo 发送播放事件
-                            //syncMusicStatus(0, "play");
-                            break;
-                    }
+                    recvSpeakerBox(recvControlBean);
+                }else if(recvControlBean.getDevType().equals("wifi家电")){
+                    recvWifiDevice(recvControlBean);
                 }
                 break;
 
+        }
+    }
+
+    /**
+     * 接收到box 信息
+     */
+    private void recvSpeakerBox(RecvControlBean recvControlBean){
+        byte devattr1 = recvControlBean.getDevAttr1();
+        byte devattr2 = recvControlBean.getDevAttr2();
+
+        byte [] status = new byte[2];
+        status[0] = recvControlBean.getAttrStatus1();
+        status[1] = recvControlBean.getAttrStatus2();
+
+        short attrStatus = BytesUtil.getShort(status);
+
+        switch (devattr2){
+            case ApplianceDefine.MODE_VOLUME://控制音量
+                if(0 == attrStatus){//减小
+                    MusicPlayerManager.getInstance().adjustSystemVoiceLow();
+                }else if(1 == attrStatus){//增加
+                    MusicPlayerManager.getInstance().adjustSystemVoiceHigh();
+                }
+                break;
+            case ApplianceDefine.MODE_PLAY_MODE:
+                Log.d(TAG, "handleCommand: playmusic:" + attrStatus);
+                //if(1 == attrStatus)
+            {//
+                if(DeviceConst.MUSIC_STATE == Const.STATE_PLAYING){
+                    MusicPlayerManager.getInstance().pauseMusic();
+                }else if(DeviceConst.MUSIC_STATE == Const.STATE_STOP) {
+                    MusicPlayerManager.getInstance().playRandomUrlMusic();
+                }
+                else if(DeviceConst.MUSIC_STATE == Const.STATE_PAUSE){
+                    MusicPlayerManager.getInstance().restartMusic();
+                }
+
+            }
+            break;
+            case ApplianceDefine.MODE_PLAY_CONTROL:
+                Log.d(TAG, "handleCommand: MODE_PLAY_CONTROL:" + attrStatus);
+                if(1 == attrStatus){// 上一首
+                    MusicPlayerManager.getInstance().playRandomUrlMusic();
+                }else if(2 == attrStatus){//
+                    MusicPlayerManager.getInstance().playRandomUrlMusic();
+                }
+                break;
+            case ApplianceDefine.MODE_PLAY_SONG:
+                String song = recvControlBean.getNickName();
+                Log.d(TAG, "handleCommand: song name:" + song);
+                //EventBus.getDefault().post(new LocalMusicEvent(song));
+                MusicPlayerManager.getInstance().playLocalMusic(song);
+                //todo 发送播放事件
+                //syncMusicStatus(0, "play");
+                break;
+        }
+    }
+
+    private void recvWifiDevice(RecvControlBean recvControlBean){
+        recvControlBean.setDevDetail("空调");
+        String dev = recvControlBean.getDevDetail();
+        switch (dev){
+            case "空调":
+                recvACStatus(recvControlBean);
+                break;
+        }
+    }
+
+    private void recvACStatus(RecvControlBean recvControlBean){
+        byte devattr1 = recvControlBean.getDevAttr1();
+        byte devattr2 = recvControlBean.getDevAttr2();
+
+        byte [] status = new byte[2];
+        status[0] = recvControlBean.getAttrStatus1();
+        status[1] = recvControlBean.getAttrStatus2();
+
+        short attrStatus = BytesUtil.getShort(status);
+
+        switch (devattr2){
+            case ApplianceDefine.AIRCON_status:
+                AcStatus.ON_OFF_STATUS = attrStatus;
+                Log.d(TAG, "recvACStatus: ac onoff:" + AcStatus.ON_OFF_STATUS);
+                break;
+            case ApplianceDefine.AIRCON_operation:
+                AcStatus.OPERATOR_MODE = attrStatus;
+                break;
+            case ApplianceDefine.AIRCON_windSpeed:
+                AcStatus.WIND_SPEED = attrStatus;
+                break;
+            case ApplianceDefine.AIRCON_indoorTemp:
+                AcStatus.CURRENT_TEMP = attrStatus;
+                break;
         }
     }
 
