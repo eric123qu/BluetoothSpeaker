@@ -153,16 +153,17 @@ public class ProtocolManager {
     /**
      * 空调控制
      */
-    public void handlerAC(){
+    public int handlerAC(){
+        int ret = 0;
         if(operator.equals(UnisoundDefine.ACT_OPS)){//开关控制
             if(TextUtils.isEmpty(value)){
-                return;
+                return -1;
             }
 
             if(value.equals(UnisoundDefine.ACT_OPEN)){
-                operatorOpenAC();
+                ret = operatorOpenAC();
             }else if(value.equals(UnisoundDefine.ACT_CLOSE)){
-                operatorCloseAC();
+                ret = operatorCloseAC();
             }
 
         }else if(operator.equals(UnisoundDefine.ACT_SETTEMP)){
@@ -170,10 +171,12 @@ public class ProtocolManager {
         }else if(operator.equals(UnisoundDefine.ACT_ADJTEMP)){
             operatorACAdjTemp();
         }else if(operator.equals(UnisoundDefine.ACT_SETSPEED)){
-            operatorACSetSpeed();
+            ret = operatorACSetSpeed();
         }else if(operator.equals(UnisoundDefine.ACT_SETMODE)){
-            operatorACSetMode();
+            ret = operatorACSetMode();
         }
+
+        return ret;
     }
 
     /**
@@ -381,46 +384,64 @@ public class ProtocolManager {
     }
 
 
-    public void operatorACSetSpeed(){
+    public int operatorACSetSpeed(){
         short status = 1;
+
         control.setDevAttr(ApplianceDefine.AIRCON_windSpeed);
         if(value.contains(UnisoundDefine.WIND_SPEED_LOW)){//低风
-            status = 1;
+            status = AcStatus.SPEED_LOW;
         }else if(value.contains(UnisoundDefine.WIND_SPEED_MEDIUM)) {//中风
-            status = 2;
+            status = AcStatus.SPEED_MID;
         }
         else if(value.contains(UnisoundDefine.WIND_SPEED_HIGH)) {//高风
-            status = 3;
+            status = AcStatus.SPEED_HIGH;
         }
         else if(value.contains(UnisoundDefine.WIND_SPEED_AUTO)) {//自动
-            status = 4;
+            status = AcStatus.SPEED_AUTO;
         }
-        control.setAttrStatusShort(status);
+
+        if(AcStatus.WIND_SPEED == status){
+            RecordModel.getInstance().playTTS("当前已经处于该风速下");
+            return -1;
+        }else {
+            control.setAttrStatusShort(status);
+            AcStatus.WIND_SPEED = status;
+        }
+
+        return 0;
     }
 
-    public void operatorACSetMode(){
+    public int operatorACSetMode(){
         short status = 1;
 
         if(value.equals(UnisoundDefine.MODE_AUTO)){//自动
             control.setDevAttr(ApplianceDefine.AIRCON_operation);
-            status = 1;
+            status = AcStatus.MODE_AUTO;
         }else if(value.equals(UnisoundDefine.MODE_COOL)) {//制冷
             control.setDevAttr(ApplianceDefine.AIRCON_operation);
-            status = 2;
+            status = AcStatus.MODE_COOL;
         }
         else if(value.equals(UnisoundDefine.MODE_HEAT)) {//制热
             control.setDevAttr(ApplianceDefine.AIRCON_operation);
-            status = 3;
+            status = AcStatus.MODE_HEAT;
         }
         else if(value.equals(UnisoundDefine.MODE_AIR_SUPPLY)) {//送风
             control.setDevAttr(ApplianceDefine.AIRCON_operation);
-            status = 4;
+            status = AcStatus.MODE_WIND;
         }else if(value.equals(UnisoundDefine.MODE_WETTED)) {//除湿
             control.setDevAttr(ApplianceDefine.AIRCON_operation);
-            status = 5;
+            status = AcStatus.MODE_HUMI;
         }
 
-        control.setAttrStatusShort(status);
+        if(AcStatus.OPERATOR_MODE == status){
+            RecordModel.getInstance().playTTS("当前已处于该模式下");
+            return -1;
+        }else {
+            control.setAttrStatusShort(status);
+            AcStatus.OPERATOR_MODE = status;
+        }
+
+        return 0;
     }
 
     public void operatorACAdjTemp(){

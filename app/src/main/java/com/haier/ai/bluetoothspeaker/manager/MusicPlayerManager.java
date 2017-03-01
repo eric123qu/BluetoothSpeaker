@@ -270,9 +270,9 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
             ProtocolManager.getInstance().syncMusicStatus(0, "play");
 
             //跟app同步播放状态
-           /* ResponseMusic.DataEntity data = new ResponseMusic.DataEntity();
+            ResponseMusic.DataEntity data = new ResponseMusic.DataEntity();
             data.setSong(song);
-            ProtocolManager.getInstance().syncMusicStatus(1, data.toString());*/
+            ProtocolManager.getInstance().syncMusicStatus(1, data.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -454,9 +454,9 @@ public class MusicPlayerManager implements MediaPlayer.OnPreparedListener, Media
         playLocalMusic(song);
 
         //跟app同步播放状态
-        /*ResponseMusic.DataEntity data = new ResponseMusic.DataEntity();
+        ResponseMusic.DataEntity data = new ResponseMusic.DataEntity();
         data.setSong(song);
-        ProtocolManager.getInstance().syncMusicStatus(1, data.toString());*/
+        ProtocolManager.getInstance().syncMusicStatus(1, data.toString());
     }
 
     public void playNetError(){

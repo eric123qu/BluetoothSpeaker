@@ -54,7 +54,7 @@ public class Const {
 
     public static final String DOMAIN_MUSIC_STATUS = "music_music_status";  //音箱音乐
 
-    public static final String DOMAIN_AIR_MAGIC = "air_magic";  //空气魔方
+    public static final String DOMAIN_AIR_MAGIC = "magic";  //空气魔方
 
     public static final String DOMAIN_AC = "Air_conditioner";   //空调
 
