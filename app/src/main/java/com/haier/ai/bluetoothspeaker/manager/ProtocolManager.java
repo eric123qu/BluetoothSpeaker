@@ -118,7 +118,7 @@ public class ProtocolManager {
         int ret = 0;  //ret:0 播放语音并发送协议  -1：不执行 2：只发送协议
 
         if(operands.equals(Const.DOMAIN_AC)){ // 空调
-            handlerAC();
+            ret = handlerAC();
         }else if(operands.equals(Const.DOMAIN_DEVICE)){ //载体
             ret = handlerDevice();
         }else if(operands.equals(Const.DOMAIN_MUSIC_STATUS)){ //音乐
@@ -218,6 +218,19 @@ public class ProtocolManager {
 
     private int handlerAirMagic(){
         int ret = 0;
+
+        if(operator.equals(UnisoundDefine.ACT_OPS)){//开关控制
+            if(TextUtils.isEmpty(value)){
+                return -1;
+            }
+
+            if(value.equals(UnisoundDefine.ACT_OPEN)){
+                ret = operatorOpenMaigc();
+            }else if(value.equals(UnisoundDefine.ACT_CLOSE)){
+                //ret = operatorCloseMaigc();
+            }
+
+        }
 
         return ret;
     }
@@ -468,11 +481,25 @@ public class ProtocolManager {
         if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_OPEN){
             RecordModel.getInstance().playTTS("当前灯光已经在打开状态。");
             return -1;
+        }else {
+            control.setAttrStatusShort((short) 1);
+            control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
+
+            DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
+
+            return 0;
         }
+    }
+
+    public int operatorOpenMaigc(){
+        /*if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_OPEN){
+            RecordModel.getInstance().playTTS("当前灯光已经在打开状态。");
+            return -1;
+        }*/
         control.setAttrStatusShort((short) 1);
         control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
 
-        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
+        //DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
 
         return 0;
     }
@@ -481,13 +508,14 @@ public class ProtocolManager {
         if(AcStatus.ON_OFF_STATUS == AcStatus.STATUS_ON){
             RecordModel.getInstance().playTTS("当前空调已经在打开状态。");
             return -1;
+        }else {
+            control.setAttrStatusShort((short) 1);
+            control.setDevAttr(ApplianceDefine.AIRCON_status);
+
+            DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
+
+            return 0;
         }
-        control.setAttrStatusShort((short) 1);
-        control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
-
-        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_OPEN;
-
-        return 0;
     }
 
     /**
@@ -497,13 +525,14 @@ public class ProtocolManager {
         if(DeviceConst.LIGHT_STATUS == DeviceConst.LIGHT_STATUS_CLOSE){
             RecordModel.getInstance().playTTS("当前灯光已经在关闭状态。 ");
             return -1;
+        }else {
+
+            control.setAttrStatusShort((short) 0);
+            control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
+            DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_CLOSE;
+
+            return 0;
         }
-
-        control.setAttrStatusShort((short) 0);
-        control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
-        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_CLOSE;
-
-        return 0;
     }
 
     /**
@@ -513,13 +542,12 @@ public class ProtocolManager {
         if(AcStatus.ON_OFF_STATUS == AcStatus.STATUS_OFF){
             RecordModel.getInstance().playTTS("当前空调已经在关闭状态。 ");
             return -1;
+        }else {
+            control.setAttrStatusShort((short) 0);
+            control.setDevAttr(ApplianceDefine.AIRCON_status);
+            DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_CLOSE;
+            return 0;
         }
-
-        control.setAttrStatusShort((short) 0);
-        control.setDevAttr(ApplianceDefine.MODE_ONOFF_STATUS);
-        DeviceConst.LIGHT_STATUS = DeviceConst.LIGHT_STATUS_CLOSE;
-
-        return 0;
     }
 
     /**
@@ -552,16 +580,19 @@ public class ProtocolManager {
         tmpDatas[arrayLen++] = ApplianceDefine.ORDER_CONTROL; //控制
 
         //设备类型(1 byte)
-        tmpDatas[arrayLen++] = ApplianceDefine.DEV_SPEAKER;
+//        tmpDatas[arrayLen++] = ApplianceDefine.DEV_SPEAKER;
 
         //设备种类(1 byte)
         //origin_type = control.getOriginType();
         domain = control.getOperands();
         if(domain.equals(Const.DOMAIN_AC)){
+            tmpDatas[arrayLen++] = ApplianceDefine.DEV_WIFI; //设备类型(1 byte)
             tmpDatas[arrayLen++] = ApplianceDefine.TYPE_AIRCONDITIONER;
         }else if(domain.equals(Const.DOMAIN_DEVICE)){
+            tmpDatas[arrayLen++] = ApplianceDefine.DEV_SPEAKER;
             tmpDatas[arrayLen++] = ApplianceDefine.TYPE_SPEAKER_LIGHT;
         }else if(domain.equals(Const.DOMAIN_MUSIC_STATUS)){
+            tmpDatas[arrayLen++] = ApplianceDefine.DEV_SPEAKER;
             tmpDatas[arrayLen++] = ApplianceDefine.TYPE_SPEAKER_MUSIC;
         }
 

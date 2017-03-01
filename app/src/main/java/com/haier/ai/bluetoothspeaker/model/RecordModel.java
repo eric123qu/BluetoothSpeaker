@@ -758,6 +758,7 @@ public class RecordModel {
                 break;
             case Const.DOMAIN_DEVICE:
             case Const.DOMAIN_AC:
+            case Const.DOMAIN_AIR_MAGIC:
                 handlerSingleCommand(resp);
                 break;
             case Const.DOMAIN_ALARM:
