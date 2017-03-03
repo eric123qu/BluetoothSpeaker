@@ -84,8 +84,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.haier.ai.bluetoothspeaker.Const.DOMAIN_WEATHER;
-
 /**
  * author: qu
  * date: 16-8-30
@@ -104,6 +102,7 @@ public class RecordModel {
     @IntDef({TYPE_AIR, TYPE_FRIDGE}) @interface ControlType{}
     ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
 
+    private static boolean bSleep = false;
     public static RecordModel getInstance(){
         if(sRecordModel == null){
             sRecordModel = new RecordModel();
@@ -193,6 +192,8 @@ public class RecordModel {
 
     public void startRecord(){
         Log.d(TAG, "startRecord: ");
+
+        bSleep = false;
 
         // 通过initOk()函数可以检测SDK的初始化状态。
         if (UbicAI.initOk() != ErrorCode.UAI_ERR_NONE){
@@ -534,9 +535,9 @@ public class RecordModel {
 
     public void playTTS(String content){
         Log.d(TAG, "playTTS: ");
-        if(!Const.ISDIALOG){
+        /*if(!Const.ISDIALOG){
             waitForWakeup();
-        }
+        }*/
 
 
         if(TextUtils.isEmpty(content)){
@@ -577,6 +578,8 @@ public class RecordModel {
                 MusicPlayerManager.getInstance().stopMusic();
             }
         }
+
+        bSleep = true;
 
         Intent intent = new Intent(Const.WAKEUP_TAG);
         App.getInstance().sendBroadcast(intent);
@@ -621,7 +624,7 @@ public class RecordModel {
                     }
                 }*/
                 //// TODO: 17-2-26 天气多伦 test
-                if(Const.ISDIALOG){
+                /*if(Const.ISDIALOG){
 
                     if (Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_STOP){
                         //天气多轮 test
@@ -644,9 +647,14 @@ public class RecordModel {
                         }
                     }
 
-                }//test
+                }*///test
 
                 //test end
+                if (Const.TTS_PLAY_STATUS == TtsPlayerStatus.TTS_PLAYER_STATUS_STOP) {
+                    if(!bSleep) {
+                        EventBus.getDefault().post(new DialogEvent(""));
+                    }
+                }
             }
 
             @Override
@@ -704,6 +712,7 @@ public class RecordModel {
                 playTTS("对不起我没听清楚");
             }else{
                 playTTS(response);
+                waitForWakeup();
             }
 
             return;
@@ -2106,5 +2115,7 @@ public class RecordModel {
         }
 
         playTTS(tts);
+
+        waitForWakeup();
     }
 }
